@@ -101,6 +101,10 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   # check input consistency manually since I did not find a good way to use FileType and have the behavior that I wanted
+  if args.method not in ["single","complete","average","weighted","centroid","median","ward"]:
+    print("The method you selected with -m (%s) is not valid." % args.method)
+    sys.exit(1)
+
   if not args.input:
     if not args.outputdistmat:
       args.outputdistmat = "distmat.dat"
