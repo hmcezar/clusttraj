@@ -52,10 +52,10 @@ Saving clustering classification to clusters.dat
 A total of 3 cluster(s) was(were) found.
 
 A total of 200 structures were read from the trajectory. The cluster sizes are:
-Cluster	Size
-1				183
-2				6
-3				11
+Cluster Size
+1       183
+2       6
+3       11
 ```
 
 In the cluster output file (`-oc` option, default filename `clusters.dat`) the classification for each structure in the trajectory is printed.
