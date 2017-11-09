@@ -1,8 +1,9 @@
 # Clustering Trajectory
-This Python script receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering to classify similar conformations. 
+This Python script receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
+The script should work both in Python 2 or Python 3, given that all the libraries are available.
 
 What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a distance matrix (stored in the condensed form).
-Notice that calculating the distance matrix might take some time depending on how long are your trajectories and how many atoms there are in each configuration.
+Notice that calculating the distance matrix might take some time depending on how long your trajectories are and how many atoms there are in each configuration.
 The distance matrix can also be read from a file (with the `-i` option) to avoid recalculating it everytime you want to change the linkage method or distance of the clustering.
 
 ## Dependencies
@@ -29,7 +30,7 @@ To see all the options run the script with the `-h` command option:
 python clustering_traj.py -h
 ```
 
-The only mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and the maximum RMSD between two clusters for them to be considered of the same cluster.
+The only mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and the maximum RMSD between two configurations for them to be considered of the same cluster.
 ```
 python clustering_traj.py trajectory.xyz 1.0
 ```
