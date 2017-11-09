@@ -8,6 +8,7 @@ The distance matrix can also be read from a file (with the `-i` option) to avoid
 ## Dependencies
 The implementation rely on several libraries, so before running the script, make sure you have all of them installed in your Python distribution.
 Currently, the following libraries are required:
+- [argparse](https://docs.python.org/3/library/argparse.html)
 - [NumPy](http://www.numpy.org/)
 - [OpenBabel](http://openbabel.org/)
 - [RMSD](https://github.com/charnley/rmsd)
@@ -15,6 +16,7 @@ Currently, the following libraries are required:
 
 You can install most of those libraries using your package manager or with pip:
 ```
+pip install argparse
 pip install numpy
 pip install openbabel
 pip install rmsd
