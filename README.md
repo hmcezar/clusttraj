@@ -27,4 +27,7 @@ python clustering_traj.py -h
 ```
 
 The only mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and the maximum RMSD between two clusters for them to be considered of the same cluster.
+```
+python clustering_traj.py trajectory.xyz 1.0
+```
 Additional options are available to select the linkage method and specifying the input and output files.
