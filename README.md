@@ -81,7 +81,10 @@ For example, if the first structure of the trajectory belongs to the cluster num
 .
 .
 ```
+
 The plot of the multidimensional representation (when the `-p` option is used) have each cluster colored in one color.
+![Example MDS](img/example_mds.png)
+
 
 If you wish to use the distance matrix file to other uses, bear in mind that the matrix is stored in the condensed form, i.e., only the superior diagonal matrix is printed (not including the diagonal).
 It means that if you have `N` structures in your trajectory, your file (specified with `-od` option, default filename `distmat.dat`) will have `N(N-1)/2` lines, with each line representing a distance.
