@@ -14,6 +14,8 @@ Currently, the following libraries are required:
 - [OpenBabel](http://openbabel.org/)
 - [RMSD](https://github.com/charnley/rmsd)
 - [SciPy](https://www.scipy.org/)
+- [scikit-learn](http://scikit-learn.org/stable/index.html)
+- [matplotlib](https://matplotlib.org/)
 
 You can install most of those libraries using your package manager or with pip:
 ```
@@ -22,7 +24,11 @@ pip install numpy
 pip install openbabel
 pip install rmsd
 pip install scipy
+pip install scikit-learn
+pip install matplotlib
 ```
+
+We recommend the use of the [Anaconda](https://www.anaconda.com/download/) Python distribution.
 
 ## Usage
 To see all the options run the script with the `-h` command option:
