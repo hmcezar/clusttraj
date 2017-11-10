@@ -1,12 +1,10 @@
 """
-Script used to find clusters using RMSD.
+This script takes a trajectory and based on a minimal RMSD classify the structures in clusters.
+
 The RMSD implementation using the Kabsch algorithm to superpose the molecules is taken from: https://github.com/charnley/rmsd
-To install this RMSD package, use pip (more at https://github.com/charnley/rmsd).
 A very good description of the problem of superposition can be found at http://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures
 A very good tutorial on hierachical clustering with scipy can be seen at https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/
-Performs hierachic cluster as suggested in https://stackoverflow.com/questions/31085393/hierarchical-clustering-a-pairwise-distance-matrix-of-precomputed-distances
-
-This script takes a trajectory and based on a minimal RMSD classify the structures in clusters.
+This script performs agglomerative clustering as suggested in https://stackoverflow.com/questions/31085393/hierarchical-clustering-a-pairwise-distance-matrix-of-precomputed-distances
 
 Author: Henrique Musseli Cezar
 Date: NOV/2017
@@ -20,12 +18,6 @@ import rmsd
 import pybel
 import openbabel
 import scipy.cluster.hierarchy as hcl
-
-def check_file_exists(parser, arg):
-  if os.path.exists(arg):
-    parser.error("file %s already exists, specify a new filename with the right command option" % arg)
-  else:
-    return open(arg,'wb')
 
 def build_distance_matrix(trajfile, noh):
   # table to convert atomic number to symbols
@@ -83,11 +75,11 @@ def build_distance_matrix(trajfile, noh):
   return np.asarray(distmat)
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description="Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition.")
-  parser.add_argument("trajectory_file", help="path to the trajectory containing the conformations to be classified")
-  parser.add_argument("min_rmsd", help="value of RMSD used to classify structures as similar")
+  parser = argparse.ArgumentParser(description='Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition.')
+  parser.add_argument('trajectory_file', help='path to the trajectory containing the conformations to be classified')
+  parser.add_argument('min_rmsd', help='value of RMSD used to classify structures as similar')
   parser.add_argument('-n', '--no-hydrogen', action='store_true', help='ignore hydrogens when doing the Kabsch superposition and calculating the RMSD')
-  parser.add_argument('-m', '--method', metavar='METHOD', default='ward', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: ward)")
+  parser.add_argument('-m', '--method', metavar='METHOD', default='average', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: average)")
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
 
   io_group = parser.add_mutually_exclusive_group()
@@ -110,12 +102,12 @@ if __name__ == '__main__':
       args.outputdistmat = "distmat.dat"
 
     if os.path.exists(args.outputdistmat):
-      exit("file %s already exists, specify a new filename with the -od command option" % args.outputdistmat)
+      exit("File %s already exists, specify a new filename with the -od command option. If you are trying to read the distance matrix from a file, use the -i option" % args.outputdistmat)
     else:
       args.outputdistmat = open(args.outputdistmat,'wb')
 
   if os.path.exists(args.outputclusters):
-    exit("file %s already exists, specify a new filename with the -oc command option" % args.outputclusters)
+    exit("File %s already exists, specify a new filename with the -oc command option" % args.outputclusters)
   else:
     args.outputclusters = open(args.outputclusters,'wb')
 
@@ -132,6 +124,7 @@ if __name__ == '__main__':
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
 
   # linkage
+  print('Starting clustering using %s method to join the clusters\n' % args.method)
   Z = hcl.linkage(distmat, args.method)
 
   # build the clusters and print them to file
