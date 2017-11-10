@@ -4,7 +4,7 @@ The script should work both in Python 2 or Python 3, given that all the librarie
 
 What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a distance matrix (stored in the condensed form).
 Notice that calculating the distance matrix might take some time depending on how long your trajectories are and how many atoms there are in each configuration.
-The distance matrix can also be read from a file (with the `-i` option) to avoid recalculating it every time you want to change the linkage method or distance of the clustering.
+The distance matrix can also be read from a file (with the `-i` option) to avoid recalculating it every time you want to change the linkage method (with`-m`) or distance of the clustering.
 
 ## Dependencies
 The implementation rely on several libraries, so before running the script, make sure you have all of them installed in your Python distribution.
@@ -43,7 +43,8 @@ python clustering_traj.py trajectory.xyz 1.0
 
 Additional options are available for specifying the input and output files and selecting how the clustering is done.
 The possible methods used for the agglomerative clustering are the ones available in the linkage method of SciPy's hierarchical clustering.
-A list with the possible methods and the description of each of them can be found [here](https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html).
+A list with the possible methods (selected with `-m`) and the description of each of them can be found [here](https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html).
+The default method for the linkage is `average`, since [it was found](https://dx.doi.org/10.1021/ct700119m) to have a good compromise with the number of clusters and the actual similarity.
 If the `-n` option is used, the hydrogens are ignored when performing the Kabsch algorithm to find the superposition and calculating the RMSD.
 
 To use an already saved distance matrix, specify the file containing the distance matrix in the condensed form with the `-i` option.
