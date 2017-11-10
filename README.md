@@ -4,7 +4,7 @@ The script should work both in Python 2 or Python 3, given that all the librarie
 
 What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a distance matrix (stored in the condensed form).
 Notice that calculating the distance matrix might take some time depending on how long your trajectories are and how many atoms there are in each configuration.
-The distance matrix can also be read from a file (with the `-i` option) to avoid recalculating it everytime you want to change the linkage method or distance of the clustering.
+The distance matrix can also be read from a file (with the `-i` option) to avoid recalculating it every time you want to change the linkage method or distance of the clustering.
 
 ## Dependencies
 The implementation rely on several libraries, so before running the script, make sure you have all of them installed in your Python distribution.
@@ -40,6 +40,12 @@ The possible methods used for the agglomerative clustering are the ones availabl
 A list with the possible methods and the description of each of them can be found [here](https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html).
 If the `-n` option is used, the hydrogens are ignored when performing the Kabsch algorithm to find the superposition and calculating the RMSD.
 
+To use an already saved distance matrix, specify the file containing the distance matrix in the condensed form with the `-i` option.
+The options `-i` and `-od` are mutually exclusive.
+
+A plot with the [multidimensional scaling](http://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling) representation of the distance matrix, colored with the clustering information can be saved in the `.pdf` format by using the `-p` command option.
+In this case, the filename will start with the same name used for the clusters output (specified with the `-oc` option).
+
 ## Output
 Some basic information about the size clusters are printed to `STDOUT`.
 The number of clusters that were found, as well as the number of members for each cluster are printed in a table.
@@ -68,6 +74,8 @@ For example, if the first structure of the trajectory belongs to the cluster num
 .
 .
 ```
+The plot of the multidimensional representation (when the `-p` option is used) have each cluster colored in one color.
 
 If you wish to use the distance matrix file to other uses, bear in mind that the matrix is stored in the condensed form, i.e., only the superior diagonal matrix is printed (not including the diagonal).
 It means that if you have `N` structures in your trajectory, your file (specified with `-od` option, default filename `distmat.dat`) will have `N(N-1)/2` lines, with each line representing a distance.
+

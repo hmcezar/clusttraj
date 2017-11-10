@@ -18,6 +18,10 @@ import rmsd
 import pybel
 import openbabel
 import scipy.cluster.hierarchy as hcl
+from scipy.spatial.distance import squareform
+from sklearn import manifold
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 def build_distance_matrix(trajfile, noh):
   # table to convert atomic number to symbols
@@ -79,6 +83,7 @@ if __name__ == '__main__':
   parser.add_argument('trajectory_file', help='path to the trajectory containing the conformations to be classified')
   parser.add_argument('min_rmsd', help='value of RMSD used to classify structures as similar')
   parser.add_argument('-n', '--no-hydrogen', action='store_true', help='ignore hydrogens when doing the Kabsch superposition and calculating the RMSD')
+  parser.add_argument('-p', '--plot', action='store_true', help='enable the multidimensional scaling plot and saves figure in pdf format (filename uses the same basename of the -oc option)')
   parser.add_argument('-m', '--method', metavar='METHOD', default='average', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: average)")
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
 
@@ -113,7 +118,7 @@ if __name__ == '__main__':
 
   # check if distance matrix will be read from input or calculated
   # if a file is specified, read it (TODO: check if the matrix makes sense)
-  if (args.input):
+  if args.input:
     print('\nReading condensed distance matrix from %s\n' % args.input.name)
     distmat = np.loadtxt(args.input)
   # build a distance matrix already in the condensed form
@@ -124,13 +129,24 @@ if __name__ == '__main__':
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
 
   # linkage
-  print('Starting clustering using %s method to join the clusters\n' % args.method)
+  print("Starting clustering using '%s' method to join the clusters\n" % args.method)
   Z = hcl.linkage(distmat, args.method)
 
   # build the clusters and print them to file
   clusters = hcl.fcluster(Z, float(args.min_rmsd), criterion='distance')
   print("Saving clustering classification to %s\n" % args.outputclusters.name)
   np.savetxt(args.outputclusters, clusters, fmt='%d')
+
+  if args.plot:
+    # finds the 2D representation of the distance matrix
+    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=6)
+    results = mds.fit(squareform(distmat))
+    coords = results.embedding_
+
+    # plot
+    plt.tick_params(axis='both', which='both', bottom='off', top='off', left='off', right='off', labelbottom='off', labelleft='off')
+    plt.scatter(coords[:, 0], coords[:, 1], marker = 'o', c=clusters, cmap=plt.cm.nipy_spectral)
+    plt.savefig(os.path.splitext(args.outputclusters.name)[0]+".pdf", bbox_inches='tight')
 
   # print the cluster sizes
   print("A total of %d cluster(s) was(were) found.\n" % max(clusters))
