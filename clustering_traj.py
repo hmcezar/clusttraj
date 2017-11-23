@@ -139,9 +139,8 @@ if __name__ == '__main__':
 
   if args.plot:
     # finds the 2D representation of the distance matrix
-    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=6)
-    results = mds.fit(squareform(distmat))
-    coords = results.embedding_
+    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=666, max_iter=3000, eps=1e-9)
+    coords = mds.fit_transform(squareform(distmat))
 
     # plot
     plt.tick_params(axis='both', which='both', bottom='off', top='off', left='off', right='off', labelbottom='off', labelleft='off')
