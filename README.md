@@ -29,6 +29,16 @@ pip install matplotlib
 ```
 
 We recommend the use of the [Anaconda](https://www.anaconda.com/download/) Python distribution.
+To install the libraries with Anaconda, do the following:
+```
+conda install numpy
+conda install -c openbabel openbabel
+conda install scipy
+conda install scikit-learn
+conda install matplotlib
+conda install pip
+pip install rmsd
+```
 
 ## Usage
 To see all the options run the script with the `-h` command option:
