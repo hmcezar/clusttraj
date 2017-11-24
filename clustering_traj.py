@@ -83,7 +83,7 @@ if __name__ == '__main__':
   parser.add_argument('trajectory_file', help='path to the trajectory containing the conformations to be classified')
   parser.add_argument('min_rmsd', help='value of RMSD used to classify structures as similar')
   parser.add_argument('-n', '--no-hydrogen', action='store_true', help='ignore hydrogens when doing the Kabsch superposition and calculating the RMSD')
-  parser.add_argument('-p', '--plot', action='store_true', help='enable the multidimensional scaling plot and saves figure in pdf format (filename uses the same basename of the -oc option)')
+  parser.add_argument('-p', '--plot', action='store_true', help='enable the multidimensional scaling and dendrogram plot saving the figures in pdf format (filenames use the same basename of the -oc option)')
   parser.add_argument('-m', '--method', metavar='METHOD', default='average', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: average)")
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
 
@@ -137,6 +137,8 @@ if __name__ == '__main__':
   print("Saving clustering classification to %s\n" % args.outputclusters.name)
   np.savetxt(args.outputclusters, clusters, fmt='%d')
 
+  # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
+
   if args.plot:
     # finds the 2D representation of the distance matrix
     mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=666, max_iter=3000, eps=1e-9)
@@ -146,6 +148,19 @@ if __name__ == '__main__':
     plt.tick_params(axis='both', which='both', bottom='off', top='off', left='off', right='off', labelbottom='off', labelleft='off')
     plt.scatter(coords[:, 0], coords[:, 1], marker = 'o', c=clusters, cmap=plt.cm.nipy_spectral)
     plt.savefig(os.path.splitext(args.outputclusters.name)[0]+".pdf", bbox_inches='tight')
+
+    # save the dendrogram
+    plt.figure(figsize=(25, 10))
+    plt.title('Hierarchical Clustering Dendrogram')
+    plt.xlabel('Sample Index')
+    plt.ylabel('RMSD')
+    hcl.dendrogram(
+      Z,
+      leaf_rotation=90.,  # rotates the x axis labels
+      leaf_font_size=8.,  # font size for the x axis labels
+    )
+    plt.axhline(float(args.min_rmsd),linestyle='--')
+    plt.savefig(os.path.splitext(args.outputclusters.name)[0]+"_dendrogram.pdf", bbox_inches='tight')
 
   # print the cluster sizes
   print("A total of %d cluster(s) was(were) found.\n" % max(clusters))
