@@ -34,11 +34,12 @@ To install the libraries with Anaconda, do the following:
 conda install numpy
 conda install -c openbabel openbabel
 conda install scipy
-conda install scikit-learn
+conda install scikit-learn=0.18
 conda install matplotlib
 conda install pip
 pip install rmsd
 ```
+Do not install the latest version of scikit-learn with Anaconda, since there is a conflict between it and the openbabel version, as reported [here](https://github.com/scikit-learn/scikit-learn/issues/10196).
 
 ## Usage
 To see all the options run the script with the `-h` command option:
