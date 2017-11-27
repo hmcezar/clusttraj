@@ -242,16 +242,21 @@ if __name__ == '__main__':
     save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
 
   if args.plot:
-    # finds the 2D representation of the distance matrix
-    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=666, max_iter=3000, eps=1e-9)
+    # finds the 2D representation of the distance matrix (multidimensional scaling) and plot it
+    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=666, n_init=6, max_iter=300, eps=1e-3)
     coords = mds.fit_transform(squareform(distmat))
-
-    # plot
     plt.tick_params(axis='both', which='both', bottom='off', top='off', left='off', right='off', labelbottom='off', labelleft='off')
     plt.scatter(coords[:, 0], coords[:, 1], marker = 'o', c=clusters, cmap=plt.cm.nipy_spectral)
     plt.savefig(os.path.splitext(args.outputclusters.name)[0]+".pdf", bbox_inches='tight')
 
-    # save the dendrogram
+    # plot evolution with o cluster in trajectory
+    plt.figure(figsize=(25, 10))
+    plt.plot(range(1,len(clusters)+1), clusters, "o-", markersize=4)
+    plt.xlabel('Sample Index')
+    plt.ylabel('Cluster classification')
+    plt.savefig(os.path.splitext(args.outputclusters.name)[0]+"_evo.pdf", bbox_inches='tight')
+
+    # plot the dendrogram
     plt.figure(figsize=(25, 10))
     plt.title('Hierarchical Clustering Dendrogram')
     plt.xlabel('Sample Index')
