@@ -29,22 +29,39 @@ def get_mol_coords(mol):
   q_all = []
   for atom in mol:
     q_all.append(atom.coords)
-  return np.array(q_all)
+
+  return np.asarray(q_all)
+
+
+def get_mol_info(mol):
+  # table to convert atomic number to symbols
+  etab = openbabel.OBElementTable()
+
+  q_atoms = []
+  q_all = []
+  for atom in mol:
+    q_atoms.append(etab.GetSymbol(atom.atomicnum))
+    q_all.append(atom.coords)
+
+  return np.asarray(q_atoms), np.asarray(q_all)
+
+
+def build_distance_matrix(trajfile, noh, nprocs):
+  # create iterator containing information to compute a line of the distance matrix
+  inputiterator = zip(itertools.count(), map(lambda x: get_mol_coords(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh))
+
+  # create the pool with nprocs processes to compute the distance matrix in parallel
+  p = multiprocessing.Pool(processes = nprocs)
+
+  # build the distance matrix in parallel
+  ldistmat = p.starmap(compute_distmat_line, inputiterator)
+
+  return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
+
 
 def compute_distmat_line(idx1, q_all, trajfile, noh):
-
   # initialize distance matrix
   distmat = []
-
-  # arrays for first molecule
-  # natoms = len(mol1.atoms)
-  # q_atoms = []
-  # q_all = []
-  # for atom in mol1:
-  #   q_atoms.append(atom.atomicnum)
-  #   q_all.append(atom.coords)
-  # q_atoms = np.array(q_atoms)
-  # q_all = np.array(q_all)
 
   for idx2, mol2 in enumerate(pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)):
     # skip if it's not an element from the superior diagonal matrix
@@ -52,20 +69,11 @@ def compute_distmat_line(idx1, q_all, trajfile, noh):
       continue 
 
     # arrays for second molecule
-    p_atoms = []
-    p_all = []
-    for atom in mol2:
-      p_atoms.append(atom.atomicnum)
-      p_all.append(atom.coords)
-    p_atoms = np.array(p_atoms)
-    p_all = np.array(p_all)
-
-    # if np.count_nonzero(p_atoms != q_atoms):
-    #   exit("Atoms not in the same order")
+    p_atoms, p_all = get_mol_info(mol2)
 
     # consider the H or not consider depending on option
     if noh:
-      not_hydrogens = np.where(p_atoms != 1)
+      not_hydrogens = np.where(p_atoms != 'H')
       P = p_all[not_hydrogens]
       Q = q_all[not_hydrogens]
     else:
@@ -81,22 +89,8 @@ def compute_distmat_line(idx1, q_all, trajfile, noh):
 
   return distmat
 
-def build_distance_matrix(trajfile, noh):
-
-  inputiterator = zip(itertools.count(), map(lambda x: get_mol_coords(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh))
-
-  p = multiprocessing.Pool()
-
-  # build the distance matrix in parallel
-  ldistmat = p.starmap(compute_distmat_line, inputiterator)
-  distmat = [x for n in ldistmat if len(n) > 0 for x in n]
-  print(distmat)
-
-  return np.asarray(distmat)
 
 def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
-  # table to convert atomic number to symbols
-  etab = openbabel.OBElementTable()
 
   # complete distance matrix
   sqdistmat = squareform(distmat)
@@ -124,13 +118,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
 
       # medoid coordinates
       natoms = len(mol.atoms)
-      q_atoms = []
-      q_all = []
-      for atom in mol:
-        q_atoms.append(etab.GetSymbol(atom.atomicnum))
-        q_all.append(atom.coords)
-      q_atoms = np.array(q_atoms)
-      q_all = np.array(q_all)
+      q_atoms, q_all = get_mol_info(mol)
 
       Q = q_all
       Q -= rmsd.centroid(Q)
@@ -151,13 +139,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
         continue
 
       # config coordinates
-      p_atoms = []
-      p_all = []
-      for atom in mol:
-        p_atoms.append(etab.GetSymbol(atom.atomicnum))
-        p_all.append(atom.coords)
-      p_atoms = np.array(p_atoms)
-      p_all = np.array(p_all)
+      p_atoms, p_all = get_mol_info(mol)
 
       # consider the H or not consider depending on option
       if noh:
@@ -190,10 +172,18 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
     outfile.close()
 
 
+def check_positive(value):
+  ivalue = int(value)
+  if ivalue <= 0:
+       raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+  return ivalue
+
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition.')
   parser.add_argument('trajectory_file', help='path to the trajectory containing the conformations to be classified')
   parser.add_argument('min_rmsd', help='value of RMSD used to classify structures as similar')
+  parser.add_argument('-np', '--nprocesses', metavar='NPROCS', type=check_positive, default=4, help='defines the number of processes used to compute the distance matrix')
   parser.add_argument('-n', '--no-hydrogen', action='store_true', help='ignore hydrogens when doing the Kabsch superposition and calculating the RMSD')
   parser.add_argument('-p', '--plot', action='store_true', help='enable the multidimensional scaling and dendrogram plot saving the figures in pdf format (filenames use the same basename of the -oc option)')
   parser.add_argument('-m', '--method', metavar='METHOD', default='average', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: average)")
@@ -242,7 +232,7 @@ if __name__ == '__main__':
   # build a distance matrix already in the condensed form
   else:
     print('\nCalculating distance matrix\n')
-    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen)
+    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, args.nprocesses)
     print('Saving condensed distance matrix to %s\n' % args.outputdistmat.name)
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
 
