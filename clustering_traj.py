@@ -22,58 +22,80 @@ from scipy.spatial.distance import squareform
 from sklearn import manifold
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import multiprocessing
+import itertools
 
-def build_distance_matrix(trajfile, noh):
+def get_mol_coords(mol):
+  q_all = []
+  for atom in mol:
+    q_all.append(atom.coords)
+  return np.array(q_all)
+
+def compute_distmat_line(idx1, q_all, trajfile, noh):
+
   # initialize distance matrix
   distmat = []
 
+  # arrays for first molecule
+  # natoms = len(mol1.atoms)
+  # q_atoms = []
+  # q_all = []
+  # for atom in mol1:
+  #   q_atoms.append(atom.atomicnum)
+  #   q_all.append(atom.coords)
+  # q_atoms = np.array(q_atoms)
+  # q_all = np.array(q_all)
+
+  for idx2, mol2 in enumerate(pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)):
+    # skip if it's not an element from the superior diagonal matrix
+    if idx1 >= idx2:
+      continue 
+
+    # arrays for second molecule
+    p_atoms = []
+    p_all = []
+    for atom in mol2:
+      p_atoms.append(atom.atomicnum)
+      p_all.append(atom.coords)
+    p_atoms = np.array(p_atoms)
+    p_all = np.array(p_all)
+
+    # if np.count_nonzero(p_atoms != q_atoms):
+    #   exit("Atoms not in the same order")
+
+    # consider the H or not consider depending on option
+    if noh:
+      not_hydrogens = np.where(p_atoms != 1)
+      P = p_all[not_hydrogens]
+      Q = q_all[not_hydrogens]
+    else:
+      P = p_all
+      Q = q_all
+
+    # center the coordinates at the origin
+    P -= rmsd.centroid(P)
+    Q -= rmsd.centroid(Q)
+
+    # get the RMSD and store it
+    distmat.append(rmsd.kabsch_rmsd(P, Q))
+
+  return distmat
+
+def build_distance_matrix(trajfile, noh):
+
+  inputiterator = zip(itertools.count(), map(lambda x: get_mol_coords(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh))
+
+  p = multiprocessing.Pool()
+
   # start building the distance matrix
-  for idx1, mol1 in enumerate(pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)):
+  distmat = p.starmap(compute_distmat_line, inputiterator) 
+  print(distmat)
 
-    # arrays for first molecule
-    natoms = len(mol1.atoms)
-    q_atoms = []
-    q_all = []
-    for atom in mol1:
-      q_atoms.append(atom.atomicnum)
-      q_all.append(atom.coords)
-    q_atoms = np.array(q_atoms)
-    q_all = np.array(q_all)
+  # for idx1, mol1 in enumerate(pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)):
 
-    for idx2, mol2 in enumerate(pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)):
-      # skip if it's not an element from the superior diagonal matrix
-      if idx1 >= idx2:
-        continue 
 
-      # arrays for second molecule
-      p_atoms = []
-      p_all = []
-      for atom in mol2:
-        p_atoms.append(atom.atomicnum)
-        p_all.append(atom.coords)
-      p_atoms = np.array(p_atoms)
-      p_all = np.array(p_all)
 
-      if np.count_nonzero(p_atoms != q_atoms):
-        exit("Atoms not in the same order")
-
-      # consider the H or not consider depending on option
-      if noh:
-        not_hydrogens = np.where(p_atoms != 1)
-        P = p_all[not_hydrogens]
-        Q = q_all[not_hydrogens]
-      else:
-        P = p_all
-        Q = q_all
-
-      # center the coordinates at the origin
-      P -= rmsd.centroid(P)
-      Q -= rmsd.centroid(Q)
-
-      # get the RMSD and store it
-      distmat.append(rmsd.kabsch_rmsd(P, Q))
-
-  return np.asarray(distmat)
+  # return np.asarray(distmat)
 
 def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
   # table to convert atomic number to symbols
