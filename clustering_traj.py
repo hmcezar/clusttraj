@@ -87,15 +87,12 @@ def build_distance_matrix(trajfile, noh):
 
   p = multiprocessing.Pool()
 
-  # start building the distance matrix
-  distmat = p.starmap(compute_distmat_line, inputiterator) 
+  # build the distance matrix in parallel
+  ldistmat = p.starmap(compute_distmat_line, inputiterator)
+  distmat = [x for n in ldistmat if len(n) > 0 for x in n]
   print(distmat)
 
-  # for idx1, mol1 in enumerate(pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)):
-
-
-
-  # return np.asarray(distmat)
+  return np.asarray(distmat)
 
 def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
   # table to convert atomic number to symbols
