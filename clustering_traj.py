@@ -151,14 +151,15 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
         Q = q_all
 
       # center the coordinates at the origin
-      P -= rmsd.centroid(P)
+      pcenter = rmsd.centroid(P)
+      P -= pcenter
       Q -= rmsd.centroid(Q)
 
       # generate rotation matrix
       U = rmsd.kabsch(P,Q)
 
       # rotate whole configuration (considering hydrogens even with noh)
-      P = p_all
+      P = p_all - pcenter
       P = np.dot(P, U)
 
       # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
