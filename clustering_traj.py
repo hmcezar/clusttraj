@@ -120,8 +120,13 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
       natoms = len(mol.atoms)
       q_atoms, q_all = get_mol_info(mol)
 
-      Q = q_all
-      Q -= rmsd.centroid(Q)
+      if noh:
+        not_hydrogens = np.where(q_atoms != 'H')
+        qcenter = rmsd.centroid(q_all[not_hydrogens])
+        Q = q_all[not_hydrogens] - qcenter
+      else:
+        qcenter = rmsd.centroid(q_all)
+        Q = q_all - qcenter
 
       # write medoid configuration to file (molstring is a xyz string used to generate de pybel mol)
       molstring = str(natoms)+"\n"+mol.title.rstrip()+"\n"
@@ -144,29 +149,24 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
       # consider the H or not consider depending on option
       if noh:
         not_hydrogens = np.where(p_atoms != 'H')
-        P = p_all[not_hydrogens]
-        Q = q_all[not_hydrogens]
+        P = np.copy(p_all[not_hydrogens])
       else:
-        P = p_all
-        Q = q_all
+        P = np.copy(p_all)
 
       # center the coordinates at the origin
       pcenter = rmsd.centroid(P)
-      qcenter = rmsd.centroid(Q)
       P -= pcenter
-      Q -= qcenter
 
       # generate rotation matrix
       U = rmsd.kabsch(P,Q)
 
       # rotate whole configuration (considering hydrogens even with noh)
-      P = p_all - pcenter
-      P = np.dot(P, U)
-      P += qcenter # not sure why I have to do this...
+      p_all -= pcenter
+      p_all = np.dot(p_all, U)
 
       # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
       molstring = str(natoms)+"\n"+mol.title.rstrip()+"\n"
-      for i, coords in enumerate(P):
+      for i, coords in enumerate(p_all):
         molstring += p_atoms[i]+"\t"+str(coords[0])+"\t"+str(coords[1])+"\t"+str(coords[2])+"\n"
       rmol = pybel.readstring("xyz", molstring)
       outfile.write(rmol)
