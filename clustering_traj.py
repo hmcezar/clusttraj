@@ -130,7 +130,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
 
       # write medoid configuration to file (molstring is a xyz string used to generate de pybel mol)
       molstring = str(natoms)+"\n"+mol.title.rstrip()+"\n"
-      for i, coords in enumerate(Q):
+      for i, coords in enumerate(q_all - qcenter):
         molstring += q_atoms[i]+"\t"+str(coords[0])+"\t"+str(coords[1])+"\t"+str(coords[2])+"\n"
       rmol = pybel.readstring("xyz", molstring)
       outfile.write(rmol)
