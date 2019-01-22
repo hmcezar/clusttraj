@@ -46,9 +46,9 @@ def get_mol_info(mol):
   return np.asarray(q_atoms), np.asarray(q_all)
 
 
-def build_distance_matrix(trajfile, noh, nprocs):
+def build_distance_matrix(trajfile, noh, reorder, nprocs):
   # create iterator containing information to compute a line of the distance matrix
-  inputiterator = zip(itertools.count(), map(lambda x: get_mol_coords(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh))
+  inputiterator = zip(itertools.count(), map(lambda x: get_mol_info(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh), itertools.repeat(reorder))
 
   # create the pool with nprocs processes to compute the distance matrix in parallel
   p = multiprocessing.Pool(processes = nprocs)
@@ -59,7 +59,10 @@ def build_distance_matrix(trajfile, noh, nprocs):
   return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
 
 
-def compute_distmat_line(idx1, q_all, trajfile, noh):
+def compute_distmat_line(idx1, q_info, trajfile, noh, reorder):
+  # unpack q_info tuple
+  q_atoms, q_all = q_info
+
   # initialize distance matrix
   distmat = []
 
@@ -76,21 +79,34 @@ def compute_distmat_line(idx1, q_all, trajfile, noh):
       not_hydrogens = np.where(p_atoms != 'H')
       P = p_all[not_hydrogens]
       Q = q_all[not_hydrogens]
+      Pa = p_atoms[not_hydrogens]
+      Qa = q_atoms[not_hydrogens]
     else:
       P = p_all
       Q = q_all
+      Pa = p_atoms
+      Qa = q_atoms
 
     # center the coordinates at the origin
     P -= rmsd.centroid(P)
     Q -= rmsd.centroid(Q)
 
+    # reorder the atoms if necessary
+    if reorder:
+      prr = reorder(Qa, Pa, Q, P)
+      Pr = P[prr]
+      Pra = Pa[prr]
+    else:
+      Pr = P
+      Pra = Pa
+
     # get the RMSD and store it
-    distmat.append(rmsd.kabsch_rmsd(P, Q))
+    distmat.append(rmsd.kabsch_rmsd(Pr, Q))
 
   return distmat
 
 
-def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
+def save_clusters_config(trajfile, clusters, distmat, noh, reorder, outbasename, outfmt):
 
   # complete distance matrix
   sqdistmat = squareform(distmat)
@@ -124,9 +140,11 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
         not_hydrogens = np.where(q_atoms != 'H')
         qcenter = rmsd.centroid(q_all[not_hydrogens])
         Q = q_all[not_hydrogens] - qcenter
+        Qa = q_atoms[not_hydrogens]
       else:
         qcenter = rmsd.centroid(q_all)
         Q = q_all - qcenter
+        Qa = q_atoms
 
       # write medoid configuration to file (molstring is a xyz string used to generate de pybel mol)
       molstring = str(natoms)+"\n"+mol.title.rstrip()+"\n"
@@ -150,15 +168,26 @@ def save_clusters_config(trajfile, clusters, distmat, noh, outbasename, outfmt):
       if noh:
         not_hydrogens = np.where(p_atoms != 'H')
         P = np.copy(p_all[not_hydrogens])
+        Pa = np.copy(p_atoms[not_hydrogens])
       else:
         P = np.copy(p_all)
+        Pa = np.copy(p_atoms)
 
       # center the coordinates at the origin
       pcenter = rmsd.centroid(P)
       P -= pcenter
 
+      # reorder the atoms if necessary
+      if reorder:
+        prr = reorder(Qa, Pa, Q, P)
+        Pr = P[prr]
+        Pra = Pa[prr]
+      else:
+        Pr = P
+        Pra = Pa
+
       # generate rotation matrix
-      U = rmsd.kabsch(P,Q)
+      U = rmsd.kabsch(Pr, Q)
 
       # rotate whole configuration (considering hydrogens even with noh)
       p_all -= pcenter
@@ -192,6 +221,8 @@ if __name__ == '__main__':
   parser.add_argument('-m', '--method', metavar='METHOD', default='average', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: average)")
   parser.add_argument('-cc', '--clusters-configurations', metavar='EXTENSION', help='save superposed configurations for each cluster in EXTENSION format (basename based on -oc option)')
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
+  parser.add_argument('-e', '--reorder', action='store_true', help='reorder atoms of molecules to lower the RMSD (default: Hungarian)')
+  parser.add_argument('--reorder-alg', action='store', default="hungarian", metavar="METHOD", help='select which reorder algorithm to use; hungarian (default), brute, distance (warning: brute is VERY slow)')
 
   io_group = parser.add_mutually_exclusive_group()
   io_group.add_argument('-i', '--input', type=argparse.FileType('rb'), metavar='FILE', help='file containing input distance matrix in condensed form')
@@ -208,10 +239,24 @@ if __name__ == '__main__':
     print("The method you selected with -m (%s) is not valid." % args.method)
     sys.exit(1)
 
+  if args.reorder_alg not in ["hungarian", "brute", "distance"]:
+    print("The reorder method you selected with --reorder-method (%s) is not valid." % args.reorder_alg)
+    sys.exit(1)
+
   if args.clusters_configurations:
     if args.clusters_configurations not in ["acr", "adf", "adfout", "alc", "arc", "bgf", "box", "bs", "c3d1", "c3d2", "cac", "caccrt", "cache", "cacint", "can", "car", "ccc", "cdx", "cdxml", "cht", "cif", "ck", "cml", "cmlr", "com", "copy", "crk2d", "crk3d", "csr", "cssr", "ct", "cub", "cube", "dmol", "dx", "ent", "fa", "fasta", "fch", "fchk", "fck", "feat", "fh", "fix", "fpt", "fract", "fs", "fsa", "g03", "g92", "g94", "g98", "gal", "gam", "gamin", "gamout", "gau", "gjc", "gjf", "gpr", "gr96", "gukin", "gukout", "gzmat", "hin", "inchi", "inp", "ins", "jin", "jout", "mcdl", "mcif", "mdl", "ml2", "mmcif", "mmd", "mmod", "mol", "mol2", "molden", "molreport", "moo", "mop", "mopcrt", "mopin", "mopout", "mpc", "mpd", "mpqc", "mpqcin", "msi", "msms", "nw", "nwo", "outmol", "pc", "pcm", "pdb", "png", "pov", "pqr", "pqs", "prep", "qcin", "qcout", "report", "res", "rsmi", "rxn", "sd", "sdf", "smi", "smiles", "sy2", "t41", "tdd", "test", "therm", "tmol", "txt", "txyz", "unixyz", "vmol", "xed", "xml", "xyz", "yob", "zin"]:
       print("The format you selected to save the clustered superposed configurations (%s) is not valid." % args.clusters_configurations)
       sys.exit(1)
+
+  if args.reorder_alg == "hungarian":
+    reorder_alg = rmsd.reorder_hungarian
+  elif args.reorder_alg == "distance":
+    reorder_alg = rmsd.reorder_distance
+  elif args.reorder_alg == "brute":
+    reorder_alg = rmsd.reorder_brute
+
+  if not args.reorder:
+    reorder_alg = None
 
   if not args.input:
     if not args.outputdistmat:
@@ -235,7 +280,7 @@ if __name__ == '__main__':
   # build a distance matrix already in the condensed form
   else:
     print('\nCalculating distance matrix\n')
-    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, args.nprocesses)
+    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, args.nprocesses)
     print('Saving condensed distance matrix to %s\n' % args.outputdistmat.name)
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
 
@@ -251,7 +296,7 @@ if __name__ == '__main__':
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
     print("Writing superposed configurations per cluster to files %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
-    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
+    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
 
   if args.plot:
     # plot evolution with o cluster in trajectory
