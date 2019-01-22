@@ -62,6 +62,10 @@ To learn more about how the clustering is performed using this algorithm, see [U
 If the `-n` option is used, the hydrogens are ignored when performing the Kabsch algorithm to find the superposition and calculating the RMSD.
 This is useful to avoid clustering identical structures with just a methyl group rotated as different.
 
+The `-e` or `--reorder` option, tries to reorder the atoms to increase the overlap and reduce the RMSD. 
+The algorithm can be selected with `--reorder-alg`, between hungarian (default), brute or distance. 
+For more information about the implementation, see the [RMSD](https://github.com/charnley/rmsd) package.
+
 To use an already saved distance matrix, specify the file containing the distance matrix in the condensed form with the `-i` option.
 The options `-i` and `-od` are mutually exclusive.
 
