@@ -120,7 +120,7 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, natoms):
   return distmat
 
 
-def save_clusters_config(trajfile, clusters, distmat, noh, reorder, outbasename, outfmt):
+def save_clusters_config(trajfile, clusters, distmat, noh, reorder, natoms, outbasename, outfmt):
 
   # complete distance matrix
   sqdistmat = squareform(distmat)
@@ -191,8 +191,22 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, outbasename,
       pcenter = rmsd.centroid(P)
       P -= pcenter
 
+      # generate rotation to superpose the solute configuration
+      if natoms:
+        # generate a rotation considering only the solute atoms
+        U = rmsd.kabsch(P[:natoms], Q[:natoms])
+
+        # rotate the whole system with this rotation
+        P = np.dot(P, U)
+
+        # consider only the solvent atoms in the reorder
+        prr = reorder(Qa[natoms:], Pa[natoms:], Q[natoms:], P[natoms:])
+        prr += natoms
+        prr = np.concatenate((np.arange(natoms),prr))
+        Pr = P[prr]
+        Pra = Pa[prr]
       # reorder the atoms if necessary
-      if reorder:
+      elif reorder:
         prr = reorder(Qa, Pa, Q, P)
         Pr = P[prr]
         Pra = Pa[prr]
@@ -314,7 +328,7 @@ if __name__ == '__main__':
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
     print("Writing superposed configurations per cluster to files %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
-    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
+    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, args.natoms_solute, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
 
   if args.plot:
     # plot evolution with o cluster in trajectory
