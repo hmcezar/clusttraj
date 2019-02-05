@@ -65,6 +65,9 @@ This is useful to avoid clustering identical structures with just a methyl group
 The `-e` or `--reorder` option, tries to reorder the atoms to increase the overlap and reduce the RMSD. 
 The algorithm can be selected with `--reorder-alg`, between hungarian (default), brute or distance. 
 For more information about the implementation, see the [RMSD](https://github.com/charnley/rmsd) package.
+The reorder option can be used together with the `-ns` option, that receives an integer with the number of atoms of the solute.
+When the `-ns` option is used, the script will first superpose the configurations considering only the solute atoms and then reorder considering only the solvent atoms (the atoms in the input that are after the ns atoms).
+For solute-solvent systems, the use of `-ns` is strongly encouraged.
 
 To use an already saved distance matrix, specify the file containing the distance matrix in the condensed form with the `-i` option.
 The options `-i` and `-od` are mutually exclusive.
