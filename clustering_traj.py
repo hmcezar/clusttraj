@@ -59,7 +59,7 @@ def build_distance_matrix(trajfile, noh, reorder, natoms, nprocs):
   return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
 
 
-def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, natoms):
+def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
   # unpack q_info tuple
   q_atoms, q_all = q_info
 
@@ -92,7 +92,13 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, natoms):
     Q -= rmsd.centroid(Q)
 
     # generate rotation to superpose the solute configuration
-    if natoms:
+    if nsatoms:
+      # get the number of non hydrogen atoms in the solute to subtract if needed
+      if noh:
+        natoms = len(np.where(p_atoms[:nsatoms] != 'H')[0])
+      else:
+        natoms = nsatoms
+
       # generate a rotation considering only the solute atoms
       U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
@@ -120,7 +126,7 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, natoms):
   return distmat
 
 
-def save_clusters_config(trajfile, clusters, distmat, noh, reorder, natoms, outbasename, outfmt):
+def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, outbasename, outfmt):
 
   # complete distance matrix
   sqdistmat = squareform(distmat)
@@ -147,7 +153,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, natoms, outb
         continue
 
       # medoid coordinates
-      natoms = len(mol.atoms)
+      tnatoms = len(mol.atoms)
       q_atoms, q_all = get_mol_info(mol)
 
       if noh:
@@ -161,7 +167,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, natoms, outb
         Qa = q_atoms
 
       # write medoid configuration to file (molstring is a xyz string used to generate de pybel mol)
-      molstring = str(natoms)+"\n"+mol.title.rstrip()+"\n"
+      molstring = str(tnatoms)+"\n"+mol.title.rstrip()+"\n"
       for i, coords in enumerate(q_all - qcenter):
         molstring += q_atoms[i]+"\t"+str(coords[0])+"\t"+str(coords[1])+"\t"+str(coords[2])+"\n"
       rmol = pybel.readstring("xyz", molstring)
@@ -192,7 +198,13 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, natoms, outb
       P -= pcenter
 
       # generate rotation to superpose the solute configuration
-      if natoms:
+      if nsatoms:
+        # get the number of non hydrogen atoms in the solute to subtract if needed
+        if noh:
+          natoms = len(np.where(p_atoms[:nsatoms] != 'H')[0])
+        else:
+          natoms = nsatoms
+
         # generate a rotation considering only the solute atoms
         U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
@@ -222,7 +234,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, natoms, outb
       p_all = np.dot(p_all, U)
 
       # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
-      molstring = str(natoms)+"\n"+mol.title.rstrip()+"\n"
+      molstring = str(tnatoms)+"\n"+mol.title.rstrip()+"\n"
       for i, coords in enumerate(p_all):
         molstring += p_atoms[i]+"\t"+str(coords[0])+"\t"+str(coords[1])+"\t"+str(coords[2])+"\n"
       rmol = pybel.readstring("xyz", molstring)
@@ -279,6 +291,9 @@ if __name__ == '__main__':
 
   if args.natoms_solute and not args.reorder:
     print("Specifying the number of solute atoms is only useful for the reordering algorithms, continuing anyways..")
+    natoms = None
+  else:
+    natoms = args.natoms_solute
 
   if args.reorder_alg == "hungarian":
     reorder_alg = rmsd.reorder_hungarian
@@ -312,7 +327,7 @@ if __name__ == '__main__':
   # build a distance matrix already in the condensed form
   else:
     print('\nCalculating distance matrix\n')
-    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, args.natoms_solute, args.nprocesses)
+    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, natoms, args.nprocesses)
     print('Saving condensed distance matrix to %s\n' % args.outputdistmat.name)
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
 
@@ -328,7 +343,7 @@ if __name__ == '__main__':
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
     print("Writing superposed configurations per cluster to files %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
-    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, args.natoms_solute, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
+    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
 
   if args.plot:
     # plot evolution with o cluster in trajectory
