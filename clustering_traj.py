@@ -75,29 +75,51 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
     p_atoms, p_all = get_mol_info(mol2)
 
     # consider the H or not consider depending on option
-    if noh:
-      not_hydrogens = np.where(p_atoms != 'H')
-      P = p_all[not_hydrogens]
-      Q = q_all[not_hydrogens]
-      Pa = p_atoms[not_hydrogens]
-      Qa = q_atoms[not_hydrogens]
-    else:
-      P = p_all
-      Q = q_all
-      Pa = p_atoms
-      Qa = q_atoms
-
-    # center the coordinates at the origin
-    P -= rmsd.centroid(P)
-    Q -= rmsd.centroid(Q)
-
-    # generate rotation to superpose the solute configuration
     if nsatoms:
       # get the number of non hydrogen atoms in the solute to subtract if needed
       if noh:
         natoms = len(np.where(p_atoms[:nsatoms] != 'H')[0])
       else:
         natoms = nsatoms
+
+      if noh:
+        not_hydrogens = np.where(p_atoms != 'H')
+        P = p_all[not_hydrogens]
+        Q = q_all[not_hydrogens]
+        Pa = p_atoms[not_hydrogens]
+        Qa = q_atoms[not_hydrogens]
+      else:
+        P = p_all
+        Q = q_all
+        Pa = p_atoms
+        Qa = q_atoms        
+
+      pcenter = rmsd.centroid(P[:natoms])
+      qcenter = rmsd.centroid(Q[:natoms])
+    elif noh:
+      not_hydrogens = np.where(p_atoms != 'H')
+      P = p_all[not_hydrogens]
+      Q = q_all[not_hydrogens]
+      Pa = p_atoms[not_hydrogens]
+      Qa = q_atoms[not_hydrogens]
+      pcenter = rmsd.centroid(P)
+      qcenter = rmsd.centroid(Q)
+    else:
+      P = p_all
+      Q = q_all
+      Pa = p_atoms
+      Qa = q_atoms
+      pcenter = rmsd.centroid(P)
+      qcenter = rmsd.centroid(Q)
+
+    # center the coordinates at the origin
+    P -= pcenter
+    Q -= qcenter
+
+    # generate rotation to superpose the solute configuration
+    if nsatoms:
+      # center the coordinates at the solute
+      P -= rmsd.centroid(Q[:natoms])
 
       # generate a rotation considering only the solute atoms
       U = rmsd.kabsch(P[:natoms], Q[:natoms])
@@ -156,15 +178,34 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
       tnatoms = len(mol.atoms)
       q_atoms, q_all = get_mol_info(mol)
 
-      if noh:
+      if nsatoms:
+        # get the number of non hydrogen atoms in the solute to subtract if needed
+        if noh:
+          natoms = len(np.where(q_atoms[:nsatoms] != 'H')[0])
+        else:
+          natoms = nsatoms
+
+        if noh:
+          not_hydrogens = np.where(q_atoms != 'H')
+          Q = np.copy(q_all[not_hydrogens])
+          Qa = np.copy(q_atoms[not_hydrogens])
+        else:
+          Q = np.copy(q_all)
+          Qa = np.copy(q_atoms)
+
+        qcenter = rmsd.centroid(Q[:natoms])
+      elif noh:
         not_hydrogens = np.where(q_atoms != 'H')
-        qcenter = rmsd.centroid(q_all[not_hydrogens])
-        Q = q_all[not_hydrogens] - qcenter
-        Qa = q_atoms[not_hydrogens]
+        Q = np.copy(q_all[not_hydrogens])
+        qcenter = rmsd.centroid(Q)
+        Qa = np.copy(q_atoms[not_hydrogens])
       else:
-        qcenter = rmsd.centroid(q_all)
-        Q = q_all - qcenter
-        Qa = q_atoms
+        Q = np.copy(q_all)
+        qcenter = rmsd.centroid(Q)
+        Qa = np.copy(q_atoms)
+
+      # center the coordinates at the origin
+      Q -= qcenter
 
       # write medoid configuration to file (molstring is a xyz string used to generate de pybel mol)
       molstring = str(tnatoms)+"\n"+mol.title.rstrip()+"\n"
@@ -184,27 +225,31 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
       # config coordinates
       p_atoms, p_all = get_mol_info(mol)
 
-      # consider the H or not consider depending on option
-      if noh:
+      if nsatoms:
+        if noh:
+          not_hydrogens = np.where(p_atoms != 'H')
+          P = np.copy(p_all[not_hydrogens])
+          Pa = np.copy(p_atoms[not_hydrogens])
+        else:
+          P = np.copy(p_all)
+          Pa = np.copy(p_atoms)     
+
+        pcenter = rmsd.centroid(P[:natoms])
+      elif noh:
         not_hydrogens = np.where(p_atoms != 'H')
         P = np.copy(p_all[not_hydrogens])
+        pcenter = rmsd.centroid(P)
         Pa = np.copy(p_atoms[not_hydrogens])
       else:
         P = np.copy(p_all)
+        pcenter = rmsd.centroid(P)
         Pa = np.copy(p_atoms)
 
       # center the coordinates at the origin
-      pcenter = rmsd.centroid(P)
       P -= pcenter
 
       # generate rotation to superpose the solute configuration
       if nsatoms:
-        # get the number of non hydrogen atoms in the solute to subtract if needed
-        if noh:
-          natoms = len(np.where(p_atoms[:nsatoms] != 'H')[0])
-        else:
-          natoms = nsatoms
-
         # generate a rotation considering only the solute atoms
         U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
