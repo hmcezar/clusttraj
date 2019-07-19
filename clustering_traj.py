@@ -307,7 +307,7 @@ if __name__ == '__main__':
   parser.add_argument('-cc', '--clusters-configurations', metavar='EXTENSION', help='save superposed configurations for each cluster in EXTENSION format (basename based on -oc option)')
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
   parser.add_argument('-e', '--reorder', action='store_true', help='reorder atoms of molecules to lower the RMSD (default: Hungarian)')
-  parser.add_argument('--reorder-alg', action='store', default="hungarian", metavar="METHOD", help='select which reorder algorithm to use; hungarian (default), brute, distance (warning: brute is VERY slow)')
+  parser.add_argument('--reorder-alg', action='store', default="distance", metavar="METHOD", help='select which reorder algorithm to use; hungarian, brute, distance (default). Warning: brute is VERY slow)')
   parser.add_argument('-ns', '--natoms-solute', metavar="NATOMS", type=int, help='number of solute atoms, to ignore these atoms in the reordering process')
 
   io_group = parser.add_mutually_exclusive_group()
