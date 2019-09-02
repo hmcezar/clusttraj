@@ -247,6 +247,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
 
       # center the coordinates at the origin
       P -= pcenter
+      p_all -= pcenter
 
       # generate rotation to superpose the solute configuration
       if nsatoms:
@@ -255,6 +256,7 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
 
         # rotate the whole system with this rotation
         P = np.dot(P, U)
+        p_all = np.dot(p_all, U)
 
         # consider only the solvent atoms in the reorder
         prr = reorder(Qa[natoms:], Pa[natoms:], Q[natoms:], P[natoms:])
@@ -275,7 +277,6 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
       U = rmsd.kabsch(Pr, Q)
 
       # rotate whole configuration (considering hydrogens even with noh)
-      p_all -= pcenter
       p_all = np.dot(p_all, U)
 
       # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
