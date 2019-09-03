@@ -121,6 +121,12 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
       # center the coordinates at the solute
       P -= rmsd.centroid(Q[:natoms])
 
+      # reorder solute atoms
+      prr = reorder(Qa[:natoms], Pa[:natoms], Q[:natoms], P[:natoms])
+      prr = np.concatenate((prr,np.arange(len(P)-natoms)+natoms))
+      P = P[prr]
+      Pa = Pa[prr]
+
       # generate a rotation considering only the solute atoms
       U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
@@ -251,6 +257,12 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
 
       # generate rotation to superpose the solute configuration
       if nsatoms:
+        # reorder solute atoms
+        prr = reorder(Qa[:natoms], Pa[:natoms], Q[:natoms], P[:natoms])
+        prr = np.concatenate((prr,np.arange(len(P)-natoms)+natoms))
+        P = P[prr]
+        Pa = Pa[prr]
+
         # generate a rotation considering only the solute atoms
         U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
