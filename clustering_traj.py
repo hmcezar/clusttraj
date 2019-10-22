@@ -312,16 +312,17 @@ def check_positive(value):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition.')
   parser.add_argument('trajectory_file', help='path to the trajectory containing the conformations to be classified')
-  parser.add_argument('min_rmsd', help='value of RMSD used to classify structures as similar')
+  parser.add_argument('min_rmsd', type=float, help='value of RMSD used to classify structures as similar')
   parser.add_argument('-np', '--nprocesses', metavar='NPROCS', type=check_positive, default=2, help='defines the number of processes used to compute the distance matrix and multidimensional representation (default = 2)')
   parser.add_argument('-n', '--no-hydrogen', action='store_true', help='ignore hydrogens when doing the Kabsch superposition and calculating the RMSD')
   parser.add_argument('-p', '--plot', action='store_true', help='enable the multidimensional scaling and dendrogram plot saving the figures in pdf format (filenames use the same basename of the -oc option)')
   parser.add_argument('-m', '--method', metavar='METHOD', default='average', help="method used for clustering (see valid methods at https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html) (default: average)")
   parser.add_argument('-cc', '--clusters-configurations', metavar='EXTENSION', help='save superposed configurations for each cluster in EXTENSION format (basename based on -oc option)')
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
-  parser.add_argument('-e', '--reorder', action='store_true', help='reorder atoms of molecules to lower the RMSD (default: Hungarian)')
+  parser.add_argument('-e', '--reorder', action='store_true', help='reorder atoms of molecules to lower the RMSD')
+  parser.add_argument('-eex', '--reorder-exclusions', metavar="EXCLUDED ATOMS", nargs='+', type=check_positive, help='list of atoms that are ignored when reordering')
   parser.add_argument('--reorder-alg', action='store', default="distance", metavar="METHOD", help='select which reorder algorithm to use; hungarian, brute, distance (default). Warning: brute is VERY slow)')
-  parser.add_argument('-ns', '--natoms-solute', metavar="NATOMS", type=int, help='number of solute atoms, to ignore these atoms in the reordering process')
+  parser.add_argument('-ns', '--natoms-solute', metavar="NATOMS", type=check_positive, help='number of solute atoms, to ignore these atoms in the reordering process')
 
   io_group = parser.add_mutually_exclusive_group()
   io_group.add_argument('-i', '--input', type=argparse.FileType('rb'), metavar='FILE', help='file containing input distance matrix in condensed form')
@@ -347,11 +348,17 @@ if __name__ == '__main__':
       print("The format you selected to save the clustered superposed configurations (%s) is not valid." % args.clusters_configurations)
       sys.exit(1)
 
+  if len(os.path.splitext(args.outputclusters)[1]) == 0:
+    args.outputclusters += ".dat"
+
   if args.natoms_solute and not args.reorder:
-    print("Specifying the number of solute atoms is only useful for the reordering algorithms, continuing anyways..")
+    print("Specifying the number of solute atoms is only useful for the reordering algorithms, atoms will be reordered.")
     natoms = None
   else:
     natoms = args.natoms_solute
+
+  if not (args.reorder or args.natoms_solute) and args.reorder_exclusion:
+    print("The list of atoms to exclude for reordering only makes sense if reordering is enabled, continuing anyways..")
 
   if args.reorder_alg == "hungarian":
     reorder_alg = rmsd.reorder_hungarian
@@ -360,7 +367,7 @@ if __name__ == '__main__':
   elif args.reorder_alg == "brute":
     reorder_alg = rmsd.reorder_brute
 
-  if not args.reorder:
+  if not (args.reorder or args.natoms_solute):
     reorder_alg = None
 
   if not args.input:
@@ -384,19 +391,21 @@ if __name__ == '__main__':
     distmat = np.loadtxt(args.input)
   # build a distance matrix already in the condensed form
   else:
-    print('\nCalculating distance matrix\n')
+    print('\nCalculating distance matrix using %d threads\n' % args.nprocesses)
     distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, natoms, args.nprocesses)
     print('Saving condensed distance matrix to %s\n' % args.outputdistmat.name)
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
+    args.outputdistmat.close()
 
   # linkage
   print("Starting clustering using '%s' method to join the clusters\n" % args.method)
   Z = hcl.linkage(distmat, args.method)
 
   # build the clusters and print them to file
-  clusters = hcl.fcluster(Z, float(args.min_rmsd), criterion='distance')
+  clusters = hcl.fcluster(Z, args.min_rmsd, criterion='distance')
   print("Saving clustering classification to %s\n" % args.outputclusters.name)
   np.savetxt(args.outputclusters, clusters, fmt='%d')
+  args.outputclusters.close()
 
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
@@ -421,14 +430,14 @@ if __name__ == '__main__':
       leaf_rotation=90.,  # rotates the x axis labels
       leaf_font_size=8.,  # font size for the x axis labels
     )
-    plt.axhline(float(args.min_rmsd),linestyle='--')
+    plt.axhline(args.min_rmsd,linestyle='--')
     plt.savefig(os.path.splitext(args.outputclusters.name)[0]+"_dendrogram.pdf", bbox_inches='tight')
 
     # finds the 2D representation of the distance matrix (multidimensional scaling) and plot it
     plt.figure()
-    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=666, n_init=6, max_iter=300, eps=1e-3, n_jobs=args.nprocesses)
+    mds = manifold.MDS(n_components=2, dissimilarity="precomputed", random_state=666, n_init=3, max_iter=200, eps=1e-3, n_jobs=args.nprocesses)
     coords = mds.fit_transform(squareform(distmat))
-    plt.tick_params(axis='both', which='both', bottom='off', top='off', left='off', right='off', labelbottom='off', labelleft='off')
+    plt.tick_params(axis='both', which='both', bottom=False, top=False, left=False, right=False, labelbottom=False, labelleft=False)
     plt.scatter(coords[:, 0], coords[:, 1], marker = 'o', c=clusters, cmap=plt.cm.nipy_spectral)
     plt.savefig(os.path.splitext(args.outputclusters.name)[0]+".pdf", bbox_inches='tight')
 
@@ -441,5 +450,41 @@ if __name__ == '__main__':
   labels, sizes = np.unique(clusters, return_counts=True)
   for label, size in zip(labels,sizes):
     print("%d\t%d" % (label,size))
+
+  # save summary
+  with open("summary_"+args.outputclusters.name, "w") as f:
+    f.write("Clusterized file %s with a minimum RMSD of %f\n" % (args.trajectory_file, args.min_rmsd))
+    f.write("Method: %s\nIgnoring hydrogens?: %s\n" % (args.method, args.no_hydrogen))
+    if args.natoms_solute:
+      f.write("\nUsing solute-solvent reordering\n")
+      f.write("Number of solute atoms: %d\n" % args.natoms_solute)
+      f.write("Reordering algorithm: %s\n" % args.reorder_alg)
+      if args.reorder_exclusions:
+        exclusions = ""
+        for val in args.reorder_exclusions:
+          exclusions += "%d " % val
+        f.write("Atoms that weren't considered in the reordering: %s\n" % exclusions.strip())
+    elif args.reorder:
+      f.write("\nReordering all atom at the same time\n")
+      f.write("Reordering algorithm: %s\n" % args.reorder_alg)
+      if args.reorder_exclusions:
+        exclusions = ""
+        for val in args.reorder_exclusions:
+          exclusions += "%d " % val
+        f.write("Atoms that weren't considered in the reordering: %s\n" % exclusions.strip())
+
+    f.write("\nDistance matrix was written in: %s\n" % args.outputdistmat.name)
+    f.write("The classification of each configuration was written in: %s\n" % args.outputclusters.name)
+    if args.clusters_configurations:
+      f.write("\nThe superposed structures for each cluster were saved at: %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
+    if args.plot:
+      f.write("\nPlotting the dendrogram to: %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_dendrogram.pdf"))
+      f.write("Plotting the multidimensional scaling to 2D to: %s\n" % (os.path.splitext(args.outputclusters.name)[0]+".pdf"))
+      f.write("Plotting the evolution of the classification with the trajectory to: %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_evo.pdf"))
+
+    f.write("\nThe following %d clusters were found:\n" % max(clusters))
+    f.write("Cluster\tSize\n")
+    for label, size in zip(labels,sizes):
+      f.write("%d\t%d\n" % (label,size))
 
   print()
