@@ -352,12 +352,12 @@ if __name__ == '__main__':
     args.outputclusters += ".dat"
 
   if args.natoms_solute and not args.reorder:
-    print("Specifying the number of solute atoms is only useful for the reordering algorithms, atoms will be reordered.")
+    print("Specifying the number of solute atoms is only useful for the reordering algorithms, ignoring the number of solute atoms.")
     natoms = None
   else:
     natoms = args.natoms_solute
 
-  if not (args.reorder or args.natoms_solute) and args.reorder_exclusion:
+  if not args.reorder and args.reorder_exclusions:
     print("The list of atoms to exclude for reordering only makes sense if reordering is enabled, continuing anyways..")
 
   if args.reorder_alg == "hungarian":
@@ -367,7 +367,7 @@ if __name__ == '__main__':
   elif args.reorder_alg == "brute":
     reorder_alg = rmsd.reorder_brute
 
-  if not (args.reorder or args.natoms_solute):
+  if not args.reorder:
     reorder_alg = None
 
   if not args.input:
@@ -453,11 +453,11 @@ if __name__ == '__main__':
 
   # save summary
   with open("summary_"+args.outputclusters.name, "w") as f:
-    f.write("Clusterized file %s with a minimum RMSD of %f\n" % (args.trajectory_file, args.min_rmsd))
+    f.write("Clusterized %d structures from file %s with a minimum RMSD of %f\n" % (len(clusters), args.trajectory_file, args.min_rmsd))
     f.write("Method: %s\nIgnoring hydrogens?: %s\n" % (args.method, args.no_hydrogen))
-    if args.natoms_solute:
+    if natoms:
       f.write("\nUsing solute-solvent reordering\n")
-      f.write("Number of solute atoms: %d\n" % args.natoms_solute)
+      f.write("Number of solute atoms: %d\n" % natoms)
       f.write("Reordering algorithm: %s\n" % args.reorder_alg)
       if args.reorder_exclusions:
         exclusions = ""
