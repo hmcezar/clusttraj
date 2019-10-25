@@ -122,6 +122,35 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
       P -= rmsd.centroid(Q[:natoms])
 
       # reorder solute atoms
+      # p_axis = rmsd.get_principal_axis(Pa, P)
+      # q_axis = rmsd.get_principal_axis(Qa, Q)
+
+      # # rotate Q onto P considering that the axis are parallel and antiparallel
+      # U1 = rmsd.rotation_matrix_vectors(q_axis, p_axis)
+      # U2 = rmsd.rotation_matrix_vectors(q_axis, -p_axis)
+      # P1 = np.dot(P, U1)
+      # P2 = np.dot(P, U2)
+
+      # prr1 = reorder(Qa, Pa, Q, P1)
+      # prr2 = reorder(Qa, Pa, Q, P2)
+      # P1 = P1[prr1]
+      # P2 = P2[prr2]
+      
+      # rmsd1 = rmsd.kabsch_rmsd(P1, Q)
+      # rmsd2 = rmsd.kabsch_rmsd(P2, Q)
+
+      # # consider the best case
+      # if rmsd1 < rmsd2:
+      #   minrmsd = rmsd1
+      #   Pr = P1
+      #   prr = prr1
+      #   Pra = Pa[prr]
+      # else:
+      #   minrmsd = rmsd2
+      #   Pr = P2
+      #   prr = prr2
+      #   Pra = Pa[prr]
+
       prr = reorder(Qa[:natoms], Pa[:natoms], Q[:natoms], P[:natoms])
       prr = np.concatenate((prr,np.arange(len(P)-natoms)+natoms))
       P = P[prr]
@@ -141,15 +170,43 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
       Pra = Pa[prr]
     # reorder the atoms if necessary
     elif reorder:
-      prr = reorder(Qa, Pa, Q, P)
-      Pr = P[prr]
-      Pra = Pa[prr]
+      p_axis = rmsd.get_principal_axis(Pa, P)
+      q_axis = rmsd.get_principal_axis(Qa, Q)
+
+      # rotate Q onto P considering that the axis are parallel and antiparallel
+      U1 = rmsd.rotation_matrix_vectors(q_axis, p_axis)
+      U2 = rmsd.rotation_matrix_vectors(q_axis, -p_axis)
+      P1 = np.dot(P, U1)
+      P2 = np.dot(P, U2)
+
+      prr1 = reorder(Qa, Pa, Q, P1)
+      prr2 = reorder(Qa, Pa, Q, P2)
+      P1 = P1[prr1]
+      P2 = P2[prr2]
+      
+      rmsd1 = rmsd.kabsch_rmsd(P1, Q)
+      rmsd2 = rmsd.kabsch_rmsd(P2, Q)
+
+      # consider the best case
+      if rmsd1 < rmsd2:
+        minrmsd = rmsd1
+        Pr = P1
+        prr = prr1
+        Pra = Pa[prr]
+      else:
+        minrmsd = rmsd2
+        Pr = P2
+        prr = prr2
+        Pra = Pa[prr]
     else:
       Pr = P
       Pra = Pa
 
     # get the RMSD and store it
-    distmat.append(rmsd.kabsch_rmsd(Pr, Q))
+    if reorder:
+      distmat.append(minrmsd)
+    else:
+      distmat.append(rmsd.kabsch_rmsd(Pr, Q))
 
   return distmat
 
@@ -278,6 +335,9 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
         Pra = Pa[prr]
       # reorder the atoms if necessary
       elif reorder:
+        U = rmsd.kabsch(P, Q)
+        P = np.dot(P, U)
+        p_all = np.dot(p_all, U)
         prr = reorder(Qa, Pa, Q, P)
         Pr = P[prr]
         Pra = Pa[prr]
