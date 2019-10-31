@@ -46,9 +46,9 @@ def get_mol_info(mol):
   return np.asarray(q_atoms), np.asarray(q_all)
 
 
-def build_distance_matrix(trajfile, noh, reorder, natoms, nprocs):
+def build_distance_matrix(trajfile, noh, reorder, natoms, reorderexcl, nprocs):
   # create iterator containing information to compute a line of the distance matrix
-  inputiterator = zip(itertools.count(), map(lambda x: get_mol_info(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh), itertools.repeat(reorder), itertools.repeat(natoms))
+  inputiterator = zip(itertools.count(), map(lambda x: get_mol_info(x), pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)), itertools.repeat(trajfile), itertools.repeat(noh), itertools.repeat(reorder), itertools.repeat(natoms), itertools.repeat(reorderexcl))
 
   # create the pool with nprocs processes to compute the distance matrix in parallel
   p = multiprocessing.Pool(processes = nprocs)
@@ -59,7 +59,7 @@ def build_distance_matrix(trajfile, noh, reorder, natoms, nprocs):
   return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
 
 
-def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
+def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reorderexcl):
   # unpack q_info tuple
   q_atoms, q_all = q_info
 
@@ -122,10 +122,24 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
       P -= rmsd.centroid(Q[:natoms])
 
       # reorder solute atoms
-      prr = reorder(Qa[:natoms], Pa[:natoms], Q[:natoms], P[:natoms])
-      prr = np.concatenate((prr,np.arange(len(P)-natoms)+natoms))
-      P = P[prr]
-      Pa = Pa[prr]
+      # find the solute atoms that are not excluded
+      soluexcl = np.where(reorderexcl < natoms)
+      soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
+      Pview = P[soluteview]
+      Paview = Pa[soluteview]
+      
+      # reorder just these atoms
+      prr = reorder(Qa[soluteview], Paview, Q[soluteview], Pview)
+      Pview = Pview[prr]
+      Paview = Paview[prr]
+
+      # build the total molecule reordering just these atoms
+      whereins = np.where(np.isin(np.arange(natoms), reorderexcl[soluexcl]) == True)
+      Psolu = np.insert(Pview, [x-whereins[0].tolist().index(x) for x in whereins[0]], P[reorderexcl[soluexcl]], axis = 0)
+      Pasolu = np.insert(Paview, [x-whereins[0].tolist().index(x) for x in whereins[0]], Pa[reorderexcl[soluexcl]], axis = 0)
+
+      P = np.concatenate((Psolu, P[np.arange(len(P)-natoms)+natoms]))
+      Pa = np.concatenate((Pasolu, Pa[np.arange(len(Pa)-natoms)+natoms]))
 
       # generate a rotation considering only the solute atoms
       U = rmsd.kabsch(P[:natoms], Q[:natoms])
@@ -133,12 +147,25 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms):
       # rotate the whole system with this rotation
       P = np.dot(P, U)
 
-      # consider only the solvent atoms in the reorder
-      prr = reorder(Qa[natoms:], Pa[natoms:], Q[natoms:], P[natoms:])
-      prr += natoms
-      prr = np.concatenate((np.arange(natoms),prr))
-      Pr = P[prr]
-      Pra = Pa[prr]
+      # consider only the solvent atoms in the reorder (without exclusions)
+      solvexcl = np.where(reorderexcl >= natoms)
+      solvview = np.delete(np.arange(natoms,len(P)), reorderexcl[solvexcl])
+      Pview = P[solvview]
+      Paview = Pa[solvview]
+
+      # reorder just these atoms
+      prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
+      Pview = Pview[prr]
+      Paview = Paview[prr]
+
+      # build the total molecule with the reordered atoms
+      whereins = np.where(np.isin(np.arange(natoms,len(P)), reorderexcl[solvexcl]) == True)
+      Psolv = np.insert(Pview, [x-whereins[0].tolist().index(x) for x in whereins[0]], P[reorderexcl[solvexcl]], axis = 0)
+      Pasolv = np.insert(Paview, [x-whereins[0].tolist().index(x) for x in whereins[0]], Pa[reorderexcl[solvexcl]], axis = 0)
+
+      Pr = np.concatenate((P[:natoms], Psolv))
+      Pra = np.concatenate((Pa[:natoms], Pasolv))
+
     # reorder the atoms if necessary
     elif reorder:
       prr = reorder(Qa, Pa, Q, P)
@@ -392,7 +419,7 @@ if __name__ == '__main__':
   # build a distance matrix already in the condensed form
   else:
     print('\nCalculating distance matrix using %d threads\n' % args.nprocesses)
-    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, natoms, args.nprocesses)
+    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, natoms, np.asarray([x-1 for x in args.reorder_exclusions]), args.nprocesses)
     print('Saving condensed distance matrix to %s\n' % args.outputdistmat.name)
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
     args.outputdistmat.close()
@@ -410,7 +437,7 @@ if __name__ == '__main__':
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
     print("Writing superposed configurations per cluster to files %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
-    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations)
+    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations, args.reorder_exclusions)
 
   if args.plot:
     # plot evolution with o cluster in trajectory
