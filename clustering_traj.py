@@ -168,9 +168,20 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
 
     # reorder the atoms if necessary
     elif reorder:
-      prr = reorder(Qa, Pa, Q, P)
-      Pr = P[prr]
-      Pra = Pa[prr]
+      # get the view without the excluded atoms
+      view = np.delete(np.arange(len(P)), reorderexcl)
+      Pview = P[view]
+      Paview = Pa[view]
+
+      prr = reorder(Qa[view], Paview, Q[view], Pview)
+      Pview = Pview[prr]
+      Paview = Paview[prr]
+
+      # build the total molecule with the reordered atoms
+      whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) == True)
+      Pr = np.insert(Pview, [x-whereins[0].tolist().index(x) for x in whereins[0]], P[reorderexcl], axis = 0)
+      Pra = np.insert(Paview, [x-whereins[0].tolist().index(x) for x in whereins[0]], Pa[reorderexcl], axis = 0)
+
     else:
       Pr = P
       Pra = Pa
