@@ -192,7 +192,7 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
   return distmat
 
 
-def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, outbasename, outfmt):
+def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, outbasename, outfmt, reorderexcl):
 
   # complete distance matrix
   sqdistmat = squareform(distmat)
@@ -296,10 +296,24 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
       # generate rotation to superpose the solute configuration
       if nsatoms:
         # reorder solute atoms
-        prr = reorder(Qa[:natoms], Pa[:natoms], Q[:natoms], P[:natoms])
-        prr = np.concatenate((prr,np.arange(len(P)-natoms)+natoms))
-        P = P[prr]
-        Pa = Pa[prr]
+        # find the solute atoms that are not excluded
+        soluexcl = np.where(reorderexcl < natoms)
+        soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
+        Pview = P[soluteview]
+        Paview = Pa[soluteview]
+        
+        # reorder just these atoms
+        prr = reorder(Qa[soluteview], Paview, Q[soluteview], Pview)
+        Pview = Pview[prr]
+        Paview = Paview[prr]
+
+        # build the total molecule reordering just these atoms
+        whereins = np.where(np.isin(np.arange(natoms), reorderexcl[soluexcl]) == True)
+        Psolu = np.insert(Pview, [x-whereins[0].tolist().index(x) for x in whereins[0]], P[reorderexcl[soluexcl]], axis = 0)
+        Pasolu = np.insert(Paview, [x-whereins[0].tolist().index(x) for x in whereins[0]], Pa[reorderexcl[soluexcl]], axis = 0)
+
+        P = np.concatenate((Psolu, P[np.arange(len(P)-natoms)+natoms]))
+        Pa = np.concatenate((Pasolu, Pa[np.arange(len(Pa)-natoms)+natoms]))
 
         # generate a rotation considering only the solute atoms
         U = rmsd.kabsch(P[:natoms], Q[:natoms])
@@ -308,17 +322,39 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
         P = np.dot(P, U)
         p_all = np.dot(p_all, U)
 
-        # consider only the solvent atoms in the reorder
-        prr = reorder(Qa[natoms:], Pa[natoms:], Q[natoms:], P[natoms:])
-        prr += natoms
-        prr = np.concatenate((np.arange(natoms),prr))
-        Pr = P[prr]
-        Pra = Pa[prr]
+        # consider only the solvent atoms in the reorder (without exclusions)
+        solvexcl = np.where(reorderexcl >= natoms)
+        solvview = np.delete(np.arange(natoms,len(P)), reorderexcl[solvexcl])
+        Pview = P[solvview]
+        Paview = Pa[solvview]
+
+        # reorder just these atoms
+        prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
+        Pview = Pview[prr]
+        Paview = Paview[prr]
+
+        # build the total molecule with the reordered atoms
+        whereins = np.where(np.isin(np.arange(natoms,len(P)), reorderexcl[solvexcl]) == True)
+        Psolv = np.insert(Pview, [x-whereins[0].tolist().index(x) for x in whereins[0]], P[reorderexcl[solvexcl]], axis = 0)
+        Pasolv = np.insert(Paview, [x-whereins[0].tolist().index(x) for x in whereins[0]], Pa[reorderexcl[solvexcl]], axis = 0)
+
+        Pr = np.concatenate((P[:natoms], Psolv))
+        Pra = np.concatenate((Pa[:natoms], Pasolv))
       # reorder the atoms if necessary
       elif reorder:
-        prr = reorder(Qa, Pa, Q, P)
-        Pr = P[prr]
-        Pra = Pa[prr]
+        # get the view without the excluded atoms
+        view = np.delete(np.arange(len(P)), reorderexcl)
+        Pview = P[view]
+        Paview = Pa[view]
+
+        prr = reorder(Qa[view], Paview, Q[view], Pview)
+        Pview = Pview[prr]
+        Paview = Paview[prr]
+
+        # build the total molecule with the reordered atoms
+        whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) == True)
+        Pr = np.insert(Pview, [x-whereins[0].tolist().index(x) for x in whereins[0]], P[reorderexcl], axis = 0)
+        Pra = np.insert(Paview, [x-whereins[0].tolist().index(x) for x in whereins[0]], Pa[reorderexcl], axis = 0)
       else:
         Pr = P
         Pra = Pa
@@ -386,6 +422,10 @@ if __name__ == '__main__':
       print("The format you selected to save the clustered superposed configurations (%s) is not valid." % args.clusters_configurations)
       sys.exit(1)
 
+  if args.reorder_exclusions and args.no_hydrogen:
+    print("You cannot use --no-hydrogen and reorder exclusions with -eex at the same time")
+    sys.exit(1)
+
   if len(os.path.splitext(args.outputclusters)[1]) == 0:
     args.outputclusters += ".dat"
 
@@ -448,7 +488,7 @@ if __name__ == '__main__':
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
     print("Writing superposed configurations per cluster to files %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
-    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations, args.reorder_exclusions)
+    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations, np.asarray([x-1 for x in args.reorder_exclusions]))
 
   if args.plot:
     # plot evolution with o cluster in trajectory
