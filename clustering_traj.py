@@ -121,6 +121,13 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
       # center the coordinates at the solute
       P -= rmsd.centroid(Q[:natoms])
 
+      # try to improve atom matching by performing Kabsch
+      # generate a rotation considering only the solute atoms
+      U = rmsd.kabsch(P[:natoms], Q[:natoms])
+
+      # rotate the whole system with this rotation
+      P = np.dot(P, U)
+
       # reorder solute atoms
       # find the solute atoms that are not excluded
       soluexcl = np.where(reorderexcl < natoms)
@@ -168,6 +175,13 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
 
     # reorder the atoms if necessary
     elif reorder:
+      # try to improve atom matching by performing Kabsch
+      # generate a rotation considering only the solute atoms
+      U = rmsd.kabsch(P, Q)
+
+      # rotate the whole system with this rotation
+      P = np.dot(P, U)
+
       # get the view without the excluded atoms
       view = np.delete(np.arange(len(P)), reorderexcl)
       Pview = P[view]
@@ -295,6 +309,17 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
 
       # generate rotation to superpose the solute configuration
       if nsatoms:
+        # center the coordinates at the solute
+        P -= rmsd.centroid(Q[:natoms])
+
+        # try to improve atom matching by performing Kabsch
+        # generate a rotation considering only the solute atoms
+        U = rmsd.kabsch(P[:natoms], Q[:natoms])
+
+        # rotate the whole system with this rotation
+        P = np.dot(P, U)
+        p_all = np.dot(p_all, U)
+
         # reorder solute atoms
         # find the solute atoms that are not excluded
         soluexcl = np.where(reorderexcl < natoms)
@@ -342,6 +367,14 @@ def save_clusters_config(trajfile, clusters, distmat, noh, reorder, nsatoms, out
         Pra = np.concatenate((Pa[:natoms], Pasolv))
       # reorder the atoms if necessary
       elif reorder:
+        # try to improve atom matching by performing Kabsch
+        # generate a rotation considering only the solute atoms
+        U = rmsd.kabsch(P, Q)
+
+        # rotate the whole system with this rotation
+        P = np.dot(P, U)
+        p_all = np.dot(p_all, U)
+
         # get the view without the excluded atoms
         view = np.delete(np.arange(len(P)), reorderexcl)
         Pview = P[view]
@@ -556,7 +589,10 @@ if __name__ == '__main__':
           exclusions += "%d " % val
         f.write("Atoms that weren't considered in the reordering: %s\n" % exclusions.strip())
 
-    f.write("\nDistance matrix was written in: %s\n" % args.outputdistmat.name)
+    if args.input:
+      f.write("\nDistance matrix was read from: %s\n" % args.input.name)      
+    else:
+      f.write("\nDistance matrix was written in: %s\n" % args.outputdistmat.name)
     f.write("The classification of each configuration was written in: %s\n" % args.outputclusters.name)
     if args.clusters_configurations:
       f.write("\nThe superposed structures for each cluster were saved at: %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
