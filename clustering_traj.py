@@ -439,9 +439,9 @@ if __name__ == '__main__':
     print("The list of atoms to exclude for reordering only makes sense if reordering is enabled, continuing anyways..")
 
   if args.reorder_exclusions:
-    reorder_excl = np.asarray([x-1 for x in args.reorder_exclusions])
+    reorder_excl = np.asarray([x-1 for x in args.reorder_exclusions], np.int32)
   else:
-    reorder_excl = np.asarray([])
+    reorder_excl = np.asarray([], np.int32)
 
   if args.reorder_alg == "hungarian":
     reorder_alg = rmsd.reorder_hungarian
