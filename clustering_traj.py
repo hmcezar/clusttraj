@@ -438,6 +438,11 @@ if __name__ == '__main__':
   if not args.reorder and args.reorder_exclusions:
     print("The list of atoms to exclude for reordering only makes sense if reordering is enabled, continuing anyways..")
 
+  if args.reorder_exclusions:
+    reorder_excl = np.asarray([x-1 for x in args.reorder_exclusions])
+  else:
+    reorder_excl = np.asarray([])
+
   if args.reorder_alg == "hungarian":
     reorder_alg = rmsd.reorder_hungarian
   elif args.reorder_alg == "distance":
@@ -470,7 +475,7 @@ if __name__ == '__main__':
   # build a distance matrix already in the condensed form
   else:
     print('\nCalculating distance matrix using %d threads\n' % args.nprocesses)
-    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, natoms, np.asarray([x-1 for x in args.reorder_exclusions]), args.nprocesses)
+    distmat = build_distance_matrix(args.trajectory_file, args.no_hydrogen, reorder_alg, natoms, reorder_excl, args.nprocesses)
     print('Saving condensed distance matrix to %s\n' % args.outputdistmat.name)
     np.savetxt(args.outputdistmat, distmat, fmt='%.18f')
     args.outputdistmat.close()
@@ -488,7 +493,7 @@ if __name__ == '__main__':
   # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
   if args.clusters_configurations:
     print("Writing superposed configurations per cluster to files %s\n" % (os.path.splitext(args.outputclusters.name)[0]+"_confs"+"_*"+"."+args.clusters_configurations))
-    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations, np.asarray([x-1 for x in args.reorder_exclusions]))
+    save_clusters_config(args.trajectory_file, clusters, distmat, args.no_hydrogen, reorder_alg, natoms, os.path.splitext(args.outputclusters.name)[0]+"_confs", args.clusters_configurations, reorder_excl)
 
   if args.plot:
     # plot evolution with o cluster in trajectory
