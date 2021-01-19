@@ -39,12 +39,18 @@ def get_mol_coords(mol):
 
 def get_mol_info(mol):
   # table to convert atomic number to symbols
-  etab = openbabel.OBElementTable()
+  try:
+    etab = openbabel.OBElementTable()
+  except:
+    ob3 = True
 
   q_atoms = []
   q_all = []
   for atom in mol:
-    q_atoms.append(etab.GetSymbol(atom.atomicnum))
+    if ob3:
+      q_atoms.append(openbabel.GetSymbol(atom.atomicnum))    
+    else:
+      q_atoms.append(etab.GetSymbol(atom.atomicnum))
     q_all.append(atom.coords)
 
   return np.asarray(q_atoms), np.asarray(q_all)
