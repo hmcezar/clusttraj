@@ -10,13 +10,17 @@ Author: Henrique Musseli Cezar
 Date: NOV/2017
 """
 
+try:
+  import pybel
+  import openbabel
+except:
+  from openbabel import pybel
+  from openbabel import openbabel
 import os
 import sys
 import argparse
 import numpy as np
 import rmsd
-import pybel
-import openbabel
 import scipy.cluster.hierarchy as hcl
 from scipy.spatial.distance import squareform
 from sklearn import manifold

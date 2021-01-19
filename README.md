@@ -21,7 +21,7 @@ We recommend the use of the [Anaconda](https://www.anaconda.com/download/) Pytho
 To install the libraries with Anaconda, do the following:
 ```
 conda install numpy
-conda install -c openbabel openbabel
+conda install -c conda-forge openbabel
 conda install scipy
 conda install scikit-learn
 conda install matplotlib
