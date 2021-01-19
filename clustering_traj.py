@@ -14,6 +14,7 @@ try:
   import pybel
   import openbabel
 except:
+  ob3 = True
   from openbabel import pybel
   from openbabel import openbabel
 import os
@@ -39,10 +40,8 @@ def get_mol_coords(mol):
 
 def get_mol_info(mol):
   # table to convert atomic number to symbols
-  try:
+  if not ob3:
     etab = openbabel.OBElementTable()
-  except:
-    ob3 = True
 
   q_atoms = []
   q_all = []
