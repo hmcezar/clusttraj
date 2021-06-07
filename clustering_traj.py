@@ -13,6 +13,7 @@ Date: NOV/2017
 try:
   import pybel
   import openbabel
+  ob3 = False
 except:
   ob3 = True
   from openbabel import pybel
