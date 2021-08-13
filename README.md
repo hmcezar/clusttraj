@@ -13,6 +13,7 @@ Currently, the following libraries are required:
 - [NumPy](http://www.numpy.org/)
 - [OpenBabel](http://openbabel.org/)
 - [RMSD](https://github.com/charnley/rmsd)
+- [QML](https://github.com/qmlcode/qml)
 - [SciPy](https://www.scipy.org/)
 - [scikit-learn](http://scikit-learn.org/stable/index.html)
 - [matplotlib](https://matplotlib.org/)
@@ -26,6 +27,7 @@ conda install scipy
 conda install scikit-learn
 conda install matplotlib
 conda install pip
+pip install git+https://github.com/qmlcode/qml@develop
 pip install rmsd
 ```
 

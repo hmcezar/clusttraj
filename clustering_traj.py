@@ -438,7 +438,7 @@ if __name__ == '__main__':
   parser.add_argument('-oc', '--outputclusters', default='clusters.dat', metavar='FILE', help='file to store the clusters (default: clusters.dat)')
   parser.add_argument('-e', '--reorder', action='store_true', help='reorder atoms of molecules to lower the RMSD')
   parser.add_argument('-eex', '--reorder-exclusions', metavar="EXCLUDED ATOMS", nargs='+', type=check_positive, help='list of atoms that are ignored when reordering')
-  parser.add_argument('--reorder-alg', action='store', default="distance", metavar="METHOD", help='select which reorder algorithm to use; hungarian, brute, distance (default). Warning: brute is VERY slow)')
+  parser.add_argument('--reorder-alg', action='store', default="qml", metavar="METHOD", help='select which reorder algorithm to use; hungarian, brute, distance, qml (default). Warning: brute is VERY slow)')
   parser.add_argument('-ns', '--natoms-solute', metavar="NATOMS", type=check_positive, help='number of solute atoms, to ignore these atoms in the reordering process')
 
   io_group = parser.add_mutually_exclusive_group()
@@ -456,7 +456,7 @@ if __name__ == '__main__':
     print("The method you selected with -m (%s) is not valid." % args.method)
     sys.exit(1)
 
-  if args.reorder_alg not in ["hungarian", "brute", "distance"]:
+  if args.reorder_alg not in ["hungarian", "brute", "distance", "qml"]:
     print("The reorder method you selected with --reorder-method (%s) is not valid." % args.reorder_alg)
     sys.exit(1)
 
@@ -492,6 +492,8 @@ if __name__ == '__main__':
     reorder_alg = rmsd.reorder_distance
   elif args.reorder_alg == "brute":
     reorder_alg = rmsd.reorder_brute
+  elif args.reorder_alg == "qml":
+    reorder_alg = rmsd.reorder_similarity
 
   if not args.reorder:
     reorder_alg = None
