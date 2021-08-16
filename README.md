@@ -57,7 +57,7 @@ python clustering_traj.py trajectory.xyz 1.0
 
 Additional options are available for specifying the input and output files and selecting how the clustering is done.
 The possible methods used for the agglomerative clustering are the ones available in the linkage method of SciPy's hierarchical clustering.
-A list with the possible methods (selected with `-m`) and the description of each of them can be found [here](https://docs.scipy.org/doc/scipy-0.19.1/reference/generated/scipy.cluster.hierarchy.linkage.html).
+A list with the possible methods (selected with `-m`) and the description of each of them can be found [here](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html).
 The default method for the linkage is `average`, since [it was found](https://dx.doi.org/10.1021/ct700119m) to have a good compromise with the number of clusters and the actual similarity.
 To learn more about how the clustering is performed using this algorithm, see [UPGMA](https://en.wikipedia.org/wiki/UPGMA).
 
