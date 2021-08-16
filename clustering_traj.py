@@ -93,11 +93,12 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
         natoms = nsatoms
 
       if noh:
-        not_hydrogens = np.where(p_atoms != 'H')
-        P = p_all[not_hydrogens]
-        Q = q_all[not_hydrogens]
-        Pa = p_atoms[not_hydrogens]
-        Qa = q_atoms[not_hydrogens]
+        not_hydrogensP = np.where(p_atoms != 'H')
+        not_hydrogensQ = np.where(q_atoms != 'H')
+        P = p_all[not_hydrogensP]
+        Q = q_all[not_hydrogensQ]
+        Pa = p_atoms[not_hydrogensP]
+        Qa = q_atoms[not_hydrogensQ]
       else:
         P = p_all
         Q = q_all
@@ -107,11 +108,12 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
       pcenter = rmsd.centroid(P[:natoms])
       qcenter = rmsd.centroid(Q[:natoms])
     elif noh:
-      not_hydrogens = np.where(p_atoms != 'H')
-      P = p_all[not_hydrogens]
-      Q = q_all[not_hydrogens]
-      Pa = p_atoms[not_hydrogens]
-      Qa = q_atoms[not_hydrogens]
+      not_hydrogensP = np.where(p_atoms != 'H')
+      not_hydrogensQ = np.where(q_atoms != 'H')
+      P = p_all[not_hydrogensP]
+      Q = q_all[not_hydrogensQ]
+      Pa = p_atoms[not_hydrogensP]
+      Qa = q_atoms[not_hydrogensQ]
       pcenter = rmsd.centroid(P)
       qcenter = rmsd.centroid(Q)
     else:
