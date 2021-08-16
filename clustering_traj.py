@@ -442,6 +442,7 @@ if __name__ == '__main__':
   parser.add_argument('-eex', '--reorder-exclusions', metavar="EXCLUDED ATOMS", nargs='+', type=check_positive, help='list of atoms that are ignored when reordering')
   parser.add_argument('--reorder-alg', action='store', default="qml", metavar="METHOD", help='select which reorder algorithm to use; hungarian, brute, distance, qml (default). Warning: brute is VERY slow)')
   parser.add_argument('-ns', '--natoms-solute', metavar="NATOMS", type=check_positive, help='number of solute atoms, to ignore these atoms in the reordering process')
+  parser.add_argument('-odl', '--optimal-ordering', action="store_true", help='use optimal ordering in linkage (can be slow for large trees, and only useful for dendrogram visualization)')
 
   io_group = parser.add_mutually_exclusive_group()
   io_group.add_argument('-i', '--input', type=argparse.FileType('rb'), metavar='FILE', help='file containing input distance matrix in condensed form')
@@ -529,7 +530,7 @@ if __name__ == '__main__':
 
   # linkage
   print("Starting clustering using '%s' method to join the clusters\n" % args.method)
-  Z = hcl.linkage(distmat, args.method)
+  Z = hcl.linkage(distmat, args.method, optimal_ordering=args.optimal_ordering)
 
   # build the clusters and print them to file
   clusters = hcl.fcluster(Z, args.min_rmsd, criterion='distance')
