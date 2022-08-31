@@ -130,13 +130,13 @@ For example, if the first structure of the trajectory belongs to the cluster num
 ```
 
 The plot of the multidimensional representation (when the `-p` option is used) have each cluster colored in one color as the following picture:
-![Example MDS](img/example_mds.png)
+![Example MDS](imgs/example_mds.png)
 
 The dendrogram has an horizontal line plotted with it indicating the cutoff used for defining the clusters:
-![Example dendrogram](img/example_dendrogram.png)
+![Example dendrogram](imgs/example_dendrogram.png)
 
 The evolution of the classification with the trajectory looks like:
-![Example evolution](img/example_evo.png)
+![Example evolution](imgs/example_evo.png)
 
 If you wish to use the distance matrix file to other uses, bear in mind that the matrix is stored in the condensed form, i.e., only the superior diagonal matrix is printed (not including the diagonal).
 It means that if you have `N` structures in your trajectory, your file (specified with `-od` option, default filename `distmat.dat`) will have `N(N-1)/2` lines, with each line representing a distance.
