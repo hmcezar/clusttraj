@@ -42,3 +42,6 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/hmcezar/clusttraj"
 "Bug Tracker" = "https://github.com/hmcezar/clusttraj/issues"
+
+[tool.setuptools]
+packages = ["clusttraj"]
