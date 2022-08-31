@@ -46,5 +46,11 @@ dependencies = [
 [project.scripts]
 cli-name = "clusttraj.clusttraj:main"
 
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pytest-cov[all]"
+]
+
 [tool.setuptools]
 packages = ["clusttraj"]
