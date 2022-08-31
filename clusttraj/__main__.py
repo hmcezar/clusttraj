@@ -1,2 +1,2 @@
-from .main import main
+from .clusttraj import main
 main()
