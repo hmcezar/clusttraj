@@ -8,6 +8,17 @@ This script performs agglomerative clustering as suggested in https://stackoverf
 
 Author: Henrique Musseli Cezar
 Date: NOV/2017
+
+
+TODO: 
+    - [ ] split this file into files (compute distance, cluster, plot, etc..)
+    - [ ] add unit tests for the routines
+    - [ ] support coverage
+    - [ ] check why clusttraj is not being made available when I pip install
+    - [ ] create docker to check the installation in a completely clean env
+    - [ ] create conda package
+    - [ ] update readme (also include installation instructions)
+    - [ ] upload package
 """
 
 from openbabel import pybel
