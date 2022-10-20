@@ -31,12 +31,12 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "openbabel>=3.0",
     "rmsd",
-    "qml @ git+https://github.com/qmlcode/qml@develop",
     "scipy",
     "scikit-learn",
     "matplotlib",
+    "qml @ git+https://github.com/qmlcode/qml@develop",
+    "openbabel>=3.0",
 ]
 
 [project.urls]

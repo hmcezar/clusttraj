@@ -11,12 +11,17 @@ RUN apt-get update                  \
     pkg-config                      \
     curl                            \
     python3-pip                     \
+    gfortran                        \
+    libblas-dev                     \
+    liblapack-dev                   \
+    libopenbabel-dev                \
+    git                             \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m pip install --upgrade pip setuptools                  \
     && python3 -m pip install --no-cache-dir --upgrade numpy swig    \
-    && python3 -m pip install --no-cache-dir --upgrade openbabel     \
-    && python3 -m pip install --no-cache-dir 'qml @ git+https://github.com/qmlcode/qml@develop'
+    && python3 -m pip install --no-cache-dir 'qml @ git+https://github.com/qmlcode/qml@develop' \
+    && python3 -m pip install --no-cache-dir --upgrade --global-option=build_ext --global-option=-I/usr/include/openbabel3 --global-option=-L/usr/lib openbabel
 
 COPY . /app
 WORKDIR /app
