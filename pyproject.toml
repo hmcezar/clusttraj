@@ -36,7 +36,7 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "qml @ git+https://github.com/qmlcode/qml@develop",
-    "openbabel>=3.0",
+    "openbabel-wheel>=3.0",
 ]
 
 [project.urls]
@@ -44,7 +44,7 @@ dependencies = [
 "Bug Tracker" = "https://github.com/hmcezar/clusttraj/issues"
 
 [project.scripts]
-cli-name = "clusttraj.clusttraj:main"
+clusttraj = "clusttraj.clusttraj:main"
 
 [project.optional-dependencies]
 test = [
