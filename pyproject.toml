@@ -44,7 +44,7 @@ dependencies = [
 "Bug Tracker" = "https://github.com/hmcezar/clusttraj/issues"
 
 [project.scripts]
-clusttraj = "clusttraj.clusttraj:main"
+clusttraj = "clusttraj.main:main"
 
 [project.optional-dependencies]
 test = [
