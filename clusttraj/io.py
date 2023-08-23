@@ -6,7 +6,7 @@ import sys
 import argparse
 import numpy as np
 import rmsd
-import warnings
+import logging
 from typing import Callable
 from dataclasses import dataclass
 
@@ -27,7 +27,9 @@ class ClustOptions:
 
     method: str = None
     reorder_alg_name: str = None
-    reorder_alg: Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray] = None
+    reorder_alg: Callable[
+        [np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray
+    ] = None
     out_conf_fmt: str = None
 
     reorder: bool = None
@@ -91,6 +93,15 @@ class ClustOptions:
             return_str += f"Plotting the evolution of the classification with the trajectory to: {self.evo_name}\n\n"
 
         return return_str
+
+
+def setup_logger():
+    logformat = " %(levelname)-8s [%(filename)s:%(lineno)d] <%(funcName)s> {rank %(rank)d/%(size)d} %(message)s"
+    date_format = "%(asctime)s"
+    formatter = logging.Formatter(fmt=date_format + logformat)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    logger.setFormatter(formatter)
 
 
 def check_positive(value):
@@ -228,6 +239,9 @@ def configure_runtime(args_in):
         sys.exit(1)
 
     args = parser.parse_args(args_in)
+
+    # setup the logger
+    setup_logger()
 
     # check input consistency
     if args.method not in [
@@ -392,7 +406,7 @@ def configure_runtime(args_in):
         )
 
     if not args.reorder and args.reorder_exclusions:
-        warnings.warn(
+        logging.warning(
             "The list of atoms to exclude for reordering only makes sense if reordering is enabled. Ignoring the list."
         )
 
@@ -416,7 +430,7 @@ def parse_args(args):
         options_dict["out_clust_name"] = args.outputclusters
 
     if args.natoms_solute and not args.reorder:
-        warnings.warn(
+        logging.warning(
             "Specifying the number of solute atoms is only useful for the reordering algorithms, ignoring the number of solute atoms."
         )
         options_dict["solute_natoms"] = None
