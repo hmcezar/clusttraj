@@ -1,4 +1,5 @@
 from sklearn import manifold
+from scipy.spatial.distance import squareform
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 

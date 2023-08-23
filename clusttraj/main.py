@@ -23,7 +23,6 @@ TODO:
 import sys
 import numpy as np
 import scipy.cluster.hierarchy as hcl
-from scipy.spatial.distance import squareform
 import logging
 from .io import configure_runtime, save_clusters_config
 from .distmat import get_distmat
