@@ -1,5 +1,6 @@
 from sklearn import manifold
 from scipy.spatial.distance import squareform
+import scipy.cluster.hierarchy as hcl
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -28,7 +29,7 @@ def plot_dendrogram(clust_opt, Z):
     plt.savefig(clust_opt.dendrogram_name, bbox_inches="tight")
 
 
-def plot_mds(clust_opt, distmat):
+def plot_mds(clust_opt, clusters, distmat):
     # finds the 2D representation of the distance matrix (multidimensional scaling) and plot it
     plt.figure()
     mds = manifold.MDS(
@@ -39,6 +40,7 @@ def plot_mds(clust_opt, distmat):
         max_iter=200,
         eps=1e-3,
         n_jobs=clust_opt.n_workers,
+        normalized_stress="auto",
     )
     coords = mds.fit_transform(squareform(distmat))
     plt.tick_params(

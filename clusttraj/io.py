@@ -95,13 +95,23 @@ class ClustOptions:
         return return_str
 
 
-def setup_logger():
-    logformat = " %(levelname)-8s [%(filename)s:%(lineno)d] <%(funcName)s> {rank %(rank)d/%(size)d} %(message)s"
-    date_format = "%(asctime)s"
-    formatter = logging.Formatter(fmt=date_format + logformat)
+class Logger:
+    logformat = "%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] <%(funcName)s> %(message)s"
+    formatter = logging.Formatter(fmt=logformat)
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    logger.setFormatter(formatter)
+
+    @classmethod
+    def setup(cls, logfile):
+        cls.logger.setLevel(logging.INFO)
+        cls.fh = logging.FileHandler(logfile)
+        cls.fh.setLevel(logging.DEBUG)
+        cls.fh.setFormatter(cls.formatter)
+        cls.ch = logging.StreamHandler()
+        cls.ch.setStream(sys.stdout)
+        cls.ch.setLevel(logging.INFO)
+        cls.ch.setFormatter(cls.formatter)
+        cls.logger.addHandler(cls.fh)
+        cls.logger.addHandler(cls.ch)
 
 
 def check_positive(value):
@@ -217,6 +227,13 @@ def configure_runtime(args_in):
         action="store_true",
         help="use optimal ordering in linkage (can be slow for large trees, and only useful for dendrogram visualization)",
     )
+    parser.add_argument(
+        "--log",
+        type=str,
+        metavar="FILE",
+        default="clusttraj.log",
+        help="log file (default: clusttraj.log)",
+    )
 
     io_group = parser.add_mutually_exclusive_group()
     io_group.add_argument(
@@ -241,7 +258,7 @@ def configure_runtime(args_in):
     args = parser.parse_args(args_in)
 
     # setup the logger
-    setup_logger()
+    Logger.setup(args.log)
 
     # check input consistency
     if args.method not in [

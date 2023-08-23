@@ -2,26 +2,29 @@ from openbabel import pybel
 from openbabel import openbabel
 import numpy as np
 import rmsd
+import os
 import multiprocessing
 import itertools
-import logging
+from .io import Logger
 
 
 def get_distmat(clust_opt):
     # check if distance matrix will be read from input or calculated
     # if a file is specified, read it (TODO: check if the matrix makes sense)
     if clust_opt.input_distmat:
-        logging.info(
+        Logger.logger.info(
             f"\nReading condensed distance matrix from {clust_opt.distmat_name}\n"
         )
         distmat = np.load(clust_opt.distmat_name)
     # build a distance matrix already in the condensed form
     else:
-        logging.info(
+        Logger.logger.info(
             f"\nCalculating distance matrix using {clust_opt.n_workers} threads\n"
         )
         distmat = build_distance_matrix(clust_opt)
-        logging.info(f"Saving condensed distance matrix to {clust_opt.distmat_name}\n")
+        Logger.logger.info(
+            f"Saving condensed distance matrix to {clust_opt.distmat_name}\n"
+        )
         np.save(clust_opt.distmat_name, distmat)
 
     return distmat
