@@ -7,8 +7,10 @@ import argparse
 import numpy as np
 import rmsd
 import logging
+import ctypes
 from typing import Callable
 from dataclasses import dataclass
+from .utils import get_mol_info
 
 try:
     import qml
@@ -39,6 +41,7 @@ class ClustOptions:
     save_confs: bool = None
     plot: bool = None
     opt_order: bool = None
+    overwrite: bool = None
 
     distmat_name: str = None
     out_clust_name: str = None
@@ -523,19 +526,31 @@ def parse_args(args):
     options_dict["no_hydrogen"] = args.no_hydrogen
     options_dict["opt_order"] = args.optimal_ordering
     options_dict["solute_natoms"] = args.natoms_solute
+    options_dict["overwrite"] = args.force
 
     return ClustOptions(**options_dict)
 
 
 def save_clusters_config(
-    trajfile, clusters, distmat, noh, reorder, nsatoms, outbasename, outfmt, reorderexcl
+    trajfile,
+    clusters,
+    distmat,
+    noh,
+    reorder,
+    nsatoms,
+    outbasename,
+    outfmt,
+    reorderexcl,
+    overwrite,
 ):
     # complete distance matrix
     sqdistmat = squareform(distmat)
 
     for cnum in range(1, max(clusters) + 1):
         # create object to output the configurations
-        outfile = pybel.Outputfile(outfmt, outbasename + "_" + str(cnum) + "." + outfmt)
+        outfile = pybel.Outputfile(
+            outfmt, outbasename + "_" + str(cnum) + "." + outfmt, overwrite=overwrite
+        )
 
         # creates mask with True only for the members of cluster number cnum
         mask = np.array([1 if i == cnum else 0 for i in clusters], dtype=bool)
@@ -591,7 +606,7 @@ def save_clusters_config(
             molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"
             for i, coords in enumerate(q_all - qcenter):
                 molstring += (
-                    q_atoms[i]
+                    openbabel.GetSymbol(int(q_atoms[i]))
                     + "\t"
                     + str(coords[0])
                     + "\t"
@@ -768,7 +783,7 @@ def save_clusters_config(
             molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"
             for i, coords in enumerate(p_all):
                 molstring += (
-                    p_atoms[i]
+                    openbabel.GetSymbol(int(p_atoms[i]))
                     + "\t"
                     + str(coords[0])
                     + "\t"

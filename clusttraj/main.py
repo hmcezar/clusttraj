@@ -51,6 +51,7 @@ def main():
             clust_opt.out_conf_name,
             clust_opt.out_conf_fmt,
             clust_opt.reorder_excl,
+            clust_opt.overwrite,
         )
 
     if clust_opt.plot:

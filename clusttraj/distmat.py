@@ -6,6 +6,7 @@ import os
 import multiprocessing
 import itertools
 from .io import Logger
+from .utils import get_mol_info
 
 
 def get_distmat(clust_opt):
@@ -28,24 +29,6 @@ def get_distmat(clust_opt):
         np.save(clust_opt.distmat_name, distmat)
 
     return distmat
-
-
-def get_mol_coords(mol):
-    q_all = []
-    for atom in mol:
-        q_all.append(atom.coords)
-
-    return np.asarray(q_all)
-
-
-def get_mol_info(mol):
-    q_atoms = []
-    q_all = []
-    for atom in mol:
-        q_atoms.append(openbabel.GetSymbol(atom.atomicnum))
-        q_all.append(atom.coords)
-
-    return np.asarray(q_atoms), np.asarray(q_all)
 
 
 def build_distance_matrix(clust_opt):
