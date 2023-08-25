@@ -78,13 +78,13 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
         if nsatoms:
             # get the number of non hydrogen atoms in the solute to subtract if needed
             if noh:
-                natoms = len(np.where(p_atoms[:nsatoms] != "H")[0])
+                natoms = len(np.where(p_atoms[:nsatoms] != 1)[0])
             else:
                 natoms = nsatoms
 
             if noh:
-                not_hydrogensP = np.where(p_atoms != "H")
-                not_hydrogensQ = np.where(q_atoms != "H")
+                not_hydrogensP = np.where(p_atoms != 1)
+                not_hydrogensQ = np.where(q_atoms != 1)
                 P = p_all[not_hydrogensP]
                 Q = q_all[not_hydrogensQ]
                 Pa = p_atoms[not_hydrogensP]
@@ -98,8 +98,8 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
             pcenter = rmsd.centroid(P[:natoms])
             qcenter = rmsd.centroid(Q[:natoms])
         elif noh:
-            not_hydrogensP = np.where(p_atoms != "H")
-            not_hydrogensQ = np.where(q_atoms != "H")
+            not_hydrogensP = np.where(p_atoms != 1)
+            not_hydrogensQ = np.where(q_atoms != 1)
             P = p_all[not_hydrogensP]
             Q = q_all[not_hydrogensQ]
             Pa = p_atoms[not_hydrogensP]
@@ -124,90 +124,88 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
             P -= rmsd.centroid(Q[:natoms])
 
             # try to improve atom matching by performing Kabsch
-            # generate a rotation considering only the solute atoms
+            # generate a rotation considering only the solute atoms without reordering
             U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
             # rotate the whole system with this rotation
             P = np.dot(P, U)
 
             # reorder solute atoms
-            # find the solute atoms that are not excluded
-            soluexcl = np.where(reorderexcl < natoms)
-            soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
-            Pview = P[soluteview]
-            Paview = Pa[soluteview]
+            if reorder:
+                # find the solute atoms that are not excluded
+                soluexcl = np.where(reorderexcl < natoms)
+                soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
+                Pview = P[soluteview]
+                Paview = Pa[soluteview]
 
-            # reorder just these atoms
-            prr = reorder(Qa[soluteview], Paview, Q[soluteview], Pview)
-            Pview = Pview[prr]
-            Paview = Paview[prr]
+                # reorder just these atoms
+                prr = reorder(Qa[soluteview], Paview, Q[soluteview], Pview)
+                Pview = Pview[prr]
+                Paview = Paview[prr]
 
-            # build the total molecule reordering just these atoms
-            whereins = np.where(
-                np.isin(np.arange(natoms), reorderexcl[soluexcl]) == True
-            )
-            Psolu = np.insert(
-                Pview,
-                [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                P[reorderexcl[soluexcl]],
-                axis=0,
-            )
-            Pasolu = np.insert(
-                Paview,
-                [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                Pa[reorderexcl[soluexcl]],
-                axis=0,
-            )
+                # build the total structure reordering just these atoms
+                whereins = np.where(
+                    np.isin(np.arange(natoms), reorderexcl[soluexcl]) == True
+                )
+                Psolu = np.insert(
+                    Pview,
+                    [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                    P[reorderexcl[soluexcl]],
+                    axis=0,
+                )
+                Pasolu = np.insert(
+                    Paview,
+                    [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                    Pa[reorderexcl[soluexcl]],
+                    axis=0,
+                )
 
-            P = np.concatenate((Psolu, P[np.arange(len(P) - natoms) + natoms]))
-            Pa = np.concatenate((Pasolu, Pa[np.arange(len(Pa) - natoms) + natoms]))
+                P = np.concatenate((Psolu, P[np.arange(len(P) - natoms) + natoms]))
+                Pa = np.concatenate((Pasolu, Pa[np.arange(len(Pa) - natoms) + natoms]))
 
-            # generate a rotation considering only the solute atoms
-            U = rmsd.kabsch(P[:natoms], Q[:natoms])
+                # generate a rotation considering the reordered solute atoms
+                U = rmsd.kabsch(P[:natoms], Q[:natoms])
 
-            # rotate the whole system with this rotation
+                # rotate the whole system with this rotation
+                P = np.dot(P, U)
+
+                # consider only the solvent atoms in the reorder (without exclusions)
+                # solvexcl = np.where(reorderexcl >= natoms)
+                # solvview = np.delete(np.arange(natoms, len(P)), reorderexcl[solvexcl])
+                # Pview = P[solvview]
+                # Paview = Pa[solvview]
+
+                # # reorder just these atoms
+                # prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
+                # Pview = Pview[prr]
+                # Paview = Paview[prr]
+
+                # # build the total molecule with the reordered atoms
+                # whereins = np.where(
+                #     np.isin(np.arange(natoms, len(P)), reorderexcl[solvexcl]) == True
+                # )
+                # Psolv = np.insert(
+                #     Pview,
+                #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                #     P[reorderexcl[solvexcl]],
+                #     axis=0,
+                # )
+                # Pasolv = np.insert(
+                #     Paview,
+                #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                #     Pa[reorderexcl[solvexcl]],
+                #     axis=0,
+                # )
+
+                # Pr = np.concatenate((P[:natoms], Psolv))
+                # Pra = np.concatenate((Pa[:natoms], Pasolv))
+        else:
+            # Kabsch rotation
+            U = rmsd.kabsch(P, Q)
             P = np.dot(P, U)
-
-            # consider only the solvent atoms in the reorder (without exclusions)
-            solvexcl = np.where(reorderexcl >= natoms)
-            solvview = np.delete(np.arange(natoms, len(P)), reorderexcl[solvexcl])
-            Pview = P[solvview]
-            Paview = Pa[solvview]
-
-            # reorder just these atoms
-            prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
-            Pview = Pview[prr]
-            Paview = Paview[prr]
-
-            # build the total molecule with the reordered atoms
-            whereins = np.where(
-                np.isin(np.arange(natoms, len(P)), reorderexcl[solvexcl]) == True
-            )
-            Psolv = np.insert(
-                Pview,
-                [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                P[reorderexcl[solvexcl]],
-                axis=0,
-            )
-            Pasolv = np.insert(
-                Paview,
-                [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                Pa[reorderexcl[solvexcl]],
-                axis=0,
-            )
-
-            Pr = np.concatenate((P[:natoms], Psolv))
-            Pra = np.concatenate((Pa[:natoms], Pasolv))
 
         # reorder the atoms if necessary
-        elif reorder:
-            # try to improve atom matching by performing Kabsch
-            # generate a rotation considering only the solute atoms
-            U = rmsd.kabsch(P, Q)
-
-            # rotate the whole system with this rotation
-            P = np.dot(P, U)
-
+        if reorder:
             # get the view without the excluded atoms
             view = np.delete(np.arange(len(P)), reorderexcl)
             Pview = P[view]
