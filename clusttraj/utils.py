@@ -13,7 +13,6 @@ def get_mol_info(mol):
     q_atoms = []
     q_all = []
     for atom in mol:
-        # q_atoms.append(openbabel.GetSymbol(atom.atomicnum))
         q_atoms.append(atom.atomicnum)
         q_all.append(atom.coords)
 

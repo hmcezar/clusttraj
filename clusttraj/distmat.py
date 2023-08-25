@@ -14,13 +14,13 @@ def get_distmat(clust_opt):
     # if a file is specified, read it (TODO: check if the matrix makes sense)
     if clust_opt.input_distmat:
         Logger.logger.info(
-            f"\nReading condensed distance matrix from {clust_opt.distmat_name}\n"
+            f"Reading condensed distance matrix from {clust_opt.distmat_name}\n"
         )
         distmat = np.load(clust_opt.distmat_name)
     # build a distance matrix already in the condensed form
     else:
         Logger.logger.info(
-            f"\nCalculating distance matrix using {clust_opt.n_workers} threads\n"
+            f"Calculating distance matrix using {clust_opt.n_workers} threads\n"
         )
         distmat = build_distance_matrix(clust_opt)
         Logger.logger.info(
