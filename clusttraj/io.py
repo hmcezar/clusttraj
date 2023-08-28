@@ -42,6 +42,7 @@ class ClustOptions:
     plot: bool = None
     opt_order: bool = None
     overwrite: bool = None
+    final_kabsch: bool = None
 
     distmat_name: str = None
     out_clust_name: str = None
@@ -67,6 +68,8 @@ class ClustOptions:
         if self.reorder:
             if self.solute_natoms:
                 return_str += "\nUsing solute-solvent reordering\n"
+                if self.final_kabsch:
+                    return_str += "Using final Kabsch rotation before computing RMSD\n"
                 return_str += f"Number of solute atoms: {self.solute_natoms}\n"
             else:
                 return_str += "\nReordering all atom at the same time\n"
@@ -229,6 +232,11 @@ def configure_runtime(args_in):
         "--optimal-ordering",
         action="store_true",
         help="use optimal ordering in linkage (can be slow for large trees, and only useful for dendrogram visualization)",
+    )
+    parser.add_argument(
+        "--final-kabsch",
+        action="store_true",
+        help="force a final Kabsch rotation before the RMSD computation (effect only when using -ns and -e)",
     )
     parser.add_argument(
         "--log",
@@ -496,7 +504,7 @@ def parse_args(args):
         )
     else:
         options_dict["out_clust_name"] = args.outputclusters
-        options_dict["summary_name"] = basenameout + ".log"
+        options_dict["summary_name"] = basenameout + ".out"
 
     if args.clusters_configurations:
         options_dict["save_confs"] = True
@@ -521,6 +529,7 @@ def parse_args(args):
     options_dict["opt_order"] = args.optimal_ordering
     options_dict["solute_natoms"] = args.natoms_solute
     options_dict["overwrite"] = args.force
+    options_dict["final_kabsch"] = args.final_kabsch
 
     return ClustOptions(**options_dict)
 
@@ -692,7 +701,9 @@ def save_clusters_config(
                     )
 
                     P = np.concatenate((Psolu, P[np.arange(len(P) - natoms) + natoms]))
-                    Pa = np.concatenate((Pasolu, Pa[np.arange(len(Pa) - natoms) + natoms]))
+                    Pa = np.concatenate(
+                        (Pasolu, Pa[np.arange(len(Pa) - natoms) + natoms])
+                    )
 
                     # generate a rotation considering only the solute atoms
                     U = rmsd.kabsch(P[:natoms], Q[:natoms])
@@ -737,7 +748,7 @@ def save_clusters_config(
                 P = np.dot(P, U)
                 p_all = np.dot(p_all, U)
 
-            # reorder the atoms if necessary
+            # reorder the solvent atoms separately
             if reorder:
                 # get the view without the excluded atoms
                 view = np.delete(np.arange(len(P)), reorderexcl)
@@ -766,11 +777,10 @@ def save_clusters_config(
                 Pr = P
                 Pra = Pa
 
-            # generate rotation matrix
-            U = rmsd.kabsch(Pr, Q)
-
-            # rotate whole configuration (considering hydrogens even with noh)
-            p_all = np.dot(p_all, U)
+            if nsatoms and reorder:
+                # rotate whole configuration (considering hydrogens even with noh)
+                U = rmsd.kabsch(Pr, Q)
+                p_all = np.dot(p_all, U)
 
             # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
             molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"

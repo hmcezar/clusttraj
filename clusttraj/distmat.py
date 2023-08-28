@@ -46,6 +46,7 @@ def build_distance_matrix(clust_opt):
         itertools.repeat(clust_opt.reorder_alg),
         itertools.repeat(clust_opt.solute_natoms),
         itertools.repeat(clust_opt.reorder_excl),
+        itertools.repeat(clust_opt.final_kabsch),
     )
 
     # create the pool with nprocs processes to compute the distance matrix in parallel
@@ -57,7 +58,9 @@ def build_distance_matrix(clust_opt):
     return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
 
 
-def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reorderexcl):
+def compute_distmat_line(
+    idx1, q_info, trajfile, noh, reorder, nsatoms, reorderexcl, final_kabsch
+):
     # unpack q_info tuple
     q_atoms, q_all = q_info
 
@@ -204,7 +207,7 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
             U = rmsd.kabsch(P, Q)
             P = np.dot(P, U)
 
-        # reorder the atoms if necessary
+        # reorder the solvent atoms separately
         if reorder:
             # get the view without the excluded atoms
             view = np.delete(np.arange(len(P)), reorderexcl)
@@ -234,7 +237,10 @@ def compute_distmat_line(idx1, q_info, trajfile, noh, reorder, nsatoms, reordere
             Pr = P
             Pra = Pa
 
-        # get the RMSD and store it
-        distmat.append(rmsd.kabsch_rmsd(Pr, Q))
+        # for solute solvent alignement, compute RMSD without Kabsch
+        if nsatoms and reorder and not final_kabsch:
+            distmat.append(rmsd.rmsd(Pr, Q))
+        else:
+            distmat.append(rmsd.kabsch_rmsd(Pr, Q))
 
     return distmat
