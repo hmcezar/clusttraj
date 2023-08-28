@@ -544,6 +544,7 @@ def save_clusters_config(
     outbasename,
     outfmt,
     reorderexcl,
+    final_kabsch,
     overwrite,
 ):
     # complete distance matrix
@@ -777,7 +778,7 @@ def save_clusters_config(
                 Pr = P
                 Pra = Pa
 
-            if nsatoms and reorder:
+            if nsatoms and reorder and not final_kabsch:
                 # rotate whole configuration (considering hydrogens even with noh)
                 U = rmsd.kabsch(Pr, Q)
                 p_all = np.dot(p_all, U)
