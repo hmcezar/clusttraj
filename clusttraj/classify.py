@@ -1,12 +1,26 @@
 import scipy.cluster.hierarchy as hcl
 import numpy as np
-from .io import Logger
+from typing import Tuple
+from .io import ClustOptions, Logger
 
 
-def classify_structures(clust_opt, distmat):
+def classify_structures(
+    clust_opt: ClustOptions, distmat: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Classify structures based on clustering options and distance matrix.
+
+    Args:
+        clust_opt: The clustering options.
+        distmat: The distance matrix.
+
+    Returns:
+        A tuple containing the linkage matrix and the clusters.
+
+    """
     # linkage
     Logger.logger.info(
-        f"Starting clustering using '{clust_opt.method}' method to join the clusters\n"
+        f"Clustering using '{clust_opt.method}' method to join the clusters\n"
     )
     Z = hcl.linkage(distmat, clust_opt.method, optimal_ordering=clust_opt.opt_order)
 

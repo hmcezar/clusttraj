@@ -7,8 +7,7 @@ import argparse
 import numpy as np
 import rmsd
 import logging
-import ctypes
-from typing import Callable
+from typing import Callable, List, Union
 from dataclasses import dataclass
 from .utils import get_mol_info
 
@@ -24,16 +23,13 @@ except ImportError:
 class ClustOptions:
     trajfile: str = None
     min_rmsd: float = None
-
     n_workers: int = None
-
     method: str = None
     reorder_alg_name: str = None
     reorder_alg: Callable[
         [np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray
     ] = None
     out_conf_fmt: str = None
-
     reorder: bool = None
     exclusions: bool = None
     no_hydrogen: bool = None
@@ -43,7 +39,6 @@ class ClustOptions:
     opt_order: bool = None
     overwrite: bool = None
     final_kabsch: bool = None
-
     distmat_name: str = None
     out_clust_name: str = None
     evo_name: str = None
@@ -51,12 +46,16 @@ class ClustOptions:
     dendrogram_name: str = None
     out_conf_name: str = None
     summary_name: str = None
-
     solute_natoms: int = None
-
     reorder_excl: np.ndarray = None
 
     def __str__(self):
+        """
+        Return a string representation of the ClustOptions object.
+
+        Returns:
+            str: The string representation of the ClustOptions object.
+        """
         return_str = "\nFull command: " + " ".join(sys.argv)
 
         # main parameters
@@ -78,7 +77,7 @@ class ClustOptions:
 
             if self.exclusions:
                 exclusions_str = ""
-                for val in args.reorder_exclusions:
+                for val in self.reorder_excl:
                     exclusions_str += "%d " % val
                 return_str += f"Atoms that weren't considered in the reordering: {exclusions_str.strip()}\n"
 
@@ -107,7 +106,15 @@ class Logger:
     logger = logging.getLogger(__name__)
 
     @classmethod
-    def setup(cls, logfile):
+    def setup(cls, logfile: str) -> None:
+        """Set up the logger.
+
+        Args:
+            logfile (str): The path to the log file.
+
+        Returns:
+            None
+        """
         cls.logger.setLevel(logging.INFO)
         cls.fh = logging.FileHandler(logfile)
         cls.fh.setLevel(logging.DEBUG)
@@ -120,24 +127,53 @@ class Logger:
         cls.logger.addHandler(cls.ch)
 
 
-def check_positive(value):
+def check_positive(value: str) -> int:
+    """
+    Check if the given value is a positive integer.
+
+    Args:
+        value (str): The value to be checked.
+
+    Raises:
+        argparse.ArgumentTypeError: If the value is not a positive integer.
+
+    Returns:
+        int: The converted positive integer value.
+    """
     ivalue = int(value)
     if ivalue <= 0:
         raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
     return ivalue
 
 
-def extant_file(x):
+def extant_file(x: str) -> str:
     """
-    'Type' for argparse - checks that file exists but does not open.
-    From https://stackoverflow.com/a/11541495
+    Check if a file exists.
+
+    Args:
+        x (str): The file path to check.
+
+    Returns:
+        str: The input file path if it exists.
+
+    Raises:
+        argparse.ArgumentTypeError: If the file does not exist.
     """
     if not os.path.exists(x):
         raise argparse.ArgumentTypeError(f"{x} does not exist")
     return x
 
 
-def configure_runtime(args_in):
+def configure_runtime(args_in: List[str]) -> ClustOptions:
+    """
+    Configure the runtime based on command line arguments.
+
+    Args:
+        args_in (List[str]): The command line arguments.
+
+    Returns:
+        argparse.Namespace: The parsed command line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition."
     )
@@ -441,112 +477,105 @@ def configure_runtime(args_in):
     return parse_args(args)
 
 
-def parse_args(args):
+def parse_args(args: argparse.Namespace) -> ClustOptions:
     """
     Parse all the information from the argument parser, storing
     in the ClustOptions class.
 
     Define file names and set the pointers to the correct functions.
-    """
-    options_dict = {}
 
+    Args:
+        args (Namespace): The arguments parsed from the argument parser.
+
+    Returns:
+        ClustOptions: An instance of the ClustOptions class with the parsed options.
+    """
     basenameout = os.path.splitext(args.outputclusters)[0]
 
-    if len(os.path.splitext(args.outputclusters)[1]) == 0:
-        options_dict["out_clust_name"] = args.outputclusters + ".dat"
-    else:
-        options_dict["out_clust_name"] = args.outputclusters
+    options_dict = {
+        "solute_natoms": args.natoms_solute,
+        "reorder_excl": np.asarray([x - 1 for x in args.reorder_exclusions], np.int32) if args.reorder_exclusions else np.asarray([], np.int32),
+        "exclusions": bool(args.reorder_exclusions),
+        "reorder_alg_name": args.reorder_alg,
+        "reorder_alg": None,
+        "reorder": bool(args.reorder),
+        "input_distmat": bool(args.input),
+        "distmat_name": args.outputdistmat if not args.input else args.input,
+        "out_clust_name": args.outputclusters,
+        "summary_name": basenameout + ".out",
+        "save_confs": bool(args.clusters_configurations),
+        "out_conf_name": basenameout + "_confs" if args.clusters_configurations else None,
+        "out_conf_fmt": args.clusters_configurations if args.clusters_configurations else None,
+        "plot": bool(args.plot),
+        "evo_name": basenameout + "_evo.pdf" if args.plot else None,
+        "dendrogram_name": basenameout + "_dendrogram.pdf" if args.plot else None,
+        "mds_name": basenameout + ".pdf" if args.plot else None,
+        "trajfile": args.trajectory_file,
+        "min_rmsd": args.min_rmsd,
+        "method": args.method,
+        "n_workers": args.nprocesses,
+        "no_hydrogen": args.no_hydrogen,
+        "opt_order": args.optimal_ordering,
+        "overwrite": args.force,
+        "final_kabsch": args.final_kabsch,
+    }
 
-    options_dict["solute_natoms"] = args.natoms_solute
+    if args.reorder:
+        if args.reorder_alg == "hungarian":
+            options_dict["reorder_alg"] = rmsd.reorder_hungarian
+        elif args.reorder_alg == "distance":
+            options_dict["reorder_alg"] = rmsd.reorder_distance
+        elif args.reorder_alg == "brute":
+            options_dict["reorder_alg"] = rmsd.reorder_brute
+        elif args.reorder_alg == "qml":
+            options_dict["reorder_alg"] = rmsd.reorder_similarity
 
-    if args.reorder_exclusions:
-        options_dict["reorder_excl"] = np.asarray(
-            [x - 1 for x in args.reorder_exclusions], np.int32
+    if not args.input and os.path.exists(args.outputdistmat) and not args.force:
+        raise FileExistsError(
+            f"File {args.outputdistmat} already exists, specify a new filename with the -od command option or use the -f option. If you are trying to read the distance matrix from a file, use the -i option."
         )
-        options_dict["exclusions"] = True
-    else:
-        options_dict["reorder_excl"] = np.asarray([], np.int32)
-        options_dict["exclusions"] = False
-
-    options_dict["reorder_alg_name"] = args.reorder_alg
-
-    if args.reorder_alg == "hungarian":
-        options_dict["reorder_alg"] = rmsd.reorder_hungarian
-    elif args.reorder_alg == "distance":
-        options_dict["reorder_alg"] = rmsd.reorder_distance
-    elif args.reorder_alg == "brute":
-        options_dict["reorder_alg"] = rmsd.reorder_brute
-    elif args.reorder_alg == "qml":
-        options_dict["reorder_alg"] = rmsd.reorder_similarity
-
-    if not args.reorder:
-        options_dict["reorder_alg"] = None
-        options_dict["reorder"] = False
-    else:
-        options_dict["reorder"] = True
-
-    if not args.input:
-        options_dict["input_distmat"] = False
-
-        if os.path.exists(args.outputdistmat) and not args.force:
-            raise AssertionError(
-                f"File {args.outputdistmat} already exists, specify a new filename with the -od command option or use the -f option. If you are trying to read the distance matrix from a file, use the -i option."
-            )
-        else:
-            options_dict["distmat_name"] = args.outputdistmat
-    else:
-        options_dict["input_distmat"] = True
-        options_dict["distmat_name"] = args.input
 
     if os.path.exists(args.outputclusters) and not args.force:
-        raise AssertionError(
+        raise FileExistsError(
             f"File {args.outputclusters} already exists, specify a new filename with the -oc command option or use the -f option."
         )
-    else:
-        options_dict["out_clust_name"] = args.outputclusters
-        options_dict["summary_name"] = basenameout + ".out"
-
-    if args.clusters_configurations:
-        options_dict["save_confs"] = True
-        options_dict["out_conf_name"] = basenameout + "_confs"
-        options_dict["out_conf_fmt"] = args.clusters_configurations
-    else:
-        options_dict["save_confs"] = False
-
-    if args.plot:
-        options_dict["plot"] = True
-        options_dict["evo_name"] = basenameout + "_evo.pdf"
-        options_dict["dendrogram_name"] = basenameout + "_dendrogram.pdf"
-        options_dict["mds_name"] = basenameout + ".pdf"
-    else:
-        options_dict["plot"] = False
-
-    options_dict["trajfile"] = args.trajectory_file
-    options_dict["min_rmsd"] = args.min_rmsd
-    options_dict["method"] = args.method
-    options_dict["n_workers"] = args.nprocesses
-    options_dict["no_hydrogen"] = args.no_hydrogen
-    options_dict["opt_order"] = args.optimal_ordering
-    options_dict["solute_natoms"] = args.natoms_solute
-    options_dict["overwrite"] = args.force
-    options_dict["final_kabsch"] = args.final_kabsch
 
     return ClustOptions(**options_dict)
 
 
 def save_clusters_config(
-    trajfile,
-    clusters,
-    distmat,
-    noh,
-    reorder,
-    nsatoms,
-    outbasename,
-    outfmt,
-    reorderexcl,
-    final_kabsch,
-    overwrite,
-):
+    trajfile: str,
+    clusters: np.ndarray,
+    distmat: np.ndarray,
+    noh: bool,
+    reorder: Union[
+        Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
+    ],
+    nsatoms: int,
+    outbasename: str,
+    outfmt: str,
+    reorderexcl: np.ndarray,
+    final_kabsch: bool,
+    overwrite: bool,
+) -> None:
+    """
+    Save best superpositioned configurations for each cluster.
+    First configuration is the medoid.
+
+    Args:
+        trajfile: The trajectory file path.
+        clusters: An array containing cluster labels.
+        distmat: The distance matrix.
+        noh: Flag indicating whether to exclude hydrogen atoms.
+        reorder (Union[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None]):
+            A function to reorder the atoms, if necessary.
+        nsatoms: The number of atoms in the solute.
+        outbasename: The base name for the output files.
+        outfmt: The output file format.
+        reorderexcl: An array of atom indices to exclude during reordering.
+        final_kabsch: Flag indicating whether to perform a final Kabsch rotation.
+        overwrite: Flag indicating whether to overwrite existing output files.
+    """
     # complete distance matrix
     sqdistmat = squareform(distmat)
 
@@ -577,13 +606,12 @@ def save_clusters_config(
             tnatoms = len(mol.atoms)
             q_atoms, q_all = get_mol_info(mol)
 
-            if nsatoms:
-                # get the number of non hydrogen atoms in the solute to subtract if needed
-                if noh:
-                    natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
-                else:
-                    natoms = nsatoms
+            # get the number of non hydrogen atoms in the solute to subtract if needed
+            natoms = nsatoms
+            if noh:
+                natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
 
+            if nsatoms:
                 if noh:
                     not_hydrogens = np.where(q_atoms != 1)
                     Q = np.copy(q_all[not_hydrogens])

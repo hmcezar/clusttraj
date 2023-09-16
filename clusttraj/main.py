@@ -12,11 +12,11 @@ Date: NOV/2017
 
 TODO: 
     - [x] split this file into files (compute distance, cluster, plot, etc..)
-    - [ ] add unit tests for the routines
+    - [x] add unit tests for the routines
     - [ ] support coverage
     - [x] check why clusttraj is not being made available when I pip install
     - [ ] create conda package
-    - [ ] update readme (also include installation instructions)
+    - [x] update readme (also include installation instructions)
     - [ ] upload package
 """
 
@@ -28,11 +28,26 @@ from .plot import plot_clust_evo, plot_dendrogram, plot_mds
 from .classify import classify_structures
 
 
-def main():
-    clust_opt = configure_runtime(sys.argv[1:])
+def main(args=None) -> None:
+    """
+    Main function that performs clustering and generates output.
 
+    Args:
+        args (list): List of command-line arguments. Defaults to None.
+
+    Returns:
+        None
+    """
+    if args is None:
+        args = sys.argv[1:]
+
+    # get ClustOptions class with parsed arguments
+    clust_opt = configure_runtime(args)
+
+    # get the distance matrix
     distmat = get_distmat(clust_opt)
 
+    # perform the actual clustering
     Z, clusters = classify_structures(clust_opt, distmat)
 
     # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
@@ -55,6 +70,7 @@ def main():
             clust_opt.overwrite,
         )
 
+    # generate plots
     if clust_opt.plot:
         plot_clust_evo(clust_opt, clusters)
 

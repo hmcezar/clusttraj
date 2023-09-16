@@ -1,19 +1,29 @@
-from openbabel import openbabel
+from openbabel import pybel
 import numpy as np
-
-def get_mol_coords(mol):
-    q_all = []
-    for atom in mol:
-        q_all.append(atom.coords)
-
-    return np.asarray(q_all)
+from typing import Tuple
 
 
-def get_mol_info(mol):
-    q_atoms = []
-    q_all = []
-    for atom in mol:
-        q_atoms.append(atom.atomicnum)
-        q_all.append(atom.coords)
+def get_mol_coords(mol: pybel.Molecule) -> np.ndarray:
+    """
+    Get the coordinates of all atoms in a molecule.
 
-    return np.array(q_atoms), np.array(q_all)
+    Args:
+        mol (pybel.Molecule): The molecule object.
+
+    Returns:
+        np.ndarray: The array of atom coordinates.
+    """
+    return np.asarray([atom.coords for atom in mol])
+
+
+def get_mol_info(mol: pybel.Molecule) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Get the atomic numbers and coordinates of all atoms in a molecule.
+
+    Args:
+        mol (pybel.Molecule): The molecule object.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: The array of atomic numbers and the array of atom coordinates.
+    """
+    return np.array([atom.atomicnum for atom in mol]), np.array([atom.coords for atom in mol])

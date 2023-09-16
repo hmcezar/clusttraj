@@ -5,11 +5,22 @@ import rmsd
 import os
 import multiprocessing
 import itertools
-from .io import Logger
+from .io import ClustOptions, Logger
 from .utils import get_mol_info
+from typing import List, Union
+from collections.abc import Callable
 
 
-def get_distmat(clust_opt):
+def get_distmat(clust_opt: ClustOptions) -> np.ndarray:
+    """
+    Calculate or read a condensed distance matrix based on the given clustering options.
+
+    Args:
+        clust_opt (ClustOptions): The clustering options.
+
+    Returns:
+        np.ndarray: The condensed distance matrix.
+    """
     # check if distance matrix will be read from input or calculated
     # if a file is specified, read it (TODO: check if the matrix makes sense)
     if clust_opt.input_distmat:
@@ -31,7 +42,16 @@ def get_distmat(clust_opt):
     return distmat
 
 
-def build_distance_matrix(clust_opt):
+def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
+    """
+    Compute the distance matrix.
+
+    Args:
+        clust_opt (ClustOptions): The options for clustering.
+
+    Returns:
+        np.ndarray: The computed distance matrix.
+    """
     # create iterator containing information to compute a line of the distance matrix
     inputiterator = zip(
         itertools.count(),
@@ -59,10 +79,41 @@ def build_distance_matrix(clust_opt):
 
 
 def compute_distmat_line(
-    idx1, q_info, trajfile, noh, reorder, nsatoms, reorderexcl, final_kabsch
-):
+    idx1: int,
+    q_info: tuple,
+    trajfile: str,
+    noh: bool,
+    reorder: Union[
+        Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
+    ],
+    nsatoms: int,
+    reorderexcl: np.ndarray,
+    final_kabsch: bool,
+) -> List[float]:
+    """
+    Compute the distance between molecule idx1 and molecules with idx2 > idx1.
+
+    Args:
+        idx1 (int): The index of the first molecule.
+        q_info (tuple): Tuple containing the atom and all information of the first molecule.
+        trajfile (str): The path to the trajectory file.
+        noh (bool): Whether to consider hydrogen atoms or not.
+        reorder (Union[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None]):
+            A function to reorder the atoms, if necessary.
+        nsatoms (int): The number of atoms in the solute.
+        reorderexcl (np.ndarray): The array defining the excluded atoms during reordering.
+        final_kabsch (bool): Whether to perform the final Kabsch rotation or not.
+
+    Returns:
+        List[float]: The distance matrix.
+    """
     # unpack q_info tuple
     q_atoms, q_all = q_info
+
+    # get the number of non hydrogen atoms in the solute to subtract if needed
+    natoms = nsatoms
+    if noh:
+        natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
 
     # initialize distance matrix
     distmat = []
@@ -79,12 +130,6 @@ def compute_distmat_line(
 
         # consider the H or not consider depending on option
         if nsatoms:
-            # get the number of non hydrogen atoms in the solute to subtract if needed
-            if noh:
-                natoms = len(np.where(p_atoms[:nsatoms] != 1)[0])
-            else:
-                natoms = nsatoms
-
             if noh:
                 not_hydrogensP = np.where(p_atoms != 1)
                 not_hydrogensQ = np.where(q_atoms != 1)
