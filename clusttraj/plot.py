@@ -14,18 +14,24 @@ def plot_clust_evo(clust_opt, clusters):
     plt.savefig(clust_opt.evo_name, bbox_inches="tight")
 
 
-def plot_dendrogram(clust_opt, Z):
+def plot_dendrogram(clust_opt, Z, t_opt=None):
     # plot the dendrogram
     plt.figure(figsize=(25, 10))
     plt.title("Hierarchical Clustering Dendrogram")
     plt.xlabel("Sample Index")
-    plt.ylabel("RMSD")
+    plt.ylabel(r"RMSD ($\AA$)")
     hcl.dendrogram(
         Z,
         leaf_rotation=90.0,  # rotates the x axis labels
         leaf_font_size=8.0,  # font size for the x axis labels
     )
-    plt.axhline(clust_opt.min_rmsd, linestyle="--")
+    if clust_opt.silhouette_score:
+        try: 
+            plt.axhline(t_opt, linestyle="--")
+        except:
+            plt.axhline(t_opt[0], linestyle="--")
+    else:
+        plt.axhline(clust_opt.min_rmsd, linestyle="--")
     plt.savefig(clust_opt.dendrogram_name, bbox_inches="tight")
 
 

@@ -43,6 +43,7 @@ class ClustOptions:
     opt_order: bool = None
     overwrite: bool = None
     final_kabsch: bool = None
+    silhouette_score: bool = None
 
     distmat_name: str = None
     out_clust_name: str = None
@@ -237,6 +238,12 @@ def configure_runtime(args_in):
         "--final-kabsch",
         action="store_true",
         help="force a final Kabsch rotation before the RMSD computation (effect only when using -ns and -e)",
+    )
+    parser.add_argument(
+        "-ss",
+        "--silhouette-score",
+        action="store_true",
+        help="use the silhouette score to determine the optimal number of clusters"
     )
     parser.add_argument(
         "--log",
@@ -530,6 +537,7 @@ def parse_args(args):
     options_dict["solute_natoms"] = args.natoms_solute
     options_dict["overwrite"] = args.force
     options_dict["final_kabsch"] = args.final_kabsch
+    options_dict["silhouette_score"] = args.silhouette_score
 
     return ClustOptions(**options_dict)
 
@@ -545,6 +553,7 @@ def save_clusters_config(
     outfmt,
     reorderexcl,
     final_kabsch,
+    silhouette_score,
     overwrite,
 ):
     # complete distance matrix
