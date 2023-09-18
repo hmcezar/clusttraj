@@ -5,3 +5,4 @@ docs/build
 *__pycache__*
 clusttraj.log
 .coverage
+coverage.xml
