@@ -6,8 +6,7 @@ import multiprocessing
 import itertools
 from .io import ClustOptions, Logger
 from .utils import get_mol_info
-from typing import List, Union
-from collections.abc import Callable
+from typing import List, Union, Callable
 
 
 def get_distmat(clust_opt: ClustOptions) -> np.ndarray:
