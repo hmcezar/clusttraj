@@ -19,11 +19,11 @@ def test_ClustOptions(options_dict):
     assert os.path.basename(clust_opt.out_clust_name) == "clusters.dat"
     assert len(clust_opt.reorder_excl) == 0
     assert isinstance(clust_opt.reorder_excl, np.ndarray)
-    assert clust_opt.exclusions == False
+    assert clust_opt.exclusions is False
     assert clust_opt.reorder_alg_name == "hungarian"
-    assert clust_opt.reorder_alg == None
-    assert clust_opt.reorder == False
-    assert clust_opt.input_distmat == False
+    assert clust_opt.reorder_alg is None
+    assert clust_opt.reorder is False
+    assert clust_opt.input_distmat is False
     assert clust_opt.distmat_name == "test/ref/test_distmat.npy"
     assert os.path.basename(clust_opt.summary_name) == "clusters.out"
     assert os.path.basename(clust_opt.evo_name) == "clusters_evo.pdf"
@@ -31,17 +31,17 @@ def test_ClustOptions(options_dict):
     assert os.path.basename(clust_opt.out_conf_name) == "clusters_confs"
     assert clust_opt.out_conf_fmt == "xyz"
     assert os.path.basename(clust_opt.mds_name) == "clusters.pdf"
-    assert clust_opt.save_confs == False
-    assert clust_opt.plot == False
+    assert clust_opt.save_confs is False
+    assert clust_opt.plot is False
     assert clust_opt.trajfile == "test/ref/testtraj.xyz"
     assert clust_opt.min_rmsd == 1.0
     assert clust_opt.method == "ward"
     assert clust_opt.n_workers == 1
-    assert clust_opt.no_hydrogen == True
-    assert clust_opt.opt_order == False
+    assert clust_opt.no_hydrogen is True
+    assert clust_opt.opt_order is False
     assert clust_opt.solute_natoms == 17
-    assert clust_opt.overwrite == True
-    assert clust_opt.final_kabsch == False
+    assert clust_opt.overwrite is True
+    assert clust_opt.final_kabsch is False
 
 
 def test_check_positive():
@@ -84,7 +84,7 @@ def test_parse_args():
     clust_opt = parse_args(args)
 
     assert isinstance(clust_opt, ClustOptions)
-    assert clust_opt.reorder_alg == None
+    assert clust_opt.reorder_alg is None
 
     args = argparse.Namespace(
         natoms_solute=10,

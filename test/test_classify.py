@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 from clusttraj.classify import classify_structures
 
 

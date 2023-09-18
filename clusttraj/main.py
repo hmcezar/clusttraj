@@ -1,5 +1,5 @@
-"""
-This script takes a trajectory and based on a minimal RMSD classify the structures in clusters.
+"""This script takes a trajectory and based on a minimal RMSD classify the
+structures in clusters.
 
 The RMSD implementation using the Kabsch algorithm to superpose the molecules is taken from: https://github.com/charnley/rmsd
 A very good description of the problem of superposition can be found at http://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures
@@ -10,7 +10,7 @@ Author: Henrique Musseli Cezar
 Date: NOV/2017
 
 
-TODO: 
+TODO:
     - [x] split this file into files (compute distance, cluster, plot, etc..)
     - [x] add unit tests for the routines
     - [ ] support coverage
@@ -18,7 +18,7 @@ TODO:
     - [ ] create conda package
     - [x] update readme (also include installation instructions)
     - [ ] upload package
-"""
+"""  # noqa: E501
 
 import sys
 import numpy as np
@@ -29,8 +29,7 @@ from .classify import classify_structures
 
 
 def main(args=None) -> None:
-    """
-    Main function that performs clustering and generates output.
+    """Main function that performs clustering and generates output.
 
     Args:
         args (list): List of command-line arguments. Defaults to None.
@@ -80,7 +79,7 @@ def main(args=None) -> None:
 
     # print the cluster sizes
     outclust_str = f"A total {len(clusters)} snapshots were read and {max(clusters)} cluster(s) was(were) found.\n"
-    outclust_str += f"The cluster sizes are:\nCluster\tSize\n"
+    outclust_str += "The cluster sizes are:\nCluster\tSize\n"
 
     labels, sizes = np.unique(clusters, return_counts=True)
     for label, size in zip(labels, sizes):

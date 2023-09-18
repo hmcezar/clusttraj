@@ -1,5 +1,4 @@
 from openbabel import pybel
-from openbabel import openbabel
 import numpy as np
 import rmsd
 import os
@@ -12,8 +11,8 @@ from collections.abc import Callable
 
 
 def get_distmat(clust_opt: ClustOptions) -> np.ndarray:
-    """
-    Calculate or read a condensed distance matrix based on the given clustering options.
+    """Calculate or read a condensed distance matrix based on the given
+    clustering options.
 
     Args:
         clust_opt (ClustOptions): The clustering options.
@@ -43,8 +42,7 @@ def get_distmat(clust_opt: ClustOptions) -> np.ndarray:
 
 
 def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
-    """
-    Compute the distance matrix.
+    """Compute the distance matrix.
 
     Args:
         clust_opt (ClustOptions): The options for clustering.
@@ -90,8 +88,8 @@ def compute_distmat_line(
     reorderexcl: np.ndarray,
     final_kabsch: bool,
 ) -> List[float]:
-    """
-    Compute the distance between molecule idx1 and molecules with idx2 > idx1.
+    """Compute the distance between molecule idx1 and molecules with idx2 >
+    idx1.
 
     Args:
         idx1 (int): The index of the first molecule.
@@ -106,7 +104,7 @@ def compute_distmat_line(
 
     Returns:
         List[float]: The distance matrix.
-    """
+    """  # noqa: E501
     # unpack q_info tuple
     q_atoms, q_all = q_info
 
@@ -193,7 +191,7 @@ def compute_distmat_line(
 
                 # build the total structure reordering just these atoms
                 whereins = np.where(
-                    np.isin(np.arange(natoms), reorderexcl[soluexcl]) == True
+                    np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
                 )
                 Psolu = np.insert(
                     Pview,
@@ -261,26 +259,18 @@ def compute_distmat_line(
 
             prr = reorder(Qa[view], Paview, Q[view], Pview)
             Pview = Pview[prr]
-            Paview = Paview[prr]
 
             # build the total molecule with the reordered atoms
-            whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) == True)
+            whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
             Pr = np.insert(
                 Pview,
                 [x - whereins[0].tolist().index(x) for x in whereins[0]],
                 P[reorderexcl],
                 axis=0,
             )
-            Pra = np.insert(
-                Paview,
-                [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                Pa[reorderexcl],
-                axis=0,
-            )
 
         else:
             Pr = P
-            Pra = Pa
 
         # for solute solvent alignement, compute RMSD without Kabsch
         if nsatoms and reorder and not final_kabsch:

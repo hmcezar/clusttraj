@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-from openbabel import pybel
 from clusttraj.utils import get_mol_coords, get_mol_info
 
 

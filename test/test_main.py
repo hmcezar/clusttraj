@@ -1,4 +1,3 @@
-import pytest
 import os
 from clusttraj.main import main
 

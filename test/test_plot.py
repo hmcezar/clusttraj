@@ -1,6 +1,4 @@
-import pytest
 import os
-import numpy as np
 from clusttraj.plot import plot_clust_evo, plot_dendrogram, plot_mds
 
 

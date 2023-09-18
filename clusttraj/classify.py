@@ -7,8 +7,7 @@ from .io import ClustOptions, Logger
 def classify_structures(
     clust_opt: ClustOptions, distmat: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Classify structures based on clustering options and distance matrix.
+    """Classify structures based on clustering options and distance matrix.
 
     Args:
         clust_opt: The clustering options.
@@ -16,7 +15,6 @@ def classify_structures(
 
     Returns:
         A tuple containing the linkage matrix and the clusters.
-
     """
     # linkage
     Logger.logger.info(

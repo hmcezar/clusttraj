@@ -1,15 +1,13 @@
 from sklearn import manifold
 from scipy.spatial.distance import squareform
 import scipy.cluster.hierarchy as hcl
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from .io import ClustOptions
 
 
 def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
-    """
-    Plot the evolution of cluster classification over the given samples.
+    """Plot the evolution of cluster classification over the given samples.
 
     Args:
         clust_opt (ClustOptions): The clustering options.
@@ -27,8 +25,7 @@ def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
 
 
 def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
-    """
-    Plot a dendrogram based on hierarchical clustering.
+    """Plot a dendrogram based on hierarchical clustering.
 
     Parameters:
         clust_opt (ClustOptions): The options for clustering.
@@ -56,11 +53,8 @@ def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
     plt.savefig(clust_opt.dendrogram_name, bbox_inches="tight")
 
 
-def plot_mds(
-    clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray
-) -> None:
-    """
-    Plot the multidimensional scaling (MDS) of the distance matrix.
+def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray) -> None:
+    """Plot the multidimensional scaling (MDS) of the distance matrix.
 
     Args:
         clust_opt (ClustOptions): The clustering options.

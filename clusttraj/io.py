@@ -7,15 +7,14 @@ import argparse
 import numpy as np
 import rmsd
 import logging
+import importlib
 from typing import Callable, List, Union
 from dataclasses import dataclass
 from .utils import get_mol_info
 
-try:
-    import qml
-
+if importlib.util.find_spec("qml"):
     has_qml = True
-except ImportError:
+else:
     has_qml = False
 
 
@@ -50,8 +49,7 @@ class ClustOptions:
     reorder_excl: np.ndarray = None
 
     def __str__(self):
-        """
-        Return a string representation of the ClustOptions object.
+        """Return a string representation of the ClustOptions object.
 
         Returns:
             str: The string representation of the ClustOptions object.
@@ -128,8 +126,7 @@ class Logger:
 
 
 def check_positive(value: str) -> int:
-    """
-    Check if the given value is a positive integer.
+    """Check if the given value is a positive integer.
 
     Args:
         value (str): The value to be checked.
@@ -147,8 +144,7 @@ def check_positive(value: str) -> int:
 
 
 def extant_file(x: str) -> str:
-    """
-    Check if a file exists.
+    """Check if a file exists.
 
     Args:
         x (str): The file path to check.
@@ -165,8 +161,7 @@ def extant_file(x: str) -> str:
 
 
 def configure_runtime(args_in: List[str]) -> ClustOptions:
-    """
-    Configure the runtime based on command line arguments.
+    """Configure the runtime based on command line arguments.
 
     Args:
         args_in (List[str]): The command line arguments.
@@ -478,9 +473,8 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
 
 
 def parse_args(args: argparse.Namespace) -> ClustOptions:
-    """
-    Parse all the information from the argument parser, storing
-    in the ClustOptions class.
+    """Parse all the information from the argument parser, storing in the
+    ClustOptions class.
 
     Define file names and set the pointers to the correct functions.
 
@@ -494,7 +488,9 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
 
     options_dict = {
         "solute_natoms": args.natoms_solute,
-        "reorder_excl": np.asarray([x - 1 for x in args.reorder_exclusions], np.int32) if args.reorder_exclusions else np.asarray([], np.int32),
+        "reorder_excl": np.asarray([x - 1 for x in args.reorder_exclusions], np.int32)
+        if args.reorder_exclusions
+        else np.asarray([], np.int32),
         "exclusions": bool(args.reorder_exclusions),
         "reorder_alg_name": args.reorder_alg,
         "reorder_alg": None,
@@ -504,8 +500,12 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "out_clust_name": args.outputclusters,
         "summary_name": basenameout + ".out",
         "save_confs": bool(args.clusters_configurations),
-        "out_conf_name": basenameout + "_confs" if args.clusters_configurations else None,
-        "out_conf_fmt": args.clusters_configurations if args.clusters_configurations else None,
+        "out_conf_name": basenameout + "_confs"
+        if args.clusters_configurations
+        else None,
+        "out_conf_fmt": args.clusters_configurations
+        if args.clusters_configurations
+        else None,
         "plot": bool(args.plot),
         "evo_name": basenameout + "_evo.pdf" if args.plot else None,
         "dendrogram_name": basenameout + "_dendrogram.pdf" if args.plot else None,
@@ -558,9 +558,8 @@ def save_clusters_config(
     final_kabsch: bool,
     overwrite: bool,
 ) -> None:
-    """
-    Save best superpositioned configurations for each cluster.
-    First configuration is the medoid.
+    """Save best superpositioned configurations for each cluster. First
+    configuration is the medoid.
 
     Args:
         trajfile: The trajectory file path.
@@ -714,7 +713,7 @@ def save_clusters_config(
 
                     # build the total molecule reordering just these atoms
                     whereins = np.where(
-                        np.isin(np.arange(natoms), reorderexcl[soluexcl]) == True
+                        np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
                     )
                     Psolu = np.insert(
                         Pview,
@@ -786,25 +785,17 @@ def save_clusters_config(
 
                 prr = reorder(Qa[view], Paview, Q[view], Pview)
                 Pview = Pview[prr]
-                Paview = Paview[prr]
 
                 # build the total molecule with the reordered atoms
-                whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) == True)
+                whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
                 Pr = np.insert(
                     Pview,
                     [x - whereins[0].tolist().index(x) for x in whereins[0]],
                     P[reorderexcl],
                     axis=0,
                 )
-                Pra = np.insert(
-                    Paview,
-                    [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                    Pa[reorderexcl],
-                    axis=0,
-                )
             else:
                 Pr = P
-                Pra = Pa
 
             if nsatoms and reorder and not final_kabsch:
                 # rotate whole configuration (considering hydrogens even with noh)
