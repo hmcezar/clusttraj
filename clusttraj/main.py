@@ -46,8 +46,11 @@ def main(args=None) -> None:
     # get the distance matrix
     distmat = get_distmat(clust_opt)
 
-    # perform the actual clustering
-    Z, clusters = classify_structures(clust_opt, distmat)
+    # perform the clustering
+    if clust_opt.silhouette_score:
+        Z, clusters, t_opt = classify_structures(clust_opt, distmat)
+    else:
+        Z, clusters = classify_structures(clust_opt, distmat)
 
     # get the elements closest to the centroid (see https://stackoverflow.com/a/39870085/3254658)
     if clust_opt.save_confs:
@@ -66,6 +69,7 @@ def main(args=None) -> None:
             clust_opt.out_conf_fmt,
             clust_opt.reorder_excl,
             clust_opt.final_kabsch,
+            clust_opt.silhouette_score,
             clust_opt.overwrite,
         )
 
@@ -73,7 +77,10 @@ def main(args=None) -> None:
     if clust_opt.plot:
         plot_clust_evo(clust_opt, clusters)
 
-        plot_dendrogram(clust_opt, Z)
+        if clust_opt.silhouette_score:
+            plot_dendrogram(clust_opt, Z, t_opt)
+        else:
+            plot_dendrogram(clust_opt, Z)
 
         plot_mds(clust_opt, clusters, distmat)
 

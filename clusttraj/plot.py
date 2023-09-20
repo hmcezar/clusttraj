@@ -24,7 +24,7 @@ def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
     plt.savefig(clust_opt.evo_name, bbox_inches="tight")
 
 
-def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
+def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray, t_opt = None) -> None:
     """Plot a dendrogram based on hierarchical clustering.
 
     Parameters:
@@ -38,7 +38,7 @@ def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
     plt.figure(figsize=(25, 10))
     plt.title("Hierarchical Clustering Dendrogram")
     plt.xlabel("Sample Index")
-    plt.ylabel("RMSD")
+    plt.ylabel(r"RMSD ($\AA$)")
 
     hcl.dendrogram(
         Z,
@@ -47,7 +47,13 @@ def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
     )
 
     # Add a horizontal line at the minimum RMSD value
-    plt.axhline(clust_opt.min_rmsd, linestyle="--")
+    if clust_opt.silhouette_score:
+        try: 
+            plt.axhline(t_opt, linestyle="--")
+        except:
+            plt.axhline(t_opt[0], linestyle="--")
+    else:
+        plt.axhline(clust_opt.min_rmsd, linestyle="--")
 
     # Save the dendrogram to a file
     plt.savefig(clust_opt.dendrogram_name, bbox_inches="tight")

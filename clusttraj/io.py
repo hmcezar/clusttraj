@@ -38,6 +38,7 @@ class ClustOptions:
     opt_order: bool = None
     overwrite: bool = None
     final_kabsch: bool = None
+    silhouette_score: bool = None
     distmat_name: str = None
     out_clust_name: str = None
     evo_name: str = None
@@ -268,6 +269,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         "--final-kabsch",
         action="store_true",
         help="force a final Kabsch rotation before the RMSD computation (effect only when using -ns and -e)",
+    )
+    parser.add_argument(
+        "-ss",
+        "--silhouette-score",
+        action="store_true",
+        help="use the silhouette score to determine the optimal number of clusters"
     )
     parser.add_argument(
         "--log",
@@ -518,6 +525,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "opt_order": args.optimal_ordering,
         "overwrite": args.force,
         "final_kabsch": args.final_kabsch,
+        "silhouette_score" = args.silhouette_score,
     }
 
     if args.reorder:
