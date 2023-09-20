@@ -25,7 +25,7 @@ import numpy as np
 from .io import Logger, configure_runtime, save_clusters_config
 from .distmat import get_distmat
 from .plot import plot_clust_evo, plot_dendrogram, plot_mds
-from .classify import classify_structures
+from .classify import classify_structures, classify_structures_silhouette
 
 
 def main(args=None) -> None:
@@ -48,7 +48,7 @@ def main(args=None) -> None:
 
     # perform the clustering
     if clust_opt.silhouette_score:
-        Z, clusters, t_opt = classify_structures(clust_opt, distmat)
+        Z, clusters, t_opt = classify_structures_silhouette(clust_opt, distmat)
     else:
         Z, clusters = classify_structures(clust_opt, distmat)
 

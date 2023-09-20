@@ -48,6 +48,12 @@ class ClustOptions:
     summary_name: str = None
     solute_natoms: int = None
     reorder_excl: np.ndarray = None
+    optimal_cut: np.ndarray = None
+
+    def update(self, new):
+        for key, value in new.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def __str__(self):
         """Return a string representation of the ClustOptions object.
@@ -59,7 +65,11 @@ class ClustOptions:
 
         # main parameters
         return_str += f"\n\nClusterized from trajectory file: {self.trajfile}\n"
-        return_str += f"Method: {self.method}\nRMSD criterion: {self.min_rmsd}\n"
+        return_str += f"Method: {self.method}\n"
+        if self.silhouette_score:
+            return_str += "\n Using "
+        else:
+            return_str += "RMSD criterion: {self.min_rmsd}\n"
         return_str += f"Ignoring hydrogens?: {self.no_hydrogen}\n"
 
         # reordering options
@@ -274,7 +284,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         "-ss",
         "--silhouette-score",
         action="store_true",
-        help="use the silhouette score to determine the optimal number of clusters"
+        help="use the silhouette score to determine the optimal number of clusters",
     )
     parser.add_argument(
         "--log",
@@ -525,7 +535,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "opt_order": args.optimal_ordering,
         "overwrite": args.force,
         "final_kabsch": args.final_kabsch,
-        "silhouette_score" = args.silhouette_score,
+        "silhouette_score": args.silhouette_score,
     }
 
     if args.reorder:

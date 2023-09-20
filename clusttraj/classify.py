@@ -6,29 +6,29 @@ from typing import Tuple
 from .io import ClustOptions, Logger
 
 
-def silh_score(X, Z, dstep=0.1):
+def classify_structures_silhouette(
+    clust_opt: ClustOptions, distmat: np.ndarray, dstep: float = 0.1
+) -> Tuple[np.float64, np.ndarray, np.ndarray]:
     """
-    Find the optimal threshold following the silhouette score metric.
+    Find the optimal threshold following the silhouette score metric and perform the classification.
 
-    :param X: Array with initial data (distmat matrix)
-    :type X: numpy.ndarray
+    Args:
+        X (np.ndarray): Array with initial data (distmat matrix)
+        dstep (float, optional): Interval between threshold values, defaults to 0.1
 
-    :param Z: 'Z' matrix from the scipy.cluster.hierarchy.linkage() method
-    :type Z: numpy.ndarray
-
-    :param dstep: Interval between threshold values, defaults to 0.1
-    :type dstep: float
-
-    :return: The optimal silhouette score value 
-             :rtype: numpy.float64
-
-             An array with degenerated threshold values that yield the same optimal score
-             :rtype: numpy.ndarray
-
-             An array with the cluster's labels from each optimal score
-             :rtype: numpy.ndarray
+    Returns:
+        Tuple[np.float64, np.ndarray, np.ndarray]:
+            - The optimal silhouette score value
+            - An array with degenerated threshold values that yield the same optimal score
+            - An array with the cluster's labels from each optimal score
     """
-    
+
+    # linkage
+    Logger.logger.info(
+        f"Clustering using '{clust_opt.method}' method to join the clusters\n"
+    )
+    Z = hcl.linkage(distmat, clust_opt.method, optimal_ordering=clust_opt.opt_order)
+
     # Initialize the score and threshold
     ss_opt = np.float64()
     t_opt = np.array([])
@@ -39,10 +39,12 @@ def silh_score(X, Z, dstep=0.1):
 
     for t in t_range:
         # Create an array with cluster labels
-        hcl_labels = hcl.fcluster(Z, t=t, criterion='distance')
-        
+        hcl_labels = hcl.fcluster(Z, t=t, criterion="distance")
+
         # Compute the silhouette score
-        ss = metrics.silhouette_score(X, hcl_labels, metric='precomputed')
+        ss = metrics.silhouette_score(
+            squareform(distmat), hcl_labels, metric="precomputed"
+        )
 
         # Check for degeneracy for the optimal threshold value
         if np.any(ss == ss_opt):
@@ -56,7 +58,27 @@ def silh_score(X, Z, dstep=0.1):
             t_opt = t
             labels_opt = hcl_labels
 
-    return np.round(ss_opt, 3), np.round(t_opt, 3), labels_opt
+    Logger.logger.info(f"Highest silhouette score: {ss_opt}")
+
+    if t_opt.size > 1:
+        t_opt_str = ", ".join([str(t) for t in t_opt])
+        Logger.logger.info(
+            f"The following RMSD threshold values yielded the same optimial silhouette score: {t_opt_str}"
+        )
+        Logger.logger.info(f"The smallest RMSD of {t_opt[0]} has been adopted")
+        clusters = labels_opt[0]
+    else:
+        Logger.logger.info(f"Optimal RMSD threshold value: {t_opt}")
+        clusters = labels_opt
+
+    clust_opt.update({"optimal_cut": t_opt})
+
+    Logger.logger.info(
+        f"Saving clustering classification to {clust_opt.out_clust_name}\n"
+    )
+    np.savetxt(clust_opt.out_clust_name, clusters, fmt="%d")
+
+    return Z, clusters
 
 
 def classify_structures(
@@ -77,30 +99,12 @@ def classify_structures(
     )
     Z = hcl.linkage(distmat, clust_opt.method, optimal_ordering=clust_opt.opt_order)
 
-    if clust_opt.silhouette_score:
-        ss_opt, t_opt, labels_opt = silh_score(squareform(distmat), Z)
+    # build the clusters
+    clusters = hcl.fcluster(Z, clust_opt.min_rmsd, criterion="distance")
 
-        print("Highest silhouette score: %s" % ss_opt)
+    Logger.logger.info(
+        f"Saving clustering classification to {clust_opt.out_clust_name}\n"
+    )
+    np.savetxt(clust_opt.out_clust_name, clusters, fmt="%d")
 
-        if t_opt.size > 1:
-            Logger.logger.info("The following RMSD threshold values yielded the same optimial silhouette score: %s" % t_opt)
-            Logger.logger.info("Clusters labels for each threshold: %s" % labels_opt)
-            Logger.logger.info("The smallest RMSD of {} has been adopted with the corresponding labels: {}".format(t_opt[0], labels_opt[0]))
-            clusters = labels_opt[0]
-
-        else:
-            Logger.logger.info("Optimal RMSD threshold value: %s" % t_opt)
-            clusters = labels_opt
-        
-        return Z, clusters, t_opt
-
-    else:
-        # build the clusters
-        clusters = hcl.fcluster(Z, clust_opt.min_rmsd, criterion='distance')
-
-        Logger.logger.info(
-            f"Saving clustering classification to {clust_opt.out_clust_name}\n"
-        )
-        np.savetxt(clust_opt.out_clust_name, clusters, fmt="%d")
-
-        return Z, clusters
+    return Z, clusters

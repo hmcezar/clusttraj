@@ -1,5 +1,5 @@
-# clusstraj - A Python package for clustering similar structures from molecular simulations
-This Python script receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
+# ClustTraj - A Python package for clustering similar structures from molecular simulations
+This Python package receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
 
 What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a distance matrix (stored in the condensed form).
 Different strategies can be used in order to compute distances that correspond to the expected minimum RMSD, such as atom reordering or stepwise alignments.
