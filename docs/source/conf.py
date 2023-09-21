@@ -7,11 +7,13 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../.."))
 
+
 def get_release():
     with open("../../clusttraj/__init__.py", "r") as f:
         for line in f:
             if "__version__" in line:
                 return line.split("=")[1].strip().strip('"')
+
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
