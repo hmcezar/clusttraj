@@ -574,6 +574,7 @@ def save_clusters_config(
     outfmt: str,
     reorderexcl: np.ndarray,
     final_kabsch: bool,
+    silhouette_score: bool,
     overwrite: bool,
 ) -> None:
     """Save best superpositioned configurations for each cluster. First
@@ -591,6 +592,7 @@ def save_clusters_config(
         outfmt: The output file format.
         reorderexcl: An array of atom indices to exclude during reordering.
         final_kabsch: Flag indicating whether to perform a final Kabsch rotation.
+        silhouette_score: Flag indicating whether to set the threshold using the silhouette coefficient.
         overwrite: Flag indicating whether to overwrite existing output files.
     """
     # complete distance matrix

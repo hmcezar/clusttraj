@@ -48,7 +48,7 @@ def main(args=None) -> None:
 
     # perform the clustering
     if clust_opt.silhouette_score:
-        Z, clusters, t_opt = classify_structures_silhouette(clust_opt, distmat)
+        Z, clusters = classify_structures_silhouette(clust_opt, distmat)
     else:
         Z, clusters = classify_structures(clust_opt, distmat)
 
@@ -77,10 +77,12 @@ def main(args=None) -> None:
     if clust_opt.plot:
         plot_clust_evo(clust_opt, clusters)
 
-        if clust_opt.silhouette_score:
-            plot_dendrogram(clust_opt, Z, t_opt)
-        else:
-            plot_dendrogram(clust_opt, Z)
+        plot_dendrogram(clust_opt, Z)
+
+        # if clust_opt.silhouette_score:
+        #     plot_dendrogram(clust_opt, Z, t_opt)
+        # else:
+        #     plot_dendrogram(clust_opt, Z)
 
         plot_mds(clust_opt, clusters, distmat)
 

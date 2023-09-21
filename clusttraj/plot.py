@@ -48,8 +48,12 @@ def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
 
     # Add a horizontal line at the minimum RMSD value
     if clust_opt.silhouette_score:
-        for m_rmsd in clust_opt.optimal_cut:
-            plt.axhline(m_rmsd, linestyle="--")
+        if isinstance(clust_opt.optimal_cut, np.ndarray):
+            plt.axhline(clust_opt.optimal_cut[0], linestyle="--")
+        if isinstance(clust_opt.optimal_cut, (float, np.floating)):
+            plt.axhline(clust_opt.optimal_cut, linestyle="--")
+        # for m_rmsd in clust_opt.optimal_cut:
+            # plt.axhline(m_rmsd, linestyle="--")cl
     else:
         plt.axhline(clust_opt.min_rmsd, linestyle="--")
 
