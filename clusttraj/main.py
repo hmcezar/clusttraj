@@ -53,7 +53,6 @@ def main(args: list = None) -> None:
             clust_opt.out_conf_fmt,
             clust_opt.reorder_excl,
             clust_opt.final_kabsch,
-            clust_opt.silhouette_score,
             clust_opt.overwrite,
         )
 

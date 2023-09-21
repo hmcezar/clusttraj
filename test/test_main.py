@@ -6,6 +6,7 @@ def test_main(tmp_path):
     main(
         [
             "test/ref/testtraj.xyz",
+            "--min-rmsd",
             "1.0",
             "-np",
             "1",

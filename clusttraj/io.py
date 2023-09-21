@@ -206,11 +206,6 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         help="path to the trajectory containing the conformations to be classified",
     )
     parser.add_argument(
-        "min_rmsd",
-        type=float,
-        help="value of RMSD used to classify structures as similar",
-    )
-    parser.add_argument(
         "-f",
         "--force-overwrite",
         dest="force",
@@ -297,17 +292,26 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         help="force a final Kabsch rotation before the RMSD computation (effect only when using -ns and -e)",
     )
     parser.add_argument(
-        "-ss",
-        "--silhouette-score",
-        action="store_true",
-        help="use the silhouette score to determine the optimal number of clusters",
-    )
-    parser.add_argument(
         "--log",
         type=str,
         metavar="FILE",
         default="clusttraj.log",
         help="log file (default: clusttraj.log)",
+    )
+
+    rmsd_criterion = parser.add_mutually_exclusive_group(required=True)
+
+    rmsd_criterion.add_argument(
+        "-ss",
+        "--silhouette-score",
+        action="store_true",
+        help="use the silhouette to determine the criterion to classify structures",
+    )
+    rmsd_criterion.add_argument(
+        "-rmsd",
+        "--min-rmsd",
+        type=float,
+        help="value of RMSD used to classify structures as similar",
     )
 
     io_group = parser.add_mutually_exclusive_group()
