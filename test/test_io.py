@@ -42,6 +42,7 @@ def test_ClustOptions(options_dict):
     assert clust_opt.solute_natoms == 17
     assert clust_opt.overwrite is True
     assert clust_opt.final_kabsch is False
+    assert clust_opt.silhouette_score is False
 
 
 def test_check_positive():
@@ -80,6 +81,7 @@ def test_parse_args():
         optimal_ordering=True,
         force=True,
         final_kabsch=True,
+        silhouette_score=False,
     )
     clust_opt = parse_args(args)
 
@@ -104,6 +106,7 @@ def test_parse_args():
         optimal_ordering=True,
         force=True,
         final_kabsch=True,
+        silhouette_score=False,
     )
     clust_opt = parse_args(args)
 

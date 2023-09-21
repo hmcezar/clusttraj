@@ -1,3 +1,5 @@
+"""Functions to plot the obtained results."""
+
 from sklearn import manifold
 from scipy.spatial.distance import squareform
 import scipy.cluster.hierarchy as hcl

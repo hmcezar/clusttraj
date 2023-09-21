@@ -1,3 +1,6 @@
+"""Input parsing, output information and a class to store the options for
+clustering."""
+
 from openbabel import pybel
 from openbabel import openbabel
 from scipy.spatial.distance import squareform
@@ -20,6 +23,8 @@ else:
 
 @dataclass
 class ClustOptions:
+    """Class to store the options for clustering."""
+
     trajfile: str = None
     min_rmsd: float = None
     n_workers: int = None
@@ -50,12 +55,20 @@ class ClustOptions:
     reorder_excl: np.ndarray = None
     optimal_cut: np.ndarray = None
 
-    def update(self, new):
+    def update(self, new: dict) -> None:
+        """Update the instance with new values.
+
+        Args:
+            new (dict): A dictionary containing the new values to update.
+
+        Returns:
+            None
+        """
         for key, value in new.items():
             if hasattr(self, key):
                 setattr(self, key, value)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of the ClustOptions object.
 
         Returns:
@@ -67,9 +80,10 @@ class ClustOptions:
         return_str += f"\n\nClusterized from trajectory file: {self.trajfile}\n"
         return_str += f"Method: {self.method}\n"
         if self.silhouette_score:
-            return_str += "\n Using "
+            return_str += "\nUsing silhouette score\n"
+            return_str += f"RMSD criterion found by silhouette: {self.optimal_cut[0]}\n"
         else:
-            return_str += "RMSD criterion: {self.min_rmsd}\n"
+            return_str += f"RMSD criterion: {self.min_rmsd}\n"
         return_str += f"Ignoring hydrogens?: {self.no_hydrogen}\n"
 
         # reordering options
@@ -110,6 +124,8 @@ class ClustOptions:
 
 
 class Logger:
+    """Logger class."""
+
     logformat = "%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] <%(funcName)s> %(message)s"
     formatter = logging.Formatter(fmt=logformat)
     logger = logging.getLogger(__name__)
@@ -160,11 +176,11 @@ def extant_file(x: str) -> str:
     Args:
         x (str): The file path to check.
 
-    Returns:
-        str: The input file path if it exists.
-
     Raises:
         argparse.ArgumentTypeError: If the file does not exist.
+
+    Returns:
+        str: The input file path if it exists.
     """
     if not os.path.exists(x):
         raise argparse.ArgumentTypeError(f"{x} does not exist")
