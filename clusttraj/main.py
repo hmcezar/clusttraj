@@ -1,24 +1,8 @@
-"""This script takes a trajectory and based on a minimal RMSD classify the
-structures in clusters.
+"""Main entry point for clusttraj.
 
-The RMSD implementation using the Kabsch algorithm to superpose the molecules is taken from: https://github.com/charnley/rmsd
-A very good description of the problem of superposition can be found at http://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures
-A very good tutorial on hierachical clustering with scipy can be seen at https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/
-This script performs agglomerative clustering as suggested in https://stackoverflow.com/questions/31085393/hierarchical-clustering-a-pairwise-distance-matrix-of-precomputed-distances
-
-Author: Henrique Musseli Cezar
-Date: NOV/2017
-
-
-TODO:
-    - [x] split this file into files (compute distance, cluster, plot, etc..)
-    - [x] add unit tests for the routines
-    - [ ] support coverage
-    - [x] check why clusttraj is not being made available when I pip install
-    - [ ] create conda package
-    - [x] update readme (also include installation instructions)
-    - [ ] upload package
-"""  # noqa: E501
+Can be called from command line or from an external library given a list
+of arguments.
+"""
 
 import sys
 import numpy as np
@@ -28,7 +12,7 @@ from .plot import plot_clust_evo, plot_dendrogram, plot_mds
 from .classify import classify_structures, classify_structures_silhouette
 
 
-def main(args=None) -> None:
+def main(args: list = None) -> None:
     """Main function that performs clustering and generates output.
 
     Args:
@@ -69,7 +53,6 @@ def main(args=None) -> None:
             clust_opt.out_conf_fmt,
             clust_opt.reorder_excl,
             clust_opt.final_kabsch,
-            clust_opt.silhouette_score,
             clust_opt.overwrite,
         )
 

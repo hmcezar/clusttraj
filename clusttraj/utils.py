@@ -1,3 +1,5 @@
+"""Additional utility functions."""
+
 from openbabel import pybel
 import numpy as np
 from typing import Tuple

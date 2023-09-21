@@ -1,3 +1,6 @@
+"""Functions to compute the distance matrix based on the provided
+trajectory."""
+
 from openbabel import pybel
 import numpy as np
 import rmsd

@@ -1,3 +1,5 @@
+"""Functions to perform clustering based on the distance matrix."""
+
 import scipy.cluster.hierarchy as hcl
 from scipy.spatial.distance import squareform
 from sklearn import metrics
@@ -8,19 +10,17 @@ from .io import ClustOptions, Logger
 
 def classify_structures_silhouette(
     clust_opt: ClustOptions, distmat: np.ndarray, dstep: float = 0.1
-) -> Tuple[np.float64, np.ndarray, np.ndarray]:
-    """
-    Find the optimal threshold following the silhouette score metric and perform the classification.
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Find the optimal threshold following the silhouette score metric and
+    perform the classification.
 
     Args:
-        X (np.ndarray): Array with initial data (distmat matrix)
+        clust_opt: The clustering options.
+        distmat: The distance matrix.
         dstep (float, optional): Interval between threshold values, defaults to 0.1
 
     Returns:
-        Tuple[np.float64, np.ndarray, np.ndarray]:
-            - The optimal silhouette score value
-            - An array with degenerated threshold values that yield the same optimal score
-            - An array with the cluster's labels from each optimal score
+        A tuple containing the linkage matrix and the clusters.
     """
 
     # linkage
@@ -58,17 +58,17 @@ def classify_structures_silhouette(
             t_opt = t
             labels_opt = hcl_labels
 
-    Logger.logger.info(f"Highest silhouette score: {ss_opt}")
+    Logger.logger.info(f"Highest silhouette score: {ss_opt}\n")
 
     if t_opt.size > 1:
         t_opt_str = ", ".join([str(t) for t in t_opt])
         Logger.logger.info(
-            f"The following RMSD threshold values yielded the same optimial silhouette score: {t_opt_str}"
+            f"The following RMSD threshold values yielded the same optimial silhouette score: {t_opt_str}\n"
         )
-        Logger.logger.info(f"The smallest RMSD of {t_opt[0]} has been adopted")
+        Logger.logger.info(f"The smallest RMSD of {t_opt[0]} has been adopted\n")
         clusters = labels_opt[0]
     else:
-        Logger.logger.info(f"Optimal RMSD threshold value: {t_opt}")
+        Logger.logger.info(f"Optimal RMSD threshold value: {t_opt}\n")
         clusters = labels_opt
 
     clust_opt.update({"optimal_cut": t_opt})
