@@ -79,11 +79,6 @@ def main(args=None) -> None:
 
         plot_dendrogram(clust_opt, Z)
 
-        # if clust_opt.silhouette_score:
-        #     plot_dendrogram(clust_opt, Z, t_opt)
-        # else:
-        #     plot_dendrogram(clust_opt, Z)
-
         plot_mds(clust_opt, clusters, distmat)
 
     # print the cluster sizes
