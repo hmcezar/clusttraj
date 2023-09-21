@@ -114,7 +114,9 @@ def test_parse_args():
 
 
 def test_configure_runtime(caplog):
-    clust_opt = configure_runtime(["test/ref/testtraj.xyz", "--min-rmsd", "1.0", "-np", "1"])
+    clust_opt = configure_runtime(
+        ["test/ref/testtraj.xyz", "--min-rmsd", "1.0", "-np", "1"]
+    )
 
     assert clust_opt.trajfile == "test/ref/testtraj.xyz"
     assert clust_opt.min_rmsd == pytest.approx(1.0, abs=1e-8)
@@ -128,12 +130,24 @@ def test_configure_runtime(caplog):
 
     with pytest.raises(SystemExit):
         clust_opt = configure_runtime(
-            ["test/ref/testtraj.xyz", "--min-rmsd", "1.0", "--reorder-alg", "nonexistent-method"]
+            [
+                "test/ref/testtraj.xyz",
+                "--min-rmsd",
+                "1.0",
+                "--reorder-alg",
+                "nonexistent-method",
+            ]
         )
 
     with pytest.raises(SystemExit):
         clust_opt = configure_runtime(
-            ["test/ref/testtraj.xyz", "--min-rmsd", "1.0", "-cc", "nonexistent-extension"]
+            [
+                "test/ref/testtraj.xyz",
+                "--min-rmsd",
+                "1.0",
+                "-cc",
+                "nonexistent-extension",
+            ]
         )
 
     with pytest.raises(SystemExit):
