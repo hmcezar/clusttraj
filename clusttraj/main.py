@@ -6,17 +6,18 @@ of arguments.
 
 import sys
 import numpy as np
+from typing import List
 from .io import Logger, configure_runtime, save_clusters_config
 from .distmat import get_distmat
 from .plot import plot_clust_evo, plot_dendrogram, plot_mds
 from .classify import classify_structures, classify_structures_silhouette
 
 
-def main(args: list = None) -> None:
+def main(args: List[str] = None) -> None:
     """Main function that performs clustering and generates output.
 
     Args:
-        args (list): List of command-line arguments. Defaults to None.
+        args (List): List of command-line arguments. Defaults to None.
 
     Returns:
         None

@@ -612,6 +612,9 @@ def save_clusters_config(
         reorderexcl: An array of atom indices to exclude during reordering.
         final_kabsch: Flag indicating whether to perform a final Kabsch rotation.
         overwrite: Flag indicating whether to overwrite existing output files.
+
+    Returns:
+        None
     """
     # complete distance matrix
     sqdistmat = squareform(distmat)
