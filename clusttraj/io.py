@@ -269,9 +269,9 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     parser.add_argument(
         "--reorder-alg",
         action="store",
-        default="qml",
+        default="hungarian",
         metavar="METHOD",
-        help="select which reorder algorithm to use; hungarian, brute, distance, qml (default). Warning: brute is VERY slow)",
+        help="select which reorder algorithm to use; hungarian (default), brute, distance, qml. Warning: brute is VERY slow)",
     )
     parser.add_argument(
         "-ns",

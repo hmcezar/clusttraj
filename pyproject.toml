@@ -42,6 +42,10 @@ clusttraj = "clusttraj.main:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov[all]"]
+docs = ["sphinx", "sphinx_rtd_theme"]
+lint = ["ruff", "black"]
+qml = ["qml @ git+https://github.com/hmcezar/qml@develop"]
+all = ["clusttraj[test,docs,lint,qml]"]
 
 [tool.setuptools]
 packages = ["clusttraj"]
