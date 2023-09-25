@@ -44,7 +44,7 @@ clusttraj = "clusttraj.main:main"
 test = ["pytest", "pytest-cov[all]"]
 docs = ["sphinx", "sphinx_rtd_theme"]
 lint = ["ruff", "black"]
-qml = ["qml @ git+https://github.com/hmcezar/qml@develop"]
+qml = ["qml"] # you can install from git+https://github.com/hmcezar/qml@develop
 all = ["clusttraj[test,docs,lint,qml]"]
 
 [tool.setuptools]
