@@ -10,7 +10,7 @@ import argparse
 import numpy as np
 import rmsd
 import logging
-import importlib
+import importlib.util
 from typing import Callable, List, Union
 from dataclasses import dataclass
 from .utils import get_mol_info
