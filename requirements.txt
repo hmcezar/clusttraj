@@ -1,0 +1,7 @@
+numpy
+rmsd
+scipy
+scikit-learn
+matplotlib
+qml @ git+https://github.com/hmcezar/qml@develop
+openbabel-wheel>=3.0

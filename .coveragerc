@@ -1,0 +1,7 @@
+[run]
+omit =
+    setup.py
+    test/*
+    docs/*
+    clusttraj/__main__.py
+    clusttraj/__init__.py

@@ -1,0 +1,8 @@
+dist/
+build/
+docs/build
+*.egg-info
+*__pycache__*
+clusttraj.log
+.coverage
+coverage.xml
