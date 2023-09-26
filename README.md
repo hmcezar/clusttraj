@@ -1,6 +1,6 @@
 # ClustTraj - A Python package for clustering similar structures from molecular simulations
 
-[![License: GPL v3](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.html) ![build](https://github.com/hmcezar/clusttraj/actions/workflows/ci.yml/badge.svg) [![docs](https://github.com/hmcezar/clusttraj/actions/workflows/documentation.yml/badge.svg)](https://cascella-group-uio.github.io/HyMD/) [![codecov](https://codecov.io/gh/hmcezar/clusttraj/graph/badge.svg?token=DYOKR4JZEN)](https://codecov.io/gh/hmcezar/clusttraj) [![PyPI version](https://badge.fury.io/py/clusttraj.svg)](https://badge.fury.io/py/clusttraj)
+[![License: GPL v3](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.html) ![build](https://github.com/hmcezar/clusttraj/actions/workflows/ci.yml/badge.svg) [![docs](https://github.com/hmcezar/clusttraj/actions/workflows/documentation.yml/badge.svg)](https://hmcezar.github.io/clusttraj/) [![codecov](https://codecov.io/gh/hmcezar/clusttraj/graph/badge.svg?token=DYOKR4JZEN)](https://codecov.io/gh/hmcezar/clusttraj) [![PyPI version](https://badge.fury.io/py/clusttraj.svg)](https://badge.fury.io/py/clusttraj)
 
 -----------
 This Python package receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
