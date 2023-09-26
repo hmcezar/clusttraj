@@ -1,4 +1,8 @@
 # ClustTraj - A Python package for clustering similar structures from molecular simulations
+
+[![License: GPL v3](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.html) ![build](https://github.com/hmcezar/clusttraj/actions/workflows/ci.yml/badge.svg) [![docs](https://github.com/hmcezar/clusttraj/actions/workflows/documentation.yml/badge.svg)](https://cascella-group-uio.github.io/HyMD/) [![codecov](https://codecov.io/gh/hmcezar/clusttraj/graph/badge.svg?token=DYOKR4JZEN)](https://codecov.io/gh/hmcezar/clusttraj) [![PyPI version](https://badge.fury.io/py/clusttraj.svg)](https://badge.fury.io/py/clusttraj)
+
+-----------
 This Python package receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
 
 What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a distance matrix (stored in the condensed form).
@@ -24,15 +28,10 @@ For `openbabel`, we use the `pip` package `openbabel-wheel` which provides pre-b
 More details can be seen in the [projects' GitHub page](https://github.com/njzjz/openbabel-wheel).
 
 
-To install the package you should go to the cloned repository and use `pip`
+You can install the package using `pip`
 ```bash
-pip install .
+pip install clusttraj
 ``` 
-
-You can use `-e` for "developer mode".
-
-**TODO**: when we upload to PyPI replace installation to `pip install clusttraj`
-
 
 ## Usage
 To see all the options run the script with the `-h` command option:
@@ -46,9 +45,13 @@ or
 python -m clusttraj -h
 ```
 
-The only mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and the maximum RMSD between two configurations for them to be considered of the same cluster.
+The mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel), and either the maximum RMSD to join two configurations option (`-rmsd`) or the silhouette score option (`-ss`).
 ```
-clusttraj trajectory.xyz 1.0
+clusttraj trajectory.xyz -rmsd 1.0
+```
+or
+```
+clusttraj trajectory.xyz -ss
 ```
 
 Additional options are available for specifying the input and output files and selecting how the clustering is done.
@@ -103,7 +106,7 @@ The logging is done both to `stdout` and to the file `clusttraj.log`.
 The number of clusters that were found, as well as the number of members for each cluster are printed in a table.
 Below there is an example of how this information is printed:
 ```
-$ clusttraj trajectory.xyz 3.2 -np 4 -p -n -cc xyz
+$ clusttraj trajectory.xyz -rmsd 3.2 -np 4 -p -n -cc xyz
 
 2023-08-25 11:37:35,201 INFO     [distmat.py:22] <get_distmat> Calculating distance matrix using 4 threads
 
