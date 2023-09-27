@@ -81,7 +81,13 @@ class ClustOptions:
         return_str += f"Method: {self.method}\n"
         if self.silhouette_score:
             return_str += "\nUsing silhouette score\n"
-            return_str += f"RMSD criterion found by silhouette: {self.optimal_cut[0]}\n"
+            if isinstance(self.optimal_cut, (np.ndarray, list)):
+                scut = self.optimal_cut[0]
+            elif isinstance(self.optimal_cut, (float, np.float32, np.float64)):
+                scut = self.optimal_cut
+            else:
+                raise ValueError("optimal_cut must be a float or np.ndarray")
+            return_str += f"RMSD criterion found by silhouette: {scut}\n"
         else:
             return_str += f"RMSD criterion: {self.min_rmsd}\n"
         return_str += f"Ignoring hydrogens?: {self.no_hydrogen}\n"
