@@ -13,6 +13,8 @@ Welcome to ClustTraj's documentation!
    intro
    install
    clusttraj
+   usage
+   examples
 
 
 Indices and tables
