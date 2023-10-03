@@ -109,17 +109,17 @@ Since we already computed the distance matrix, we can provide it as input using 
 
 - ``clusters.pdf`` plots the multidimensional scaling (MDS) of the distance matrix.
 
-.. image:: images/clusters.pdf
+.. image:: images/average_full_mds.pdf
 	:width: 300pt
 
 - ``clusters_dendrogram.pdf`` plots the hierarchical clustering dendrogram.
 
-.. image:: images/clusters_dendrogram.pdf
+.. image:: images/average_full_dend.pdf
 	:width: 300pt
 
 - ``clusters_evo.pdf`` plots the evolution of cluster populations during the simulation.
 
-.. image:: images/clusters_evo.pdf
+.. image:: images/average_full_evo.pdf
 	:width: 300pt
 
 The highest silhouette score is printed in the ``clusttraj.log`` file, along with the corresponding RMSD threshold:
@@ -218,19 +218,123 @@ To adopt the ``median`` method we can run:
 
 In this case the highest silhouette score of 0.075 indicates that the points are located near the edge of the clusters. The distribution of population among the 2 clusters (1/99) also indicates the limitations of the method. Finally, visual inspection of the dendrogram shows anomalous behavior.
 
-.. image:: images/anomalous_dendrogram.pdf
+.. image:: images/anomalous_dend.pdf
 	:width: 300pt
 
 .. .. raw:: html
 
 .. 	<iframe src='/Users/Rafael/Coisas/Doutorado/clusttraj/clusttraj/docs/build/html/_images/anomalous_dendrogram.pdf' width="100%" height="500"></iframe>
 
+The reader is encouraged to verify that the addition of ``-odl`` for `optimal visualization <https://academic.oup.com/bioinformatics/article/17/suppl_1/S22/261423?login=true>`_ flag cannot avoid the dendrogram crossings.
 
 
+Accouting for molecule permutation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+As an attempt to avoid separating similar configurations due to permutation of identical molecules, we can reorder the atoms using the ``-e`` flag. 
 
+.. code-block:: console
 
+	python -m clusttraj h2o_traj.xyz -ss -p -m average -e -f
 
+For this system the reordering compromised the statistical quality of the clustering. The number of clusters was increased from 2 to 35 while the optimal silhouette score was reduced from 0.217 to 0.119:
+
+.. code-block:: console
+
+	╰─○ cat clusttraj.log 
+	2023-10-02 19:53:20,618 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+
+	2023-10-02 19:54:00,821 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+
+	2023-10-02 19:54:00,823 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
+
+	2023-10-02 19:54:00,855 INFO     [classify.py:61] <classify_structures_silhouette> Highest silhouette score: 0.11873407875769024
+
+	2023-10-02 19:54:00,856 INFO     [classify.py:71] <classify_structures_silhouette> Optimal RMSD threshold value: 1.237013337787396
+
+	2023-10-02 19:54:00,856 INFO     [classify.py:76] <classify_structures_silhouette> Saving clustering classification to clusters.dat
+
+	2023-10-02 19:54:06,676 INFO     [main.py:75] <main> A total 100 snapshots were read and 35 cluster(s) was(were) found.
+	The cluster sizes are:
+	Cluster	Size
+	1	2
+	2	4
+	3	3
+	4	1
+	5	1
+	6	1
+	7	2
+	8	2
+	9	3
+	10	2
+	11	7
+	12	3
+	13	7
+	14	7
+	15	3
+	16	5
+	17	4
+	18	3
+	19	2
+	20	4
+	21	2
+	22	3
+	23	3
+	24	1
+	25	2
+	26	3
+	27	2
+	28	1
+	29	2
+	30	2
+	31	5
+	32	4
+	33	2
+	34	1
+	35	1
+
+This functionality is especially useful in the case of solvated systems. In our case, we can treat one water molecule as the solute and the others as solvent. For example, considering the first water molecule as the solute:
+
+.. code-block:: console
+
+	python -m clusttraj h2o_traj.xyz -ss -p -m average -e -f -ns 3
+
+The number of solvent atoms must be specified using the ``-ns`` flag, and as a result we managed to increase the silhouette coefficient to 0.247 with a significant change in the cluster populations:
+
+.. code-block:: console
+
+	╰─○ cat clusttraj.log 
+	2023-10-02 20:13:52,041 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+
+	2023-10-02 20:13:52,044 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
+
+	2023-10-02 20:13:52,101 INFO     [classify.py:61] <classify_structures_silhouette> Highest silhouette score: 0.24735123044958368
+
+	2023-10-02 20:13:52,102 INFO     [classify.py:65] <classify_structures_silhouette> The following RMSD threshold values yielded the same optimial silhouette score: 3.035586843407412, 3.135586843407412, 3.235586843407412, 3.335586843407412
+
+	2023-10-02 20:13:52,102 INFO     [classify.py:68] <classify_structures_silhouette> The smallest RMSD of 3.035586843407412 has been adopted
+
+	2023-10-02 20:13:52,102 INFO     [classify.py:76] <classify_structures_silhouette> Saving clustering classification to clusters.dat
+
+	2023-10-02 20:13:57,498 INFO     [main.py:75] <main> A total 100 snapshots were read and 2 cluster(s) was(were) found.
+	The cluster sizes are:
+	Cluster	Size
+	1	3
+	2	97
+
+Final Kabsch rotation
+^^^^^^^^^^^^^^^^^^^^^
+
+We can also add a final Kabsch rotation to minimize the RMSD after reordering the solvent atoms:
+
+.. code-block:: console
+
+	python -m clusttraj h2o_traj.xyz -ss -p -m average -e -f -ns 3 --final-kabsch
+
+For this system no significant changes were observed, as the silhouette coefficient and cluster populations remain almost identical.
+
+Removing hydrogen atoms
+^^^^^^^^^^^^^^^^^^^^^^^
 
 
 
