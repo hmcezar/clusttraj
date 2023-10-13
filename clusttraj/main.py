@@ -11,6 +11,7 @@ from .io import Logger, configure_runtime, save_clusters_config
 from .distmat import get_distmat
 from .plot import plot_clust_evo, plot_dendrogram, plot_mds
 from .classify import classify_structures, classify_structures_silhouette
+from .metrics import compute_metrics
 
 
 def main(args: List[str] = None) -> None:
@@ -73,6 +74,15 @@ def main(args: List[str] = None) -> None:
     for label, size in zip(labels, sizes):
         outclust_str += f"{label}\t{size}\n"
     Logger.logger.info(outclust_str)
+
+    # Compute the evaluation metrics
+    if clust_opt.metrics:
+        ss, ch, db, cpcc = compute_metrics(clust_opt, distmat, Z, clusters)
+
+        outclust_str += f"\nSilhouette score: {ss:.3f}\n"
+        outclust_str += f"Calinski Harabsz score: {ch:.3f}\n"
+        outclust_str += f"Davies-Bouldin score: {db:.3f}\n"
+        outclust_str += f"Cophenetic correlation coefficient: {cpcc:.3f}\n\n" 
 
     # save summary
     with open(clust_opt.summary_name, "w") as f:

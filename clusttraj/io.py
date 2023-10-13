@@ -44,6 +44,7 @@ class ClustOptions:
     overwrite: bool = None
     final_kabsch: bool = None
     silhouette_score: bool = None
+    metrics: bool = None
     distmat_name: str = None
     out_clust_name: str = None
     evo_name: str = None
@@ -305,6 +306,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         help="log file (default: clusttraj.log)",
     )
 
+    parser.add_argument(
+        "--metrics",
+        action="store_true",
+        help="compute metrics to evaluate the clustering procedure quality."
+    )
+
     rmsd_criterion = parser.add_mutually_exclusive_group(required=True)
 
     rmsd_criterion.add_argument(
@@ -562,6 +569,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "overwrite": args.force,
         "final_kabsch": args.final_kabsch,
         "silhouette_score": args.silhouette_score,
+        "metrics": args.metrics,
     }
 
     if args.reorder:
