@@ -9,7 +9,7 @@ import numpy as np
 from typing import List
 from .io import Logger, configure_runtime, save_clusters_config
 from .distmat import get_distmat
-from .plot import plot_clust_evo, plot_dendrogram, plot_mds
+from .plot import plot_clust_evo, plot_dendrogram, plot_mds, plot_tsne
 from .classify import classify_structures, classify_structures_silhouette
 from .metrics import compute_metrics
 
@@ -65,6 +65,8 @@ def main(args: List[str] = None) -> None:
         plot_dendrogram(clust_opt, Z)
 
         plot_mds(clust_opt, clusters, distmat)
+
+        plot_tsne(clust_opt, clusters, distmat)
 
     # print the cluster sizes
     outclust_str = f"A total {len(clusters)} snapshots were read and {max(clusters)} cluster(s) was(were) found.\n"

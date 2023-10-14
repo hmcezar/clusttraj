@@ -559,7 +559,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "plot": bool(args.plot),
         "evo_name": basenameout + "_evo.pdf" if args.plot else None,
         "dendrogram_name": basenameout + "_dendrogram.pdf" if args.plot else None,
-        "mds_name": basenameout + ".pdf" if args.plot else None,
+        "mds_name": basenameout + "_mds.pdf" if args.plot else None,
         "trajfile": args.trajectory_file,
         "min_rmsd": args.min_rmsd,
         "method": args.method,
