@@ -84,7 +84,7 @@ def main(args: List[str] = None) -> None:
         outclust_str += f"\nSilhouette score: {ss:.3f}\n"
         outclust_str += f"Calinski Harabsz score: {ch:.3f}\n"
         outclust_str += f"Davies-Bouldin score: {db:.3f}\n"
-        outclust_str += f"Cophenetic correlation coefficient: {cpcc:.3f}\n\n" 
+        outclust_str += f"Cophenetic correlation coefficient: {cpcc:.3f}\n\n"
 
     # save summary
     with open(clust_opt.summary_name, "w") as f:

@@ -102,20 +102,22 @@ def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray)
         right=False,
         labelbottom=False,
         labelleft=False,
-    ) 
+    )
 
     # Scatter plot the coordinates with cluster colors
     plt.scatter(
         coords[:, 0], coords[:, 1], marker="o", c=clusters, cmap=plt.cm.nipy_spectral
     )
 
-    plt.title('MDS Visualization')
+    plt.title("MDS Visualization")
 
     # Save the plot
     plt.savefig(clust_opt.mds_name, bbox_inches="tight")
 
 
-def plot_tsne(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray) -> None:
+def plot_tsne(
+    clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray
+) -> None:
     """Plot the t-distributed Stochastic Neighbor Embedding 2D plot of the clustering.
 
     Args:
@@ -129,14 +131,14 @@ def plot_tsne(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray
 
     # Initialize the tSNE model
     tsne = manifold.TSNE(
-         n_components=2, 
-         perplexity=30, 
-         learning_rate=200,
-         random_state=666,
-         n_jobs=clust_opt.n_workers,
+        n_components=2,
+        perplexity=30,
+        learning_rate=200,
+        random_state=666,
+        n_jobs=clust_opt.n_workers,
     )
 
-    # Perform the t-SNE and get the 2D representation 
+    # Perform the t-SNE and get the 2D representation
     coords = tsne.fit_transform(squareform(distmat))
 
     # Define a list of unique colors for each cluster
@@ -156,15 +158,14 @@ def plot_tsne(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray
         right=False,
         labelbottom=False,
         labelleft=False,
-    ) 
+    )
 
     # Create a scatter plot with different colors for each cluster
     for i, cluster in enumerate(unique_clusters):
         cluster_data = coords[clusters == cluster]
         plt.scatter(cluster_data[:, 0], cluster_data[:, 1], color=colors[i])
 
-    plt.title('t-SNE Visualization')
+    plt.title("t-SNE Visualization")
 
     # Save the plot
     plt.savefig(clust_opt.mds_name[:-7] + "tsne.pdf", bbox_inches="tight")
-

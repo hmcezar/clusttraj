@@ -309,7 +309,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     parser.add_argument(
         "--metrics",
         action="store_true",
-        help="compute metrics to evaluate the clustering procedure quality."
+        help="compute metrics to evaluate the clustering procedure quality.",
     )
 
     rmsd_criterion = parser.add_mutually_exclusive_group(required=True)
