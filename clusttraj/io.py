@@ -55,6 +55,7 @@ class ClustOptions:
     solute_natoms: int = None
     reorder_excl: np.ndarray = None
     optimal_cut: np.ndarray = None
+    verbose: bool = None
 
     def update(self, new: dict) -> None:
         """Update the instance with new values.
@@ -305,11 +306,16 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         default="clusttraj.log",
         help="log file (default: clusttraj.log)",
     )
-
     parser.add_argument(
         "--metrics",
         action="store_true",
         help="compute metrics to evaluate the clustering procedure quality.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="increase verbosity, printing the timings for each part of the program.",
     )
 
     rmsd_criterion = parser.add_mutually_exclusive_group(required=True)
@@ -570,6 +576,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "final_kabsch": args.final_kabsch,
         "silhouette_score": args.silhouette_score,
         "metrics": args.metrics,
+        "verbose": args.verbose,
     }
 
     if args.reorder:
