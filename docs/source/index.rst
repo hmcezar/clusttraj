@@ -15,11 +15,7 @@ Welcome to ClustTraj's documentation!
    clusttraj
    usage
    examples
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master
-
+   
 Indices and tables
 ==================
 

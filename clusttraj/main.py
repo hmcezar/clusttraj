@@ -83,7 +83,7 @@ def main(args: List[str] = None) -> None:
         start_time = time.monotonic()
         plot_clust_evo(clust_opt, clusters)
 
-        plot_dendrogram(clust_opt, Z)
+        plot_dendrogram(clust_opt, clusters, Z)
 
         plot_mds(clust_opt, clusters, distmat)
 
