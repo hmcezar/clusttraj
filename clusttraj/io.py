@@ -10,7 +10,7 @@ import argparse
 import numpy as np
 import rmsd
 import logging
-import importlib
+import importlib.util
 from typing import Callable, List, Union
 from dataclasses import dataclass
 from .utils import get_mol_info
@@ -44,6 +44,7 @@ class ClustOptions:
     overwrite: bool = None
     final_kabsch: bool = None
     silhouette_score: bool = None
+    metrics: bool = None
     distmat_name: str = None
     out_clust_name: str = None
     evo_name: str = None
@@ -54,6 +55,7 @@ class ClustOptions:
     solute_natoms: int = None
     reorder_excl: np.ndarray = None
     optimal_cut: np.ndarray = None
+    verbose: bool = None
 
     def update(self, new: dict) -> None:
         """Update the instance with new values.
@@ -81,7 +83,13 @@ class ClustOptions:
         return_str += f"Method: {self.method}\n"
         if self.silhouette_score:
             return_str += "\nUsing silhouette score\n"
-            return_str += f"RMSD criterion found by silhouette: {self.optimal_cut[0]}\n"
+            if isinstance(self.optimal_cut, (np.ndarray, list)):
+                scut = self.optimal_cut[0]
+            elif isinstance(self.optimal_cut, (float, np.float32, np.float64)):
+                scut = self.optimal_cut
+            else:
+                raise ValueError("optimal_cut must be a float or np.ndarray")
+            return_str += f"RMSD criterion found by silhouette: {scut}\n"
         else:
             return_str += f"RMSD criterion: {self.min_rmsd}\n"
         return_str += f"Ignoring hydrogens?: {self.no_hydrogen}\n"
@@ -269,9 +277,9 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     parser.add_argument(
         "--reorder-alg",
         action="store",
-        default="qml",
+        default="hungarian",
         metavar="METHOD",
-        help="select which reorder algorithm to use; hungarian, brute, distance, qml (default). Warning: brute is VERY slow)",
+        help="select which reorder algorithm to use; hungarian (default), brute, distance, qml. Warning: brute is VERY slow)",
     )
     parser.add_argument(
         "-ns",
@@ -297,6 +305,17 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         metavar="FILE",
         default="clusttraj.log",
         help="log file (default: clusttraj.log)",
+    )
+    parser.add_argument(
+        "--metrics",
+        action="store_true",
+        help="compute metrics to evaluate the clustering procedure quality.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="increase verbosity, printing the timings for each part of the program.",
     )
 
     rmsd_criterion = parser.add_mutually_exclusive_group(required=True)
@@ -546,7 +565,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "plot": bool(args.plot),
         "evo_name": basenameout + "_evo.pdf" if args.plot else None,
         "dendrogram_name": basenameout + "_dendrogram.pdf" if args.plot else None,
-        "mds_name": basenameout + ".pdf" if args.plot else None,
+        "mds_name": basenameout + "_mds.pdf" if args.plot else None,
         "trajfile": args.trajectory_file,
         "min_rmsd": args.min_rmsd,
         "method": args.method,
@@ -556,6 +575,8 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "overwrite": args.force,
         "final_kabsch": args.final_kabsch,
         "silhouette_score": args.silhouette_score,
+        "metrics": args.metrics,
+        "verbose": args.verbose,
     }
 
     if args.reorder:

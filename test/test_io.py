@@ -82,6 +82,8 @@ def test_parse_args():
         force=True,
         final_kabsch=True,
         silhouette_score=False,
+        metrics=False,
+        verbose=False,
     )
     clust_opt = parse_args(args)
 
@@ -107,6 +109,8 @@ def test_parse_args():
         force=True,
         final_kabsch=True,
         silhouette_score=False,
+        metrics=False,
+        verbose=False,
     )
     clust_opt = parse_args(args)
 

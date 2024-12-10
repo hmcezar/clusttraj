@@ -50,11 +50,12 @@ def plot_dendrogram(clust_opt: ClustOptions, Z: np.ndarray) -> None:
 
     # Add a horizontal line at the minimum RMSD value
     if clust_opt.silhouette_score:
-        if isinstance(clust_opt.optimal_cut, np.ndarray):
+        if isinstance(clust_opt.optimal_cut, (np.ndarray, list)):
             plt.axhline(clust_opt.optimal_cut[0], linestyle="--")
-
-        if isinstance(clust_opt.optimal_cut, (float, np.float32, np.float64)):
+        elif isinstance(clust_opt.optimal_cut, (float, np.float32, np.float64)):
             plt.axhline(clust_opt.optimal_cut, linestyle="--")
+        else:
+            raise ValueError("optimal_cut must be a float or np.ndarray")
     else:
         plt.axhline(clust_opt.min_rmsd, linestyle="--")
 
@@ -108,5 +109,63 @@ def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray)
         coords[:, 0], coords[:, 1], marker="o", c=clusters, cmap=plt.cm.nipy_spectral
     )
 
+    plt.title("MDS Visualization")
+
     # Save the plot
     plt.savefig(clust_opt.mds_name, bbox_inches="tight")
+
+
+def plot_tsne(
+    clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray
+) -> None:
+    """Plot the t-distributed Stochastic Neighbor Embedding 2D plot of the clustering.
+
+    Args:
+        clust_opt (ClustOptions): The clustering options.
+        clusters (np.ndarray): The cluster labels.
+        distmat (np.ndarray): The distance matrix.
+
+    Returns:
+        None
+    """
+
+    # Initialize the tSNE model
+    tsne = manifold.TSNE(
+        n_components=2,
+        perplexity=30,
+        learning_rate=200,
+        random_state=666,
+        n_jobs=clust_opt.n_workers,
+    )
+
+    # Perform the t-SNE and get the 2D representation
+    coords = tsne.fit_transform(squareform(distmat))
+
+    # Define a list of unique colors for each cluster
+    unique_clusters = np.unique(clusters)
+    colors = plt.cm.tab20(np.linspace(0, 1, len(unique_clusters)))
+
+    # Create a new figure
+    plt.figure()
+
+    # Configure tick parameters
+    plt.tick_params(
+        axis="both",
+        which="both",
+        bottom=False,
+        top=False,
+        left=False,
+        right=False,
+        labelbottom=False,
+        labelleft=False,
+    )
+
+    # Create a scatter plot with different colors for each cluster
+    for i, cluster in enumerate(unique_clusters):
+        cluster_data = coords[clusters == cluster]
+        plt.scatter(cluster_data[:, 0], cluster_data[:, 1], color=colors[i])
+
+    plt.title("t-SNE Visualization")
+
+    # Save the plot
+    plt.savefig(clust_opt.mds_name[:-7] + "tsne.pdf", bbox_inches="tight")
