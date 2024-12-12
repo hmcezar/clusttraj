@@ -9,11 +9,11 @@ from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import cophenet
 from typing import Tuple
 import numpy as np
-from .io import ClustOptions
+# from .io import ClustOptions
 
 
 def compute_metrics(
-    clust_opt: ClustOptions,
+    # clust_opt: ClustOptions,
     distmat: np.ndarray,
     z_matrix: np.ndarray,
     clusters: np.ndarray,
@@ -21,8 +21,10 @@ def compute_metrics(
     """Compute metrics to assess the performance of the clustering procedure.
 
         Args:
-        clust_opt (ClustOptions): The clustering options.
+        # clust_opt (ClustOptions): The clustering options.
+        distmat: The distance matrix.
         z_matrix (np.ndarray): The Z-matrix from hierarchical clustering procedure.
+        clusters (np.ndarray): The cluster classifications for each sample.
 
     Returns:
         ss (np.float64): The silhouette score.

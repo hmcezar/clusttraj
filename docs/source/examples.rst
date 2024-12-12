@@ -451,7 +451,7 @@ computes 4 scores to quantitatively compare the models performance.
 	Cophenetic correlation coefficient: 0.908
 
 
-Reordering solvent molecules and performing a final Kabsch rotation
+Reordering solvent molecules and the final Kabsch rotation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To include the molecular permutation we include the ``-e`` flag and parse the number of oligomer
@@ -550,7 +550,7 @@ one can perform the final Kabsch rotation by running:
 	Cophenetic correlation coefficient: 0.845
 
 In this case, we obtained the same clustering evolution but with small differences 
-in the coefficients that consistently better, with a slight increase of silhouette and 
+in the coefficients that consistently better, `i.e.`, with a slight increase of silhouette and 
 Calinski-Harabasz scores and a decrease in the Davies-Bouldin score.
 
 
