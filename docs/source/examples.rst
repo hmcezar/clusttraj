@@ -550,7 +550,7 @@ one can perform the final Kabsch rotation by running:
 	Cophenetic correlation coefficient: 0.845
 
 In this case, we obtained the same clustering evolution but with small differences 
-in the coefficients that consistently better, `i.e.`, with a slight increase of silhouette and 
+in the coefficients that consistently better, `i.e.`, with a slight increase in silhouette and 
 Calinski-Harabasz scores and a decrease in the Davies-Bouldin score.
 
 
