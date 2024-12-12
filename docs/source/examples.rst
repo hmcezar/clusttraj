@@ -1,12 +1,15 @@
 Examples
 ========
 
-Before following the steps presented in this section, make sure to install the ``clusttraj`` package as presented in :doc:`install`.
+Before following the steps presented in this section, make sure to install the 
+``clusttraj`` package as presented in :doc:`install`.
 
+.. _water-example:
 Clustering of water molecules
 *****************************
 
-Here we perform the clustering of water molecules from a molecular dynamics simulation. The ``h2o_traj.xyz`` file has the molecular trajectory of 5 water molecules:
+Here we perform the clustering of water molecules from a molecular dynamics simulation. 
+The ``h2o_traj.xyz`` file has the configurations of 5 water molecules:
 
 .. code-block:: console
 
@@ -24,7 +27,7 @@ Here we perform the clustering of water molecules from a molecular dynamics simu
 	       H     2.46676   23.16482   10.69619
 
 
-To perform the clustering procedure we need to provide the trajectory file 
+To perform the clustering procedure we need to provide the file with configurations 
 and the Root Mean Square Deviation (RMSD) threshold distance. This cutoff distance establishes the 
 maximum accepted distance between clusters and can be determined in two ways.
 
@@ -42,7 +45,7 @@ As a result, we obtained 4 output files, `i.e.`, ``distmat.npy``, ``clusters.dat
 
 - ``distmat.npy`` file has the condensed distance matrix in the ``numpy`` file format.
 
-- ``clusters.dat`` file has the labels of each configuration in the trajectory file.
+- ``clusters.dat`` file has the labels of each configuration in the configurations file.
 
 .. code-block:: console
 
@@ -377,5 +380,137 @@ solvent atoms:
 For this system no significant changes were observed, as the silhouette coefficient 
 and cluster populations remain almost identical.
 
-Oligomer chain solvated in aqueous mixture
-******************************************
+.. _polymer-example:
+Polymer solvated in aqueous mixture
+***********************************
+
+In this example we are going to consider a larger system with solute and solvent 
+molecules. From an MD simulation of a single oligomer chain comprising 10 monomers of PTQ10
+solvated in chloroform, we extracted 100 snapshots to perform the clustering procedure. The
+classical simulations were performed for 50 ns at the NPT ensemble using the 
+`GROMACS software <https://doi.org/10.1016/j.softx.2015.06.001>`_, and the trajectory is
+stored in the ``olig_solv.gro`` file. Here is the first frame of the trajectory:
+
+.. image:: images/olig_solv.pdf
+	:align: center
+	:width: 200pt
+
+Since the code uses ``openbabel`` to read the
+configurations, the trajectory file can be provided in any one of the `file formats supported
+by the library <http://openbabel.org/docs/FileFormats/Overview.html>`_.
+
+Standard clustering using RMSD
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For comparison, we start by running the traditional hierarchical clustering scheme that
+does not account for solvent permutation. Instead of calling the library via ``python 
+-m clusttraj``, as done in the :ref:`previous section <water-example>`, one can directly 
+run the program:
+
+.. code-block:: console
+
+	$ clusttraj olig_solv.gro -m average -ss -p --metrics
+	2024-12-12 16:13:01,490 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+
+	2024-12-12 16:13:43,838 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+
+	2024-12-12 16:13:43,840 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
+
+	2024-12-12 16:13:43,923 INFO     [classify.py:61] <classify_structures_silhouette> Highest silhouette score: 0.13900364227503081
+
+	2024-12-12 16:13:43,923 INFO     [classify.py:65] <classify_structures_silhouette> The following RMSD threshold values yielded the same optimial silhouette score: 25.157769211396136, 25.257769211396134
+
+	2024-12-12 16:13:43,923 INFO     [classify.py:68] <classify_structures_silhouette> The smallest RMSD of 25.157769211396136 has been adopted
+
+	2024-12-12 16:13:43,924 INFO     [classify.py:76] <classify_structures_silhouette> Saving clustering classification to clusters.dat
+
+	2024-12-12 16:13:46,184 INFO     [main.py:102] <main> A total 100 snapshots were read and 2 cluster(s) was(were) found.
+	The cluster sizes are:
+	Cluster	Size
+	1	99
+	2	1
+
+	2024-12-12 16:13:46,189 INFO     [main.py:126] <main> Total wall time: 44.698860 s
+
+
+For this case we obtain only two clusters with a drastic difference in population,
+which is not very helpful for analysis. The addition of ``--metrics`` flag compute
+computes 4 scores to quantitatively compare the models performance.
+
+.. code-block:: console
+
+	$ tail clusters.out
+	The cluster sizes are:
+	Cluster	Size
+	1	99
+	2	1
+
+	Silhouette score: 0.139
+	Calinski Harabsz score: 2.476
+	Davies-Bouldin score: 0.619
+	Cophenetic correlation coefficient: 0.908
+
+
+To include the molecular permutation we include the ``-e`` flag and parse the number of oligomer
+atoms in the ``-ns`` flag, to be ignored during the reordering process.
+
+.. code-block:: console
+
+	$ clusttraj olig_solv.gro -m average -ss -p --metrics -e -ns 702 -f
+	2024-12-12 16:09:08,619 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+
+	2024-12-12 16:12:08,573 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+
+	2024-12-12 16:12:08,576 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
+
+	2024-12-12 16:12:08,675 INFO     [classify.py:61] <classify_structures_silhouette> Highest silhouette score: 0.4420374106917728
+
+	2024-12-12 16:12:08,676 INFO     [classify.py:65] <classify_structures_silhouette> The following RMSD threshold values yielded the same optimial silhouette score: 11.532116467337541, 11.632116467337543, 11.73211646733754, 11.832116467337542, 11.93211646733754, 12.032116467337541, 12.13211646733754, 12.23211646733754, 12.332116467337539, 12.43211646733754, 12.532116467337538, 12.63211646733754, 12.732116467337537, 12.832116467337539, 12.932116467337536, 13.032116467337538, 13.132116467337536, 13.232116467337537, 13.332116467337535, 13.432116467337536, 13.532116467337534, 13.632116467337536, 13.732116467337534, 13.832116467337535, 13.932116467337533, 14.032116467337534, 14.132116467337532, 14.232116467337534, 14.332116467337531, 14.432116467337533, 14.53211646733753, 14.632116467337532, 14.73211646733753, 14.832116467337531, 14.93211646733753, 15.03211646733753, 15.132116467337529, 15.23211646733753, 15.332116467337528, 15.43211646733753, 15.532116467337527, 15.632116467337529, 15.732116467337526, 15.832116467337528, 15.932116467337526, 16.032116467337527, 16.132116467337525, 16.232116467337526, 16.332116467337524, 16.432116467337526, 16.532116467337524
+
+	2024-12-12 16:12:08,676 INFO     [classify.py:68] <classify_structures_silhouette> The smallest RMSD of 11.532116467337541 has been adopted
+
+	2024-12-12 16:12:08,676 INFO     [classify.py:76] <classify_structures_silhouette> Saving clustering classification to clusters.dat
+
+	2024-12-12 16:12:11,256 INFO     [main.py:102] <main> A total 100 snapshots were read and 2 cluster(s) was(were) found.
+	The cluster sizes are:
+	Cluster	Size
+	1	30
+	2	70
+
+	2024-12-12 16:12:11,262 INFO     [main.py:126] <main> Total wall time: 182.642790 s
+
+
+.. code-block:: console
+
+	$ tail clusters.out
+	The cluster sizes are:
+	Cluster	Size
+	1	30
+	2	70
+
+	Silhouette score: 0.442
+	Calinski Harabsz score: 256.998
+	Davies-Bouldin score: 0.482
+	Cophenetic correlation coefficient: 0.845
+
+
+In addition to the wrong interpretation when not considering the permutation between
+identical molecules, the metrics are generally worst. Given the summary presented below,
+the three scores are significantly better when accounting for the permutation.
+
+.. image:: images/summary.png
+	:align: center
+	:width: 500pt
+
+Even the difference in the Cophenetic correlation coefficient is small, indicating an
+overall better clustering approach with the reordering process. Finally, one can perform
+the final Kabsch rotation by runnning:
+
+
+
+
+
+
+
+
+
