@@ -41,6 +41,6 @@ def compute_metrics(
     db = davies_bouldin_score(squareform(distmat), clusters)
 
     # Compute the cophenetic correlation coefficient
-    cpcc = cophenet(z_matrix)[0]
+    cpcc, _ = cophenet(z_matrix, distmat)
 
     return ss, ch, db, cpcc
