@@ -264,7 +264,7 @@ inspection of the dendrogram shows anomalous behavior.
 
 The reader is encouraged to verify that the addition of ``-odl`` for `optimal visualization <https://academic.oup.com/bioinformatics/article/17/suppl_1/S22/261423?login=true>`_ flag cannot avoid the dendrogram crossings.
 
-Accouting for molecule permutation
+Accounting for molecule permutation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As an attempt to avoid separating similar configurations due to permutation of identical 
@@ -451,6 +451,9 @@ computes 4 scores to quantitatively compare the models performance.
 	Cophenetic correlation coefficient: 0.908
 
 
+Reordering solvent molecules and performing a final Kabsch rotation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To include the molecular permutation we include the ``-e`` flag and parse the number of oligomer
 atoms in the ``-ns`` flag, to be ignored during the reordering process.
 
@@ -502,10 +505,53 @@ the three scores are significantly better when accounting for the permutation.
 	:align: center
 	:width: 500pt
 
-Even the difference in the Cophenetic correlation coefficient is small, indicating an
-overall better clustering approach with the reordering process. Finally, one can perform
-the final Kabsch rotation by runnning:
 
+Even the difference in the Cophenetic correlation coefficient is small, indicating an
+overall statistically better clustering approach with the reordering process. Finally, 
+one can perform the final Kabsch rotation by running:
+
+.. code-block:: console
+
+	$ clusttraj olig_solv.gro -m average -ss -p --metrics -e -ns 702 -f --final-kabsch
+	2024-12-12 16:35:25,405 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+
+	2024-12-12 16:38:24,715 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+
+	2024-12-12 16:38:24,718 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
+
+	2024-12-12 16:38:24,798 INFO     [classify.py:61] <classify_structures_silhouette> Highest silhouette score: 0.4505111680708198
+
+	2024-12-12 16:38:24,798 INFO     [classify.py:65] <classify_structures_silhouette> The following RMSD threshold values yielded the same optimial silhouette score: 11.504201293638701, 11.6042012936387, 11.7042012936387, 11.8042012936387, 11.9042012936387, 12.0042012936387, 12.104201293638699, 12.204201293638699, 12.304201293638698, 12.404201293638698, 12.504201293638697, 12.604201293638697, 12.704201293638697, 12.804201293638696, 12.904201293638696, 13.004201293638696, 13.104201293638695, 13.204201293638695, 13.304201293638695, 13.404201293638694, 13.504201293638694, 13.604201293638694, 13.704201293638693, 13.804201293638693, 13.904201293638693, 14.004201293638692, 14.104201293638692, 14.204201293638691, 14.304201293638691, 14.40420129363869, 14.50420129363869, 14.60420129363869, 14.70420129363869, 14.80420129363869, 14.904201293638689, 15.004201293638689, 15.104201293638688, 15.204201293638688, 15.304201293638688, 15.404201293638687, 15.504201293638687, 15.604201293638686, 15.704201293638686, 15.804201293638686, 15.904201293638685, 16.004201293638687, 16.104201293638685, 16.204201293638683, 16.304201293638684, 16.404201293638685, 16.504201293638683
+
+	2024-12-12 16:38:24,798 INFO     [classify.py:68] <classify_structures_silhouette> The smallest RMSD of 11.504201293638701 has been adopted
+
+	2024-12-12 16:38:24,798 INFO     [classify.py:76] <classify_structures_silhouette> Saving clustering classification to clusters.dat
+
+	2024-12-12 16:38:26,979 INFO     [main.py:102] <main> A total 100 snapshots were read and 2 cluster(s) was(were) found.
+	The cluster sizes are:
+	Cluster	Size
+	1	30
+	2	70
+
+	2024-12-12 16:38:26,981 INFO     [main.py:126] <main> Total wall time: 181.576293 s
+
+
+.. code-block:: console
+
+	$ tail clusters.out
+	The cluster sizes are:
+	Cluster	Size
+	1	30
+	2	70
+
+	Silhouette score: 0.451
+	Calinski Harabsz score: 268.899
+	Davies-Bouldin score: 0.463
+	Cophenetic correlation coefficient: 0.845
+
+In this case, we obtained the same clustering evolution but with small differences 
+in the coefficients that consistently better, with a slight increase of silhouette and 
+Calinski-Harabasz scores and a decrease in the Davies-Bouldin score.
 
 
 
