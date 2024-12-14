@@ -104,7 +104,7 @@ def main(args: List[str] = None) -> None:
     # Compute the evaluation metrics
     if clust_opt.metrics:
         start_time = time.monotonic()
-        ss, ch, db, cpcc = compute_metrics(clust_opt, distmat, Z, clusters)
+        ss, ch, db, cpcc = compute_metrics(distmat, Z, clusters)
         end_time = time.monotonic()
 
         outclust_str += f"\nSilhouette score: {ss:.3f}\n"
