@@ -844,8 +844,16 @@ def save_clusters_config(
 
             # reorder the solvent atoms separately
             if reorder:
+                # if the solute is specified, reorder just the solvent atoms in this step
+                if nsatoms:
+                    exclusions = np.unique(
+                        np.concatenate((np.arange(natoms), reorderexcl))
+                    )
+                else:
+                    exclusions = reorderexcl
+
                 # get the view without the excluded atoms
-                view = np.delete(np.arange(len(P)), reorderexcl)
+                view = np.delete(np.arange(len(P)), exclusions)
                 Pview = P[view]
                 Paview = Pa[view]
 
@@ -853,14 +861,13 @@ def save_clusters_config(
                 Pview = Pview[prr]
 
                 # build the total molecule with the reordered atoms
-                # whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
                 whereins = np.where(
-                    np.atleast_1d(np.isin(np.arange(len(P)), reorderexcl))
+                    np.atleast_1d(np.isin(np.arange(len(P)), exclusions))
                 )
                 Pr = np.insert(
                     Pview,
                     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                    P[reorderexcl],
+                    P[exclusions],
                     axis=0,
                 )
             else:
