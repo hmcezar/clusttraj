@@ -8,8 +8,8 @@ def test_plot_clust_evo(clust_opt, clusters_seq):
     assert os.path.exists(clust_opt.evo_name)
 
 
-def test_plot_dendrogram(clust_opt, Z_matrix):
-    assert plot_dendrogram(clust_opt, Z_matrix) is None
+def test_plot_dendrogram(clust_opt, clusters_seq, Z_matrix):
+    assert plot_dendrogram(clust_opt, clusters_seq, Z_matrix) is None
 
     assert os.path.exists(clust_opt.dendrogram_name)
 

@@ -15,7 +15,7 @@ from typing import Callable, List, Union
 from dataclasses import dataclass
 from .utils import get_mol_info
 
-if importlib.util.find_spec("qml"):
+if importlib.util.find_spec("qmllib"):
     has_qml = True
 else:
     has_qml = False
@@ -377,7 +377,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
 
     if (args.reorder_alg == "qml") and (not has_qml):
         parser.error(
-            "You must have the development branch of qml installed in order to use it as a reorder method."
+            "You must have the optional dependency `qmllib` installed in order to use it as a reorder method."
         )
 
     if args.clusters_configurations:
