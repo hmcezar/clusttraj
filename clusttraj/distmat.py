@@ -272,7 +272,6 @@ def compute_distmat_line(
             Pview = Pview[prr]
 
             # build the total molecule with the reordered atoms
-            # whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
             whereins = np.where(np.atleast_1d(np.isin(np.arange(len(P)), exclusions)))
             Pr = np.insert(
                 Pview,
