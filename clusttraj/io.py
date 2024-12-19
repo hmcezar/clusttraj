@@ -544,9 +544,11 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
 
     options_dict = {
         "solute_natoms": args.natoms_solute,
-        "reorder_excl": np.asarray([x - 1 for x in args.reorder_exclusions], np.int32)
-        if args.reorder_exclusions
-        else np.asarray([], np.int32),
+        "reorder_excl": (
+            np.asarray([x - 1 for x in args.reorder_exclusions], np.int32)
+            if args.reorder_exclusions
+            else np.asarray([], np.int32)
+        ),
         "exclusions": bool(args.reorder_exclusions),
         "reorder_alg_name": args.reorder_alg,
         "reorder_alg": None,
@@ -556,12 +558,12 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "out_clust_name": args.outputclusters,
         "summary_name": basenameout + ".out",
         "save_confs": bool(args.clusters_configurations),
-        "out_conf_name": basenameout + "_confs"
-        if args.clusters_configurations
-        else None,
-        "out_conf_fmt": args.clusters_configurations
-        if args.clusters_configurations
-        else None,
+        "out_conf_name": (
+            basenameout + "_confs" if args.clusters_configurations else None
+        ),
+        "out_conf_fmt": (
+            args.clusters_configurations if args.clusters_configurations else None
+        ),
         "plot": bool(args.plot),
         "evo_name": basenameout + "_evo.pdf" if args.plot else None,
         "dendrogram_name": basenameout + "_dendrogram.pdf" if args.plot else None,
@@ -777,7 +779,9 @@ def save_clusters_config(
                     # whereins = np.where(
                     #     np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
                     # )
-                    whereins = np.where(np.atleast_1d(np.isin(np.arange(natoms), reorderexcl)))
+                    whereins = np.where(
+                        np.atleast_1d(np.isin(np.arange(natoms), reorderexcl))
+                    )
                     Psolu = np.insert(
                         Pview,
                         [x - whereins[0].tolist().index(x) for x in whereins[0]],
@@ -850,7 +854,9 @@ def save_clusters_config(
 
                 # build the total molecule with the reordered atoms
                 # whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
-                whereins = np.where(np.atleast_1d(np.isin(np.arange(len(P)), reorderexcl)))
+                whereins = np.where(
+                    np.atleast_1d(np.isin(np.arange(len(P)), reorderexcl))
+                )
                 Pr = np.insert(
                     Pview,
                     [x - whereins[0].tolist().index(x) for x in whereins[0]],
@@ -883,4 +889,6 @@ def save_clusters_config(
 
         # closes the file for the cnum cluster
         outfile.close()
- # type: ignore
+
+
+# type: ignore

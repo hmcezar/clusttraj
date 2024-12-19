@@ -195,7 +195,9 @@ def compute_distmat_line(
                 # whereins = np.where(
                 #     np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
                 # )
-                whereins = np.where(np.atleast_1d(np.isin(np.arange(natoms), reorderexcl[soluexcl])))
+                whereins = np.where(
+                    np.atleast_1d(np.isin(np.arange(natoms), reorderexcl[soluexcl]))
+                )
                 Psolu = np.insert(
                     Pview,
                     [x - whereins[0].tolist().index(x) for x in whereins[0]],
