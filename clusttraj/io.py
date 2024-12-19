@@ -15,7 +15,7 @@ from typing import Callable, List, Union
 from dataclasses import dataclass
 from .utils import get_mol_info
 
-if importlib.util.find_spec("qml"):
+if importlib.util.find_spec("qmllib"):
     has_qml = True
 else:
     has_qml = False
@@ -377,7 +377,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
 
     if (args.reorder_alg == "qml") and (not has_qml):
         parser.error(
-            "You must have the development branch of qml installed in order to use it as a reorder method."
+            "You must have the optional dependency `qmllib` installed in order to use it as a reorder method."
         )
 
     if args.clusters_configurations:
@@ -776,8 +776,11 @@ def save_clusters_config(
                     Paview = Paview[prr]
 
                     # build the total molecule reordering just these atoms
+                    # whereins = np.where(
+                    #     np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
+                    # )
                     whereins = np.where(
-                        np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
+                        np.atleast_1d(np.isin(np.arange(natoms), reorderexcl))
                     )
                     Psolu = np.insert(
                         Pview,
@@ -814,7 +817,6 @@ def save_clusters_config(
                     # prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
                     # Pview = Pview[prr]
                     # Paview = Paview[prr]
-
                     # # build the total molecule with the reordered atoms
                     # whereins = np.where(
                     #     np.isin(np.arange(natoms, len(P)), reorderexcl[solvexcl]) == True
@@ -851,7 +853,10 @@ def save_clusters_config(
                 Pview = Pview[prr]
 
                 # build the total molecule with the reordered atoms
-                whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
+                # whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
+                whereins = np.where(
+                    np.atleast_1d(np.isin(np.arange(len(P)), reorderexcl))
+                )
                 Pr = np.insert(
                     Pview,
                     [x - whereins[0].tolist().index(x) for x in whereins[0]],
@@ -884,3 +889,6 @@ def save_clusters_config(
 
         # closes the file for the cnum cluster
         outfile.close()
+
+
+# type: ignore

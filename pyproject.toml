@@ -43,8 +43,8 @@ clusttraj = "clusttraj.main:main"
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov[all]"]
 docs = ["sphinx", "sphinx_rtd_theme"]
-lint = ["ruff", "black"]
-qml = ["qml"] # you can install from git+https://github.com/hmcezar/qml@develop
+lint = ["black"]
+qml = ["qmllib"]
 all = ["clusttraj[test,docs,lint,qml]"]
 
 [tool.setuptools]
@@ -52,7 +52,3 @@ packages = ["clusttraj"]
 
 [tool.black]
 line-length = 89
-
-[tool.ruff]
-line-length = 89
-ignore = ["E501"]
