@@ -107,45 +107,45 @@ The number of clusters that were found, as well as the number of members for eac
 Below there is an example of how this information is printed:
 ```
 $ clusttraj trajectory.xyz -rmsd 3.2 -np 4 -p -n -cc xyz
+2024-12-12 17:48:19,268 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
 
-2023-08-25 11:37:35,201 INFO     [distmat.py:22] <get_distmat> Calculating distance matrix using 4 threads
+2024-12-12 17:48:23,800 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
 
-2023-08-25 11:37:35,770 INFO     [distmat.py:26] <get_distmat> Saving condensed distance matrix to distmat.npy
+2024-12-12 17:48:23,801 INFO     [classify.py:97] <classify_structures> Clustering using 'average' method to join the clusters
 
-2023-08-25 11:37:35,771 INFO     [classify.py:8] <classify_structures> Starting clustering using 'average' method to join the clusters
+2024-12-12 17:48:23,803 INFO     [classify.py:105] <classify_structures> Saving clustering classification to clusters.dat
 
-2023-08-25 11:37:35,772 INFO     [classify.py:15] <classify_structures> Saving clustering classification to clusters.dat
+2024-12-12 17:48:23,804 INFO     [main.py:59] <main> Writing superposed configurations per cluster to files clusters_confs_*.xyz
 
-2023-08-25 11:37:35,772 INFO     [main.py:41] <main> Writing superposed configurations per cluster to files clusters_confs_*.xyz
-
-2023-08-25 11:37:37,797 INFO     [main.py:71] <main> A total 100 snapshots were read and 16 cluster(s) was(were) found.
+2024-12-12 17:48:26,729 INFO     [main.py:102] <main> A total 100 snapshots were read and 7 cluster(s) was(were) found.
 The cluster sizes are:
-Cluster Size
-1       3
-2       6
-3       6
-4       8
-5       7
-6       6
-7       11
-8       2
-9       6
-10      11
-11      6
-12      5
-13      4
-14      7
-15      4
-16      8
+Cluster	Size
+1	3
+2	3
+3	31
+4	30
+5	18
+6	3
+7	12
+
+2024-12-12 17:48:26,729 INFO     [main.py:126] <main> Total wall time: 7.462641 s
+
 ```
 
 In the cluster output file (`-oc` option, default filename `clusters.dat`) the classification for each structure in the trajectory is printed.
 For example, if the first structure of the trajectory belongs to the cluster number *2*, the second structure belongs to cluster *1*, the third to cluster *2* and so on, the file `clusters.dat` will start with
 ```
-2
-1
-2
-...
+$ head clusters.dat
+7
+4
+5
+3
+4
+7
+6
+7
+4
+3
 ```
 
 The plot of the multidimensional representation (when the `-p` option is used) have each cluster colored in one color as the following picture:

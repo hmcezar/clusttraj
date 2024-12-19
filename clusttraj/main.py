@@ -83,7 +83,7 @@ def main(args: List[str] = None) -> None:
         start_time = time.monotonic()
         plot_clust_evo(clust_opt, clusters)
 
-        plot_dendrogram(clust_opt, Z)
+        plot_dendrogram(clust_opt, clusters, Z)
 
         plot_mds(clust_opt, clusters, distmat)
 
@@ -104,7 +104,7 @@ def main(args: List[str] = None) -> None:
     # Compute the evaluation metrics
     if clust_opt.metrics:
         start_time = time.monotonic()
-        ss, ch, db, cpcc = compute_metrics(clust_opt, distmat, Z, clusters)
+        ss, ch, db, cpcc = compute_metrics(distmat, Z, clusters)
         end_time = time.monotonic()
 
         outclust_str += f"\nSilhouette score: {ss:.3f}\n"

@@ -15,7 +15,7 @@ Welcome to ClustTraj's documentation!
    clusttraj
    usage
    examples
-
+   
 Indices and tables
 ==================
 

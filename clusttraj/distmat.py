@@ -192,9 +192,10 @@ def compute_distmat_line(
                 Paview = Paview[prr]
 
                 # build the total structure reordering just these atoms
-                whereins = np.where(
-                    np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
-                )
+                # whereins = np.where(
+                #     np.isin(np.arange(natoms), reorderexcl[soluexcl]) is True
+                # )
+                whereins = np.where(np.atleast_1d(np.isin(np.arange(natoms), reorderexcl[soluexcl])))
                 Psolu = np.insert(
                     Pview,
                     [x - whereins[0].tolist().index(x) for x in whereins[0]],
@@ -263,7 +264,8 @@ def compute_distmat_line(
             Pview = Pview[prr]
 
             # build the total molecule with the reordered atoms
-            whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
+            # whereins = np.where(np.isin(np.arange(len(P)), reorderexcl) is True)
+            whereins = np.where(np.atleast_1d(np.isin(np.arange(len(P)), reorderexcl)))
             Pr = np.insert(
                 Pview,
                 [x - whereins[0].tolist().index(x) for x in whereins[0]],
