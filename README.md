@@ -16,22 +16,24 @@ The following libraries are required:
 - [NumPy](http://www.numpy.org/)
 - [OpenBabel](http://openbabel.org/)
 - [RMSD](https://github.com/charnley/rmsd)
-- [QML](https://github.com/qmlcode/qml)
 - [SciPy](https://www.scipy.org/)
 - [scikit-learn](http://scikit-learn.org/stable/index.html)
 - [matplotlib](https://matplotlib.org/)
 
-We use the development branch of `QML` as one of the reordering algorithms.
-Since the development of `QML` has been quite slow, we provide our [own branch](https://github.com/hmcezar/qml/tree/develop) in which installation using modern versions of `numpy` is possible.
+We also have [qmllib](https://github.com/qmlcode/qmllib) as an optional dependency as one of the reordering algorithms.
 
 For `openbabel`, we use the `pip` package `openbabel-wheel` which provides pre-built `openbabel` packages for Linux and MacOS.
 More details can be seen in the [projects' GitHub page](https://github.com/njzjz/openbabel-wheel).
-
 
 You can install the package using `pip`
 ```bash
 pip install clusttraj
 ``` 
+
+If you want to use the `qmllib` reordering algorithm, you can install it with:
+```bash
+pip install clusttraj[qml]
+```
 
 ## Usage
 To see all the options run the script with the `-h` command option:

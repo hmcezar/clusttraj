@@ -12,10 +12,7 @@ import numpy as np
 from .io import ClustOptions
 
 
-def plot_clust_evo(
-        clust_opt: ClustOptions, 
-        clusters: np.ndarray
-) -> None:
+def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
     """Plot the evolution of cluster classification over the given samples.
 
     Args:
@@ -25,30 +22,34 @@ def plot_clust_evo(
     Returns:
         None
     """
-    
+
     # Define a color for the lines
     line_color = (0, 0, 0, 0.5)
 
     # plot evolution with o cluster in trajectory
     plt.figure(figsize=(10, 6))
-    
+
     # Set the y-axis to only show integers
     plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
 
     # Increase tick size and font size
-    plt.tick_params(axis='both', which='major', direction='in', labelsize=12)
+    plt.tick_params(axis="both", which="major", direction="in", labelsize=12)
 
     plt.plot(range(1, len(clusters) + 1), clusters, markersize=4, color=line_color)
-    plt.scatter(range(1, len(clusters) + 1), clusters, marker="o", c=clusters, cmap=plt.cm.nipy_spectral)
+    plt.scatter(
+        range(1, len(clusters) + 1),
+        clusters,
+        marker="o",
+        c=clusters,
+        cmap=plt.cm.nipy_spectral,
+    )
     plt.xlabel("Sample Index", fontsize=14)
     plt.ylabel("Cluster classification", fontsize=14)
     plt.savefig(clust_opt.evo_name, bbox_inches="tight")
 
 
 def plot_dendrogram(
-        clust_opt: ClustOptions,
-        clusters: np.ndarray,
-        Z: np.ndarray
+    clust_opt: ClustOptions, clusters: np.ndarray, Z: np.ndarray
 ) -> None:
     """Plot a dendrogram based on hierarchical clustering.
 
@@ -65,7 +66,7 @@ def plot_dendrogram(
     plt.title("Hierarchical Clustering Dendrogram", fontsize=20)
     # plt.xlabel("Sample Index", fontsize=14)
     plt.ylabel(r"RMSD ($\AA$)", fontsize=18)
-    plt.tick_params(axis='y', labelsize=18)
+    plt.tick_params(axis="y", labelsize=18)
 
     # Define a color for the dashed and non-cluster lines
     line_color = (0, 0, 0, 0.5)
@@ -73,10 +74,14 @@ def plot_dendrogram(
     # Add a horizontal line at the minimum RMSD value and set the threshold
     if clust_opt.silhouette_score:
         if isinstance(clust_opt.optimal_cut, (np.ndarray, list)):
-            plt.axhline(clust_opt.optimal_cut[0], linestyle="--", linewidth=2, color=line_color)
+            plt.axhline(
+                clust_opt.optimal_cut[0], linestyle="--", linewidth=2, color=line_color
+            )
             threshold = clust_opt.optimal_cut[0]
         elif isinstance(clust_opt.optimal_cut, (float, np.float32, np.float64)):
-            plt.axhline(clust_opt.optimal_cut, linestyle="--", linewidth=2, color=line_color)
+            plt.axhline(
+                clust_opt.optimal_cut, linestyle="--", linewidth=2, color=line_color
+            )
             threshold = clust_opt.optimal_cut
         else:
             raise ValueError("optimal_cut must be a float or np.ndarray")
@@ -86,9 +91,9 @@ def plot_dendrogram(
 
     # Use the 'nipy_spectral' cmap to color the dendrogram
     unique_clusters = np.unique(clusters)
-    cmap = cm.get_cmap('nipy_spectral', len(unique_clusters))
+    cmap = cm.get_cmap("nipy_spectral", len(unique_clusters))
     colors = [to_hex(cmap(i)) for i in range(cmap.N)]
-    
+
     hierarchy.set_link_color_palette(colors)
 
     # Plot the dendrogram
@@ -98,18 +103,14 @@ def plot_dendrogram(
         # leaf_font_size=8.0,  # Font size for the x axis labels
         no_labels=True,
         color_threshold=threshold,
-        above_threshold_color=line_color
+        above_threshold_color=line_color,
     )
 
     # Save the dendrogram to a file
     plt.savefig(clust_opt.dendrogram_name, bbox_inches="tight")
 
 
-def plot_mds(
-        clust_opt: ClustOptions, 
-        clusters: np.ndarray, 
-        distmat: np.ndarray
-) -> None:
+def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray) -> None:
     """Plot the multidimensional scaling (MDS) of the distance matrix.
 
     Args:
@@ -139,7 +140,7 @@ def plot_mds(
     coords = mds.fit_transform(squareform(distmat))
 
     # Set the figure size
-    plt.figure(figsize=(6,6))
+    plt.figure(figsize=(6, 6))
 
     # Configure tick parameters
     plt.tick_params(
@@ -165,9 +166,7 @@ def plot_mds(
 
 
 def plot_tsne(
-    clust_opt: ClustOptions, 
-    clusters: np.ndarray, 
-    distmat: np.ndarray
+    clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray
 ) -> None:
     """Plot the t-distributed Stochastic Neighbor Embedding 2D plot of the clustering.
 
@@ -194,11 +193,11 @@ def plot_tsne(
 
     # Define a list of unique colors for each cluster
     unique_clusters = np.unique(clusters)
-    cmap = cm.get_cmap('nipy_spectral', len(unique_clusters))
+    cmap = cm.get_cmap("nipy_spectral", len(unique_clusters))
     colors = [cmap(i) for i in range(len(unique_clusters))]
 
     # Set the figure size
-    plt.figure(figsize=(6,6))
+    plt.figure(figsize=(6, 6))
 
     # Configure tick parameters
     plt.tick_params(
