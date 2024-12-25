@@ -102,6 +102,10 @@ class ClustOptions:
                 if self.final_kabsch:
                     return_str += "Using final Kabsch rotation before computing RMSD\n"
                 return_str += f"Number of solute atoms: {self.solute_natoms}\n"
+                if self.weight_solute:
+                    return_str += f"Weight of the solute atoms: {self.weight_solute}\n"
+                else:
+                    return_str += "Unweighted RMSD according to solute/solvent.\n"
             else:
                 return_str += "\nReordering all atom at the same time\n"
 
