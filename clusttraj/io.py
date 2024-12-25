@@ -537,7 +537,11 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
             "The list of atoms to exclude for reordering only makes sense if reordering is enabled. Ignoring the list."
         )
 
-    if args.weight_solute and not args.solute_natoms:
+    if args.natoms_solute:
+        if args.natoms_solute < 0:
+            parser.error("The number of solute atoms must be a positive integer.")
+
+    if args.weight_solute and not args.natoms_solute:
         parser.error(
             "You must specify the number of solute atoms with -ns to use the -ws option."
         )
