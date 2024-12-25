@@ -53,6 +53,7 @@ class ClustOptions:
     out_conf_name: str = None
     summary_name: str = None
     solute_natoms: int = None
+    weight_solute: float = None
     reorder_excl: np.ndarray = None
     optimal_cut: np.ndarray = None
     verbose: bool = None
@@ -287,6 +288,13 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         metavar="NATOMS",
         type=check_positive,
         help="number of solute atoms, to ignore these atoms in the reordering process",
+    )
+    parser.add_argument(
+        "-ws",
+        "--weight-solute",
+        metavar="WEIGHT SOLUTE",
+        type=float,
+        help="weight of the solute atoms in the RMSD calculation",
     )
     parser.add_argument(
         "-odl",
@@ -525,6 +533,15 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
             "The list of atoms to exclude for reordering only makes sense if reordering is enabled. Ignoring the list."
         )
 
+    if args.weight_solute and not args.solute_natoms:
+        parser.error(
+            "You must specify the number of solute atoms with -ns to use the -ws option."
+        )
+
+    if args.weight_solute:
+        if args.weight_solute < 0.0 or args.weight_solute > 1.0:
+            parser.error("The weight of the solute atoms must be between 0 and 1.")
+
     return parse_args(args)
 
 
@@ -544,6 +561,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
 
     options_dict = {
         "solute_natoms": args.natoms_solute,
+        "weight_solute": args.weight_solute,
         "reorder_excl": (
             np.asarray([x - 1 for x in args.reorder_exclusions], np.int32)
             if args.reorder_exclusions
@@ -807,35 +825,6 @@ def save_clusters_config(
                     P = np.dot(P, U)
                     p_all = np.dot(p_all, U)
 
-                    # consider only the solvent atoms in the reorder (without exclusions)
-                    # solvexcl = np.where(reorderexcl >= natoms)
-                    # solvview = np.delete(np.arange(natoms, len(P)), reorderexcl[solvexcl])
-                    # Pview = P[solvview]
-                    # Paview = Pa[solvview]
-
-                    # # reorder just these atoms
-                    # prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
-                    # Pview = Pview[prr]
-                    # Paview = Paview[prr]
-                    # # build the total molecule with the reordered atoms
-                    # whereins = np.where(
-                    #     np.isin(np.arange(natoms, len(P)), reorderexcl[solvexcl]) == True
-                    # )
-                    # Psolv = np.insert(
-                    #     Pview,
-                    #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                    #     P[reorderexcl[solvexcl]],
-                    #     axis=0,
-                    # )
-                    # Pasolv = np.insert(
-                    #     Paview,
-                    #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                    #     Pa[reorderexcl[solvexcl]],
-                    #     axis=0,
-                    # )
-
-                    # Pr = np.concatenate((P[:natoms], Psolv))
-                    # Pra = np.concatenate((Pa[:natoms], Pasolv))
             else:
                 # Kabsch rotation
                 U = rmsd.kabsch(P, Q)
