@@ -639,6 +639,7 @@ def save_clusters_config(
         Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
     ],
     nsatoms: int,
+    weight_solute: float,
     outbasename: str,
     outfmt: str,
     reorderexcl: np.ndarray,
@@ -870,7 +871,16 @@ def save_clusters_config(
             else:
                 Pr = P
 
-            if nsatoms and reorder and not final_kabsch:
+            # compute the weights
+            if weight_solute and final_kabsch:
+                W = np.zeros(Pr.shape[0])
+                W[:natoms] = weight_solute / natoms
+                W[natoms:] = (1.0 - weight_solute) / (Pr.shape[0] - natoms)
+
+                R, T, _ = rmsd.kabsch_weighted(Q, Pr, W)
+                p_all = np.dot(p_all, R.T) + T
+
+            elif nsatoms and reorder and final_kabsch:
                 # rotate whole configuration (considering hydrogens even with noh)
                 U = rmsd.kabsch(Pr, Q)
                 p_all = np.dot(p_all, U)

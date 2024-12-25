@@ -170,6 +170,7 @@ def test_save_clusters_config(clust_opt, clusters_seq, test_distmat):
         clust_opt.no_hydrogen,
         clust_opt.reorder_alg,
         clust_opt.solute_natoms,
+        clust_opt.weight_solute,
         clust_opt.out_conf_name,
         clust_opt.out_conf_fmt,
         clust_opt.reorder_excl,
