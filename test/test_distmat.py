@@ -24,6 +24,7 @@ def test_compute_distmat_line(options_dict, clust_opt, first_conf_traj, test_dis
         clust_opt.no_hydrogen,
         None,
         clust_opt.solute_natoms,
+        clust_opt.weight_solute,
         clust_opt.reorder_excl,
         clust_opt.final_kabsch,
     )

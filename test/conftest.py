@@ -48,6 +48,7 @@ def options_dict(tmp_path):
         "no_hydrogen": True,
         "opt_order": False,
         "solute_natoms": 17,
+        "weight_solute": None,
         "overwrite": True,
         "final_kabsch": False,
         "silhouette_score": False,

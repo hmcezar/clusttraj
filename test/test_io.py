@@ -65,6 +65,7 @@ def test_extant_file():
 def test_parse_args():
     args = argparse.Namespace(
         natoms_solute=10,
+        weight_solute=None,
         reorder_exclusions=[1, 2, 3],
         reorder_alg="hungarian",
         reorder=False,
@@ -92,6 +93,7 @@ def test_parse_args():
 
     args = argparse.Namespace(
         natoms_solute=10,
+        weight_solute=None,
         reorder_exclusions=[1, 2, 3],
         reorder_alg="hungarian",
         reorder=True,
