@@ -99,7 +99,7 @@ class ClustOptions:
         # reordering options
         if self.reorder:
             if self.solute_natoms:
-                return_str += "\nUsing solute-solvent reordering\n"
+                return_str += "\nUsing solute-solvent adjustment/reordering\n"
                 if self.final_kabsch:
                     return_str += "Using final Kabsch rotation before computing RMSD\n"
                 return_str += f"Number of solute atoms: {self.solute_natoms}\n"
@@ -107,6 +107,8 @@ class ClustOptions:
                     return_str += f"Weight of the solute atoms: {self.weight_solute}\n"
                 else:
                     return_str += "Unweighted RMSD according to solute/solvent.\n"
+                if self.reorder_solvent_only:
+                    return_str += "Reordering only solvent atoms\n"
             else:
                 return_str += "\nReordering all atom at the same time\n"
 
