@@ -35,6 +35,7 @@ class ClustOptions:
     ] = None
     out_conf_fmt: str = None
     reorder: bool = None
+    reorder_solvent_only: bool = None
     exclusions: bool = None
     no_hydrogen: bool = None
     input_distmat: bool = None
@@ -278,6 +279,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         nargs="+",
         type=check_positive,
         help="list of atoms that are ignored when reordering",
+    )
+    parser.add_argument(
+        "-rs",
+        "--reorder-solvent-only",
+        action="store_true",
+        help="reorder only the solvent atoms",
     )
     parser.add_argument(
         "--reorder-alg",
@@ -537,9 +544,10 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
             "The list of atoms to exclude for reordering only makes sense if reordering is enabled. Ignoring the list."
         )
 
-    if args.natoms_solute:
-        if args.natoms_solute < 0:
-            parser.error("The number of solute atoms must be a positive integer.")
+    if args.reorder_solvent_only and not args.natoms_solute:
+        parser.error(
+            "You must specify the number of solute atoms with -ns to use the -rs option."
+        )
 
     if args.weight_solute and not args.natoms_solute:
         parser.error(
@@ -578,6 +586,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "exclusions": bool(args.reorder_exclusions),
         "reorder_alg_name": args.reorder_alg,
         "reorder_alg": None,
+        "reorder_solvent_only": bool(args.reorder_solvent_only),
         "reorder": bool(args.reorder),
         "input_distmat": bool(args.input),
         "distmat_name": args.outputdistmat if not args.input else args.input,
@@ -638,6 +647,7 @@ def save_clusters_config(
     reorder: Union[
         Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
     ],
+    reorder_solvent_only: bool,
     nsatoms: int,
     weight_solute: float,
     outbasename: str,
@@ -790,7 +800,7 @@ def save_clusters_config(
                 p_all = np.dot(p_all, U)
 
                 # reorder solute atoms
-                if reorder:
+                if reorder and not reorder_solvent_only:
                     # find the solute atoms that are not excluded
                     soluexcl = np.where(reorderexcl < natoms)
                     soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])

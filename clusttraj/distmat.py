@@ -64,6 +64,7 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
         itertools.repeat(clust_opt.trajfile),
         itertools.repeat(clust_opt.no_hydrogen),
         itertools.repeat(clust_opt.reorder_alg),
+        itertools.repeat(clust_opt.reorder_solvent_only),
         itertools.repeat(clust_opt.solute_natoms),
         itertools.repeat(clust_opt.weight_solute),
         itertools.repeat(clust_opt.reorder_excl),
@@ -87,6 +88,7 @@ def compute_distmat_line(
     reorder: Union[
         Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
     ],
+    reorder_solvent_only: bool,
     nsatoms: int,
     weight_solute: float,
     reorderexcl: np.ndarray,
@@ -181,7 +183,7 @@ def compute_distmat_line(
             P = np.dot(P, U)
 
             # reorder solute atoms
-            if reorder:
+            if reorder and not reorder_solvent_only:
                 # find the solute atoms that are not excluded
                 soluexcl = np.where(reorderexcl < natoms)
                 soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])

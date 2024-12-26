@@ -23,6 +23,7 @@ def test_ClustOptions(options_dict):
     assert clust_opt.reorder_alg_name == "hungarian"
     assert clust_opt.reorder_alg is None
     assert clust_opt.reorder is False
+    assert clust_opt.reorder_solvent_only is False
     assert clust_opt.input_distmat is False
     assert clust_opt.distmat_name == "test/ref/test_distmat.npy"
     assert os.path.basename(clust_opt.summary_name) == "clusters.out"
@@ -40,6 +41,7 @@ def test_ClustOptions(options_dict):
     assert clust_opt.no_hydrogen is True
     assert clust_opt.opt_order is False
     assert clust_opt.solute_natoms == 17
+    assert clust_opt.weight_solute is None
     assert clust_opt.overwrite is True
     assert clust_opt.final_kabsch is False
     assert clust_opt.silhouette_score is False
@@ -69,6 +71,7 @@ def test_parse_args():
         reorder_exclusions=[1, 2, 3],
         reorder_alg="hungarian",
         reorder=False,
+        reorder_solvent_only=False,
         input=True,
         outputdistmat="distmat.npy",
         outputclusters="clusters.dat",
@@ -97,6 +100,7 @@ def test_parse_args():
         reorder_exclusions=[1, 2, 3],
         reorder_alg="hungarian",
         reorder=True,
+        reorder_solvent_only=False,
         input=True,
         outputdistmat="distmat.npy",
         outputclusters="clusters.dat",
@@ -169,6 +173,7 @@ def test_save_clusters_config(clust_opt, clusters_seq, test_distmat):
         test_distmat,
         clust_opt.no_hydrogen,
         clust_opt.reorder_alg,
+        clust_opt.reorder_solvent_only,
         clust_opt.solute_natoms,
         clust_opt.weight_solute,
         clust_opt.out_conf_name,

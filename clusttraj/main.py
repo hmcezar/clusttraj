@@ -65,6 +65,7 @@ def main(args: List[str] = None) -> None:
             distmat,
             clust_opt.no_hydrogen,
             clust_opt.reorder_alg,
+            clust_opt.reorder_solvent_only,
             clust_opt.solute_natoms,
             clust_opt.weight_solute,
             clust_opt.out_conf_name,

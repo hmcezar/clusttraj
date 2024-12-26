@@ -31,6 +31,7 @@ def options_dict(tmp_path):
         "reorder_alg_name": "hungarian",
         "reorder_alg": None,
         "reorder": False,
+        "reorder_solvent_only": False,
         "input_distmat": False,
         "distmat_name": "test/ref/test_distmat.npy",
         "summary_name": os.path.join(tmp_path, "clusters.out"),
