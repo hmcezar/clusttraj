@@ -64,7 +64,9 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
         itertools.repeat(clust_opt.trajfile),
         itertools.repeat(clust_opt.no_hydrogen),
         itertools.repeat(clust_opt.reorder_alg),
+        itertools.repeat(clust_opt.reorder_solvent_only),
         itertools.repeat(clust_opt.solute_natoms),
+        itertools.repeat(clust_opt.weight_solute),
         itertools.repeat(clust_opt.reorder_excl),
         itertools.repeat(clust_opt.final_kabsch),
     )
@@ -86,7 +88,9 @@ def compute_distmat_line(
     reorder: Union[
         Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
     ],
+    reorder_solvent_only: bool,
     nsatoms: int,
+    weight_solute: float,
     reorderexcl: np.ndarray,
     final_kabsch: bool,
 ) -> List[float]:
@@ -179,7 +183,7 @@ def compute_distmat_line(
             P = np.dot(P, U)
 
             # reorder solute atoms
-            if reorder:
+            if reorder and not reorder_solvent_only:
                 # find the solute atoms that are not excluded
                 soluexcl = np.where(reorderexcl < natoms)
                 soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
@@ -220,36 +224,6 @@ def compute_distmat_line(
                 # rotate the whole system with this rotation
                 P = np.dot(P, U)
 
-                # consider only the solvent atoms in the reorder (without exclusions)
-                # solvexcl = np.where(reorderexcl >= natoms)
-                # solvview = np.delete(np.arange(natoms, len(P)), reorderexcl[solvexcl])
-                # Pview = P[solvview]
-                # Paview = Pa[solvview]
-
-                # # reorder just these atoms
-                # prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
-                # Pview = Pview[prr]
-                # Paview = Paview[prr]
-
-                # # build the total molecule with the reordered atoms
-                # whereins = np.where(
-                #     np.isin(np.arange(natoms, len(P)), reorderexcl[solvexcl]) == True
-                # )
-                # Psolv = np.insert(
-                #     Pview,
-                #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                #     P[reorderexcl[solvexcl]],
-                #     axis=0,
-                # )
-                # Pasolv = np.insert(
-                #     Paview,
-                #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                #     Pa[reorderexcl[solvexcl]],
-                #     axis=0,
-                # )
-
-                # Pr = np.concatenate((P[:natoms], Psolv))
-                # Pra = np.concatenate((Pa[:natoms], Pasolv))
         else:
             # Kabsch rotation
             U = rmsd.kabsch(P, Q)
@@ -283,10 +257,25 @@ def compute_distmat_line(
         else:
             Pr = P
 
+        # compute the weights
+        if weight_solute:
+            W = np.zeros(Pr.shape[0])
+            W[:natoms] = weight_solute / natoms
+            W[natoms:] = (1.0 - weight_solute) / (Pr.shape[0] - natoms)
+
         # for solute solvent alignement, compute RMSD without Kabsch
         if nsatoms and reorder and not final_kabsch:
-            distmat.append(rmsd.rmsd(Pr, Q))
+            if weight_solute:
+                diff = Pr - Q
+                distmat.append(
+                    np.sqrt(np.dot(W, np.sum(diff * diff, axis=1)) / Pr.shape[0])
+                )
+            else:
+                distmat.append(rmsd.rmsd(Pr, Q))
         else:
-            distmat.append(rmsd.kabsch_rmsd(Pr, Q))
+            if weight_solute:
+                distmat.append(rmsd.kabsch_weighted_rmsd(Pr, Q, W))
+            else:
+                distmat.append(rmsd.kabsch_rmsd(Pr, Q))
 
     return distmat

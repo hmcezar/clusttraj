@@ -23,7 +23,9 @@ def test_compute_distmat_line(options_dict, clust_opt, first_conf_traj, test_dis
         clust_opt.trajfile,
         clust_opt.no_hydrogen,
         None,
+        clust_opt.reorder_solvent_only,
         clust_opt.solute_natoms,
+        clust_opt.weight_solute,
         clust_opt.reorder_excl,
         clust_opt.final_kabsch,
     )
@@ -33,6 +35,35 @@ def test_compute_distmat_line(options_dict, clust_opt, first_conf_traj, test_dis
     assert len(line) == 2
     assert line[0] == pytest.approx(test_distmat[0], abs=1e-8)
     assert line[1] == pytest.approx(test_distmat[1], abs=1e-8)
+
+
+def test_compute_distmat_line_reorder_weight_solute(
+    options_dict, clust_opt, first_conf_traj
+):
+    # test just the options
+    # TODO: need distmat to check
+    clust_opt.reorder_alg = "hungarian"
+    clust_opt.reorder_solvent_only = True
+    clust_opt.solute_natoms = 17
+    clust_opt.weight_solute = 0.8
+    clust_opt.reorder_excl = [1, 2, 3]
+    clust_opt.final_kabsch = True
+    clust_opt.no_hydrogen = False
+
+    line = compute_distmat_line(
+        0,
+        get_mol_info(first_conf_traj),
+        clust_opt.trajfile,
+        clust_opt.no_hydrogen,
+        None,
+        clust_opt.reorder_solvent_only,
+        clust_opt.solute_natoms,
+        clust_opt.weight_solute,
+        clust_opt.reorder_excl,
+        clust_opt.final_kabsch,
+    )
+
+    assert len(line) == 2
 
 
 def test_build_distance_matrix(clust_opt, test_distmat):

@@ -35,6 +35,7 @@ class ClustOptions:
     ] = None
     out_conf_fmt: str = None
     reorder: bool = None
+    reorder_solvent_only: bool = None
     exclusions: bool = None
     no_hydrogen: bool = None
     input_distmat: bool = None
@@ -53,6 +54,7 @@ class ClustOptions:
     out_conf_name: str = None
     summary_name: str = None
     solute_natoms: int = None
+    weight_solute: float = None
     reorder_excl: np.ndarray = None
     optimal_cut: np.ndarray = None
     verbose: bool = None
@@ -97,10 +99,16 @@ class ClustOptions:
         # reordering options
         if self.reorder:
             if self.solute_natoms:
-                return_str += "\nUsing solute-solvent reordering\n"
+                return_str += "\nUsing solute-solvent adjustment/reordering\n"
                 if self.final_kabsch:
                     return_str += "Using final Kabsch rotation before computing RMSD\n"
                 return_str += f"Number of solute atoms: {self.solute_natoms}\n"
+                if self.weight_solute:
+                    return_str += f"Weight of the solute atoms: {self.weight_solute}\n"
+                else:
+                    return_str += "Unweighted RMSD according to solute/solvent.\n"
+                if self.reorder_solvent_only:
+                    return_str += "Reordering only solvent atoms\n"
             else:
                 return_str += "\nReordering all atom at the same time\n"
 
@@ -275,6 +283,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         help="list of atoms that are ignored when reordering",
     )
     parser.add_argument(
+        "-rs",
+        "--reorder-solvent-only",
+        action="store_true",
+        help="reorder only the solvent atoms",
+    )
+    parser.add_argument(
         "--reorder-alg",
         action="store",
         default="hungarian",
@@ -287,6 +301,13 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         metavar="NATOMS",
         type=check_positive,
         help="number of solute atoms, to ignore these atoms in the reordering process",
+    )
+    parser.add_argument(
+        "-ws",
+        "--weight-solute",
+        metavar="WEIGHT SOLUTE",
+        type=float,
+        help="weight of the solute atoms in the RMSD calculation",
     )
     parser.add_argument(
         "-odl",
@@ -525,6 +546,20 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
             "The list of atoms to exclude for reordering only makes sense if reordering is enabled. Ignoring the list."
         )
 
+    if args.reorder_solvent_only and not args.natoms_solute:
+        parser.error(
+            "You must specify the number of solute atoms with -ns to use the -rs option."
+        )
+
+    if args.weight_solute and not args.natoms_solute:
+        parser.error(
+            "You must specify the number of solute atoms with -ns to use the -ws option."
+        )
+
+    if args.weight_solute:
+        if args.weight_solute < 0.0 or args.weight_solute > 1.0:
+            parser.error("The weight of the solute atoms must be between 0 and 1.")
+
     return parse_args(args)
 
 
@@ -544,6 +579,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
 
     options_dict = {
         "solute_natoms": args.natoms_solute,
+        "weight_solute": args.weight_solute,
         "reorder_excl": (
             np.asarray([x - 1 for x in args.reorder_exclusions], np.int32)
             if args.reorder_exclusions
@@ -552,6 +588,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "exclusions": bool(args.reorder_exclusions),
         "reorder_alg_name": args.reorder_alg,
         "reorder_alg": None,
+        "reorder_solvent_only": bool(args.reorder_solvent_only),
         "reorder": bool(args.reorder),
         "input_distmat": bool(args.input),
         "distmat_name": args.outputdistmat if not args.input else args.input,
@@ -612,7 +649,9 @@ def save_clusters_config(
     reorder: Union[
         Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
     ],
+    reorder_solvent_only: bool,
     nsatoms: int,
+    weight_solute: float,
     outbasename: str,
     outfmt: str,
     reorderexcl: np.ndarray,
@@ -763,7 +802,7 @@ def save_clusters_config(
                 p_all = np.dot(p_all, U)
 
                 # reorder solute atoms
-                if reorder:
+                if reorder and not reorder_solvent_only:
                     # find the solute atoms that are not excluded
                     soluexcl = np.where(reorderexcl < natoms)
                     soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
@@ -807,35 +846,6 @@ def save_clusters_config(
                     P = np.dot(P, U)
                     p_all = np.dot(p_all, U)
 
-                    # consider only the solvent atoms in the reorder (without exclusions)
-                    # solvexcl = np.where(reorderexcl >= natoms)
-                    # solvview = np.delete(np.arange(natoms, len(P)), reorderexcl[solvexcl])
-                    # Pview = P[solvview]
-                    # Paview = Pa[solvview]
-
-                    # # reorder just these atoms
-                    # prr = reorder(Qa[solvview], Paview, Q[solvview], Pview)
-                    # Pview = Pview[prr]
-                    # Paview = Paview[prr]
-                    # # build the total molecule with the reordered atoms
-                    # whereins = np.where(
-                    #     np.isin(np.arange(natoms, len(P)), reorderexcl[solvexcl]) == True
-                    # )
-                    # Psolv = np.insert(
-                    #     Pview,
-                    #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                    #     P[reorderexcl[solvexcl]],
-                    #     axis=0,
-                    # )
-                    # Pasolv = np.insert(
-                    #     Paview,
-                    #     [x - whereins[0].tolist().index(x) for x in whereins[0]],
-                    #     Pa[reorderexcl[solvexcl]],
-                    #     axis=0,
-                    # )
-
-                    # Pr = np.concatenate((P[:natoms], Psolv))
-                    # Pra = np.concatenate((Pa[:natoms], Pasolv))
             else:
                 # Kabsch rotation
                 U = rmsd.kabsch(P, Q)
@@ -873,7 +883,16 @@ def save_clusters_config(
             else:
                 Pr = P
 
-            if nsatoms and reorder and not final_kabsch:
+            # compute the weights
+            if weight_solute and final_kabsch:
+                W = np.zeros(Pr.shape[0])
+                W[:natoms] = weight_solute / natoms
+                W[natoms:] = (1.0 - weight_solute) / (Pr.shape[0] - natoms)
+
+                R, T, _ = rmsd.kabsch_weighted(Q, Pr, W)
+                p_all = np.dot(p_all, R.T) + T
+
+            elif nsatoms and reorder and final_kabsch:
                 # rotate whole configuration (considering hydrogens even with noh)
                 U = rmsd.kabsch(Pr, Q)
                 p_all = np.dot(p_all, U)
