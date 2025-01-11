@@ -267,9 +267,7 @@ def compute_distmat_line(
         if nsatoms and reorder and not final_kabsch:
             if weight_solute:
                 diff = Pr - Q
-                distmat.append(
-                    np.sqrt(np.dot(W, np.sum(diff * diff, axis=1)) / Pr.shape[0])
-                )
+                distmat.append(np.sqrt(np.dot(W, np.sum(diff * diff, axis=1))))
             else:
                 distmat.append(rmsd.rmsd(Pr, Q))
         else:
