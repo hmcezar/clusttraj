@@ -291,9 +291,9 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     parser.add_argument(
         "--reorder-alg",
         action="store",
-        default="hungarian",
+        default="inertia-hungarian",
         metavar="METHOD",
-        help="select which reorder algorithm to use; hungarian (default), brute, distance, qml. Warning: brute is VERY slow)",
+        help="select which reorder algorithm to use; inertia-hungarian (default), hungarian, brute, distance, qml. Warning: brute is VERY slow",
     )
     parser.add_argument(
         "-ns",
@@ -396,7 +396,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     ]:
         parser.error(f"The method you selected with -m ({args.method}) is not valid.")
 
-    if args.reorder_alg not in ["hungarian", "brute", "distance", "qml"]:
+    if args.reorder_alg not in ["inertia-hungarian", "hungarian", "brute", "distance", "qml"]:
         parser.error(
             f"The reorder method you selected with --reorder-method ({args.reorder_alg}) is not valid."
         )

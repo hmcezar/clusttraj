@@ -1,5 +1,5 @@
 numpy
-rmsd>=1.6.0
+rmsd>=1.6.3
 scipy
 scikit-learn
 matplotlib
