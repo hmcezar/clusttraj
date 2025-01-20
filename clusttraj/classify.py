@@ -108,3 +108,49 @@ def classify_structures(
     np.savetxt(clust_opt.out_clust_name, clusters, fmt="%d")
 
     return Z, clusters
+
+
+def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.ndarray:
+    """Find the medoids of the clusters.
+
+    Args:
+        distmat: The distance matrix.
+        clusters: The clusters.
+
+    Returns:
+        The indices of the medoids.
+    """
+    n_clusters = len(np.unique(clusters))
+    medoids = np.zeros(n_clusters, dtype=int)
+
+    for i in range(1, n_clusters + 1):
+        indices = np.where(clusters == i)[0]
+        distmat_cluster = distmat[indices][:, indices]
+        medoids[i - 1] = indices[np.argmin(np.sum(distmat_cluster, axis=0))]
+
+    return medoids
+
+
+def sum_distances_from_medoids(distmat: np.ndarray, medoids: np.ndarray) -> np.ndarray:
+    """Sum the distances from the medoids.
+
+    Args:
+        distmat: The distance matrix.
+        medoids: The medoids.
+
+    Returns:
+        The sum of distances from the medoids.
+    """
+    return np.sum(distmat[medoids], axis=0)
+
+
+def sum_distmat(distmat: np.ndarray) -> np.ndarray:
+    """Sum the distance matrix.
+
+    Args:
+        distmat: The distance matrix.
+
+    Returns:
+        The sum of the distance matrix.
+    """
+    return np.sum(distmat)
