@@ -122,10 +122,11 @@ def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.
     """
     n_clusters = len(np.unique(clusters))
     medoids = np.zeros(n_clusters, dtype=int)
+    sq_distmat = squareform(distmat)
 
     for i in range(1, n_clusters + 1):
         indices = np.where(clusters == i)[0]
-        distmat_cluster = distmat[indices][:, indices]
+        distmat_cluster = sq_distmat[indices][:, indices]
         medoids[i - 1] = indices[np.argmin(np.sum(distmat_cluster, axis=0))]
 
     return medoids
