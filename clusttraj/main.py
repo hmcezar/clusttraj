@@ -107,9 +107,9 @@ def main(args: List[str] = None) -> None:
     medoids = find_medoids_from_clusters(distmat, clusters)
     outclust_str += "The index for the medoids are:\n"
     for medoid in medoids:
-        outclust_str += f"{medoid}\n"
+        outclust_str += f"{medoid} "
 
-    outclust_str += "\nThe cluster sizes are:\nCluster\tSize\n"
+    outclust_str += "\n\nThe cluster sizes are:\nCluster\tSize\n"
 
     labels, sizes = np.unique(clusters, return_counts=True)
     for label, size in zip(labels, sizes):
