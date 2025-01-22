@@ -131,19 +131,6 @@ def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.
     return medoids
 
 
-def sum_distances_from_medoids(distmat: np.ndarray, medoids: np.ndarray) -> np.ndarray:
-    """Sum the distances from the medoids.
-
-    Args:
-        distmat: The distance matrix.
-        medoids: The medoids.
-
-    Returns:
-        The sum of distances from the medoids.
-    """
-    return np.sum(distmat[medoids], axis=0)
-
-
 def sum_distmat(distmat: np.ndarray) -> np.ndarray:
     """Sum the distance matrix.
 
