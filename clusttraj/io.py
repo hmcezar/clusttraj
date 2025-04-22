@@ -20,6 +20,23 @@ if importlib.util.find_spec("qmllib"):
 else:
     has_qml = False
 
+header_string = """
+        __           __  __               _ 
+  _____/ /_  _______/ /_/ /__________ _  (_)
+ / ___/ / / / / ___/ __/ __/ ___/ __ `/ / / 
+/ /__/ / /_/ (__  ) /_/ /_/ /  / /_/ / / /  
+\___/_/\__,_/____/\__/\__/_/   \__,_/_/ /   
+                                   /___/    
+
+A solvent-informed tool for clustering trajectories.
+
+Rafael B. Ribeiro and Henrique M. Cezar
+
+If you use this package, please cite:
+
+Ribeiro, R. B. & Cezar, H. M. clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling.
+Preprint at https://doi.org/10.48550/ARXIV.2504.14978 (2025)
+"""
 
 @dataclass
 class ClustOptions:
@@ -78,7 +95,8 @@ class ClustOptions:
         Returns:
             str: The string representation of the ClustOptions object.
         """
-        return_str = "\nFull command: " + " ".join(sys.argv)
+        return_str = header_string
+        return_str += "\nFull command: " + " ".join(sys.argv)
 
         # main parameters
         return_str += f"\n\nClusterized from trajectory file: {self.trajfile}\n"
@@ -166,6 +184,7 @@ class Logger:
         cls.ch.setFormatter(cls.formatter)
         cls.logger.addHandler(cls.fh)
         cls.logger.addHandler(cls.ch)
+        cls.logger.info(header_string)
 
 
 def check_positive(value: str) -> int:
@@ -213,7 +232,9 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         argparse.Namespace: The parsed command line arguments.
     """
     parser = argparse.ArgumentParser(
-        description="Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition."
+        prog="clusttraj",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=header_string
     )
 
     parser.add_argument(
