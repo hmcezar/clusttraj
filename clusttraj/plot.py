@@ -179,17 +179,23 @@ def plot_tsne(
         None
     """
 
+    sqdistmat = squareform(distmat)
+
+    if sqdistmat.shape[0] > 30:
+        perplexity = 30
+    else:
+        perplexity = sqdistmat.shape[0] - 1
     # Initialize the tSNE model
     tsne = manifold.TSNE(
         n_components=2,
-        perplexity=30,
+        perplexity=perplexity,
         learning_rate=200,
         random_state=666,
         n_jobs=clust_opt.n_workers,
     )
 
     # Perform the t-SNE and get the 2D representation
-    coords = tsne.fit_transform(squareform(distmat))
+    coords = tsne.fit_transform(sqdistmat)
 
     # Define a list of unique colors for each cluster
     unique_clusters = np.unique(clusters)
