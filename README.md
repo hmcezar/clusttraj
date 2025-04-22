@@ -1,5 +1,6 @@
 # clusttraj - Solvent-Informed Clustering Tool of Trajectories with Python
 ![clusttraj logo](imgs/logo.png)
+
 [![License: GPL v3](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.html) ![build](https://github.com/hmcezar/clusttraj/actions/workflows/ci.yml/badge.svg) [![docs](https://github.com/hmcezar/clusttraj/actions/workflows/documentation.yml/badge.svg)](https://hmcezar.github.io/clusttraj/) [![codecov](https://codecov.io/gh/hmcezar/clusttraj/graph/badge.svg?token=DYOKR4JZEN)](https://codecov.io/gh/hmcezar/clusttraj) [![PyPI version](https://badge.fury.io/py/clusttraj.svg)](https://badge.fury.io/py/clusttraj)
 
 -----------
