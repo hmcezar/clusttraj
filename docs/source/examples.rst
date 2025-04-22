@@ -43,7 +43,7 @@ up to a certain number, `e.g.`, 2.0 Angstrons:
 	
 As a result, we obtained 4 output files, `i.e.`, ``distmat.npy``, ``clusters.dat``, ``clusters.out`` and ``clusttraj.log``.
 
-- ``distmat.npy`` file has the condensed distance matrix in the ``numpy`` file format.
+- ``distmat.npy`` file has the condensed RMSD matrix in the ``numpy`` file format.
 
 - ``clusters.dat`` file has the labels of each configuration in the configurations file.
 
@@ -75,7 +75,7 @@ As a result, we obtained 4 output files, `i.e.`, ``distmat.npy``, ``clusters.dat
 	RMSD criterion: 2.0
 	Ignoring hydrogens?: False
 
-	Distance matrix was written in: distmat.npy
+	RMSD matrix was written in: distmat.npy
 	The classification of each configuration was written in: clusters.dat
 	A total 100 snapshots were read and 3 cluster(s) was(were) found.
 	The cluster sizes are:
@@ -89,9 +89,9 @@ As a result, we obtained 4 output files, `i.e.`, ``distmat.npy``, ``clusters.dat
 .. code-block:: console
 
 	$ cat clusttraj.log
-	2024-12-10 20:03:47,369 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+	2024-12-10 20:03:47,369 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-	2024-12-10 20:03:49,416 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+	2024-12-10 20:03:49,416 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 	2024-12-10 20:03:49,418 INFO     [classify.py:97] <classify_structures> Clustering using 'average' method to join the clusters
 
@@ -118,11 +118,11 @@ clustering procedure. Further details can be found `here <LINK-DO-PAPER>`_.
 
 	$ python -m clusttraj h2o_traj.xyz -ss -i distmat.npy -p
 
-Since we already computed the distance matrix, we can provide it as 
+Since we already computed the RMSD matrix, we can provide it as 
 input using the ``-i`` flag. Additionally, the ``-p`` flag generates 
 3 new output files for visualization.
 
-- ``clusters_mds.pdf`` plots the multidimensional scaling (MDS) of the distance matrix.
+- ``clusters_mds.pdf`` plots the multidimensional scaling (MDS) of the RMSD matrix.
 
 .. image:: images/average_full_mds.pdf
 	:align: center
@@ -146,7 +146,7 @@ with the corresponding RMSD threshold:
 .. code-block:: console
 	
 	$ cat clusttraj.log
-	2024-12-10 20:06:50,323 INFO     [distmat.py:28] <get_distmat> Reading condensed distance matrix from distmat.npy
+	2024-12-10 20:06:50,323 INFO     [distmat.py:28] <get_distmat> Reading condensed RMSD matrix from distmat.npy
 
 	2024-12-10 20:06:50,324 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
 
@@ -196,7 +196,7 @@ From the log file:
 	$ tail -n 22 clusttraj.log
 	2024-12-10 20:23:31,014 INFO     [main.py:126] <main> Total wall time: 2.051024 s
 
-	2024-12-10 20:24:58,651 INFO     [distmat.py:28] <get_distmat> Reading condensed distance matrix from distmat.npy
+	2024-12-10 20:24:58,651 INFO     [distmat.py:28] <get_distmat> Reading condensed RMSD matrix from distmat.npy
 
 	2024-12-10 20:24:58,652 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'ward' method to join the clusters
 
@@ -229,7 +229,7 @@ To adopt the ``median`` method we can run:
 .. code-block:: console
 
 	$ python -m clusttraj h2o_traj.xyz -ss -i distmat.npy -p -m median -f 
-	2024-12-10 20:27:55,765 INFO     [distmat.py:28] <get_distmat> Reading condensed distance matrix from distmat.npy
+	2024-12-10 20:27:55,765 INFO     [distmat.py:28] <get_distmat> Reading condensed RMSD matrix from distmat.npy
 
 	2024-12-10 20:27:55,766 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'median' method to join the clusters
 
@@ -281,9 +281,9 @@ was reduced from 0.217 to 0.119:
 .. code-block:: console
 
 	$ python -m clusttraj h2o_traj.xyz -ss -p -m average -e -f
-	2024-12-10 20:44:05,214 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+	2024-12-10 20:44:05,214 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-	2024-12-10 20:44:07,216 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+	2024-12-10 20:44:07,216 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 	2024-12-10 20:44:07,217 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
 
@@ -341,9 +341,9 @@ considering the first water molecule as the solute:
 .. code-block:: console
 
 	$ python -m clusttraj h2o_traj.xyz -ss -p -m average -e -f -ns 3
-	2024-12-10 20:46:41,192 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+	2024-12-10 20:46:41,192 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-	2024-12-10 20:46:43,383 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+	2024-12-10 20:46:43,383 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 	2024-12-10 20:46:43,385 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
 
@@ -410,9 +410,9 @@ run the program:
 .. code-block:: console
 
 	$ clusttraj olig_solv.gro -m average -ss -p --metrics
-	2024-12-12 16:13:01,490 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+	2024-12-12 16:13:01,490 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-	2024-12-12 16:13:43,838 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+	2024-12-12 16:13:43,838 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 	2024-12-12 16:13:43,840 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
 
@@ -460,9 +460,9 @@ atoms in the ``-ns`` flag, to be ignored during the reordering process.
 .. code-block:: console
 
 	$ clusttraj olig_solv.gro -m average -ss -p --metrics -e -ns 702 -f
-	2024-12-12 16:09:08,619 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+	2024-12-12 16:09:08,619 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-	2024-12-12 16:12:08,573 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+	2024-12-12 16:12:08,573 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 	2024-12-12 16:12:08,576 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
 
@@ -513,9 +513,9 @@ one can perform the final Kabsch rotation by running:
 .. code-block:: console
 
 	$ clusttraj olig_solv.gro -m average -ss -p --metrics -e -ns 702 -f --final-kabsch
-	2024-12-12 16:35:25,405 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+	2024-12-12 16:35:25,405 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-	2024-12-12 16:38:24,715 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+	2024-12-12 16:38:24,715 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 	2024-12-12 16:38:24,718 INFO     [classify.py:27] <classify_structures_silhouette> Clustering using 'average' method to join the clusters
 

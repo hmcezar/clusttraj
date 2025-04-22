@@ -38,13 +38,13 @@ def main(args: List[str] = None) -> None:
     # get ClustOptions class with parsed arguments
     clust_opt = configure_runtime(args)
 
-    # get the distance matrix
+    # get the RMSD matrix
     start_time = time.monotonic()
     distmat = get_distmat(clust_opt)
     end_time = time.monotonic()
     if clust_opt.verbose:
         Logger.logger.info(
-            f"Time spent computing (or loading) distance matrix: {end_time - start_time:.6f} s\n"
+            f"Time spent computing (or loading) RMSD matrix: {end_time - start_time:.6f} s\n"
         )
 
     # perform the clustering
@@ -102,7 +102,7 @@ def main(args: List[str] = None) -> None:
     # print the cluster sizes and medoid info
     outclust_str = f"A total {len(clusters)} snapshots were read and {max(clusters)} cluster(s) was(were) found.\n"
 
-    outclust_str += f"\nThe total sum of the distance matrix is {sum_distmat(distmat)}\n"
+    outclust_str += f"\nThe total sum of the RMSD matrix is {sum_distmat(distmat)}\n"
 
     medoids = find_medoids_from_clusters(distmat, clusters)
     outclust_str += "The index for the medoids are:\n"

@@ -141,9 +141,9 @@ class ClustOptions:
 
         # write file names
         if self.input_distmat:
-            return_str += f"\nDistance matrix was read from: {self.distmat_name}\n"
+            return_str += f"\nRMSD matrix was read from: {self.distmat_name}\n"
         else:
-            return_str += f"\nDistance matrix was written in: {self.distmat_name}\n"
+            return_str += f"\nRMSD matrix was written in: {self.distmat_name}\n"
 
         return_str += f"The classification of each configuration was written in: {self.out_clust_name}\n"
         if self.save_confs:
@@ -256,7 +256,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         metavar="NPROCS",
         type=check_positive,
         default=4,
-        help="defines the number of processes used to compute the distance matrix and multidimensional representation (default = 4)",
+        help="defines the number of processes used to compute the RMSD matrix and multidimensional representation (default = 4)",
     )
     parser.add_argument(
         "-n",
@@ -382,14 +382,14 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         "--input",
         type=extant_file,
         metavar="FILE",
-        help="file containing input distance matrix in condensed form (.npy format)",
+        help="file containing input RMSD matrix in condensed form (.npy format)",
     )
     io_group.add_argument(
         "-od",
         "--outputdistmat",
         metavar="FILE",
         default="distmat.npy",
-        help="file to store distance matrix in condensed form (default: distmat.npy)",
+        help="file to store RMSD matrix in condensed form (default: distmat.npy)",
     )
 
     if len(sys.argv) == 0:
@@ -534,7 +534,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
 
     if not args.input and os.path.exists(args.outputdistmat) and not args.force:
         raise FileExistsError(
-            f"File {args.outputdistmat} already exists, specify a new filename with the -od command option or use the -f option. If you are trying to read the distance matrix from a file, use the -i option."
+            f"File {args.outputdistmat} already exists, specify a new filename with the -od command option or use the -f option. If you are trying to read the RMSD matrix from a file, use the -i option."
         )
 
     if os.path.exists(args.outputclusters) and not args.force:
@@ -568,7 +568,7 @@ def save_clusters_config(
     Args:
         trajfile: The trajectory file path.
         clusters: An array containing cluster labels.
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
         noh: Flag indicating whether to exclude hydrogen atoms.
         reorder (Union[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None]):
             A function to reorder the atoms, if necessary.
@@ -582,7 +582,7 @@ def save_clusters_config(
     Returns:
         None
     """
-    # complete distance matrix
+    # complete RMSD matrix
     sqdistmat = squareform(distmat)
 
     for cnum in range(1, max(clusters) + 1):

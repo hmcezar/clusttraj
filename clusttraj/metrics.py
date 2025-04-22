@@ -19,7 +19,7 @@ def compute_metrics(
     """Compute metrics to assess the performance of the clustering procedure.
 
         Args:
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
         z_matrix (np.ndarray): The Z-matrix from hierarchical clustering procedure.
         clusters (np.ndarray): The cluster classifications for each sample.
 

@@ -1,4 +1,4 @@
-"""Functions to perform clustering based on the distance matrix."""
+"""Functions to perform clustering based on the RMSD matrix."""
 
 import scipy.cluster.hierarchy as hcl
 from scipy.spatial.distance import squareform
@@ -16,7 +16,7 @@ def classify_structures_silhouette(
 
     Args:
         clust_opt: The clustering options.
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
         dstep (float, optional): Interval between threshold values, defaults to 0.1
 
     Returns:
@@ -84,11 +84,11 @@ def classify_structures_silhouette(
 def classify_structures(
     clust_opt: ClustOptions, distmat: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Classify structures based on clustering options and distance matrix.
+    """Classify structures based on clustering options and RMSD matrix.
 
     Args:
         clust_opt: The clustering options.
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
 
     Returns:
         A tuple containing the linkage matrix and the clusters.
@@ -114,7 +114,7 @@ def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.
     """Find the medoids of the clusters.
 
     Args:
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
         clusters: The clusters.
 
     Returns:
@@ -133,12 +133,12 @@ def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.
 
 
 def sum_distmat(distmat: np.ndarray) -> np.ndarray:
-    """Sum the distance matrix.
+    """Sum the RMSD matrix.
 
     Args:
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
 
     Returns:
-        The sum of the distance matrix.
+        The sum of the RMSD matrix.
     """
     return np.sum(distmat)
