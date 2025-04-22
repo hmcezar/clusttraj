@@ -35,9 +35,7 @@ def get_distmat(clust_opt: ClustOptions) -> np.ndarray:
             f"Calculating RMSD matrix using {clust_opt.n_workers} threads\n"
         )
         distmat = build_distance_matrix(clust_opt)
-        Logger.logger.info(
-            f"Saving condensed RMSD matrix to {clust_opt.distmat_name}\n"
-        )
+        Logger.logger.info(f"Saving condensed RMSD matrix to {clust_opt.distmat_name}\n")
         np.save(clust_opt.distmat_name, distmat)
 
     return distmat
