@@ -38,6 +38,7 @@ Ribeiro, R. B. & Cezar, H. M. clusttraj: A Solvent-Informed Clustering Tool for 
 Preprint at https://doi.org/10.48550/ARXIV.2504.14978 (2025)
 """
 
+
 @dataclass
 class ClustOptions:
     """Class to store the options for clustering."""
@@ -234,7 +235,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     parser = argparse.ArgumentParser(
         prog="clusttraj",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=header_string
+        description=header_string,
     )
 
     parser.add_argument(
