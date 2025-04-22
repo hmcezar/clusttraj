@@ -1,0 +1,39 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: clusttraj
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Rafael B.
+    family-names: Ribeiro
+    email: rafael.bicudo.ribeiro@usp.br
+    affiliation: University of São Paulo
+    orcid: 'https://orcid.org/0000-0001-8582-7362'
+  - given-names: Henrique M.
+    family-names: Cezar
+    email: h.m.cezar@kjemi.uio.no
+    affiliation: University of Oslo
+    orcid: 'https://orcid.org/0000-0002-7553-0482'
+identifiers:
+  - type: doi
+    value: 10.48550/arXiv.2504.14978
+    description: Manuscript with the software description
+repository-code: 'https://github.com/hmcezar/clusttraj'
+url: 'https://hmcezar.github.io/clusttraj/'
+abstract: >-
+  clusttraj is a solvent-informed clustering package that
+  fixes inflated Root Mean Squared Deviation (RMSD) values
+  by finding the optimal pairing between configurations. The
+  program combines reordering schemes with the Kabsch
+  algorithm to minimize the RMSD of molecular configurations
+  before running a hierarchical clustering protocol.
+keywords:
+  - clustering
+  - python
+  - molecular dynamics
+  - Monte Carlo
+license: GPL-3.0-or-later
