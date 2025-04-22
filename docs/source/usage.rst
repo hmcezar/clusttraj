@@ -36,24 +36,24 @@ The ``-e`` or ``--reorder`` option, tries to reorder the atoms to increase the o
 
 The reorder option can be used together with the ``-ns`` option, that receives an integer with the number of atoms of the solute. When the ``-ns`` option is used, the script will first superpose the configurations considering only the solute atoms and then reorder considering only the solvent atoms (the atoms in the input that are after the ns atoms). For solute-solvent systems, the use of ``-ns`` is strongly encouraged.
 
-To use an already saved distance matrix, specify the file containing the distance matrix in the condensed form with the ``-i`` option. The options ``-i`` and ``-od`` are mutually exclusive, since ``-od`` specifies the name of the output distance matrix file to be stored.
+To use an already saved RMSD matrix, specify the file containing the RMSD matrix in the condensed form with the ``-i`` option. The options ``-i`` and ``-od`` are mutually exclusive, since ``-od`` specifies the name of the output RMSD matrix file to be stored.
 
 The ``-p`` flag specifies that pdf plots of some information will be saved.
 In this case, the filenames will start with the same name used for the clusters output (specified with the ``-oc`` option). When the option is used, the following is saved to disk:
 
-- A plot with the `multidimensional scaling <http://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling>`_ representation of the distance matrix, colored with the clustering information
+- A plot with the `multidimensional scaling <http://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling>`_ representation of the RMSD matrix, colored with the clustering information
 - The `dendrogram <https://en.wikipedia.org/wiki/Dendrogram>`_
 - The cluster classification evolution, that shows how during the trajectory, the configurations were classificated. This might be useful to analyze the quality of your sampling.
 
 If the ``-cc`` option is specified (along with a format supported by OpenBabel) the configurations belonging to the same cluster are superposed and printed to a file.
 The superpositions are done considering the `medoid <https://en.wikipedia.org/wiki/Medoid>`_ of the cluster as reference. The medoid is printed as the first structure in the clustered strcuture files.
 
-If you did not consider the hydrogens while building the distance matrix, remember to use the ``-n`` option even if with ``-i`` in this case, since the superposition is done considering the flag.
+If you did not consider the hydrogens while building the RMSD matrix, remember to use the ``-n`` option even if with ``-i`` in this case, since the superposition is done considering the flag.
 
 Threading and parallelization
 -----------------------------
 
-The ``-np`` option specified the number of processes to be used to calculate the distance matrix. 
+The ``-np`` option specified the number of processes to be used to calculate the RMSD matrix. 
 
 Since this is the most time consuming task of the clustering, and due to being a embarassingly parallel problem, it was parallelized using a Python `multiprocessing pool <https://docs.python.org/3/library/multiprocessing.html>`_.
 The default value for ``-np`` is 4.
