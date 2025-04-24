@@ -11,8 +11,8 @@ Different strategies can be used in order to compute distances that correspond t
 Notice that calculating the RMSD matrix might take some time depending on how long your trajectories are and how many atoms there are in each configuration.
 The RMSD matrix can also be read from a file (with the `-i` option) to avoid recalculating it every time you want to change the linkage method (with`-m`) or distance of the clustering.
 
-## Dependencies
-The following libraries are required:
+## Installation
+The following libraries are used by clusttraj:
 - [argparse](https://docs.python.org/3/library/argparse.html)
 - [NumPy](http://www.numpy.org/)
 - [OpenBabel](http://openbabel.org/)
@@ -26,7 +26,7 @@ We also have [qmllib](https://github.com/qmlcode/qmllib) as an optional dependen
 For `openbabel`, we use the `pip` package `openbabel-wheel` which provides pre-built `openbabel` packages for Linux and MacOS.
 More details can be seen in the [projects' GitHub page](https://github.com/njzjz/openbabel-wheel).
 
-You can install the package using `pip`
+You can install clusttraj using `pip`
 ```bash
 pip install clusttraj
 ``` 
