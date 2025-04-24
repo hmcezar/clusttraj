@@ -36,6 +36,12 @@ If you want to use the `qmllib` reordering algorithm, you can install it with:
 pip install clusttraj[qml]
 ```
 
+## Citation
+If you use clusttraj in your academic work, please cite the [preprint on arXiv](https://arxiv.org/abs/2504.14978):
+> Rafael Bicudo Ribeiro and Henrique Musseli Cezar </br>
+> "clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling" </br>
+> https://doi.org/10.48550/arXiv.2504.14978
+
 ## Usage
 To see all the options run the script with the `-h` command option:
 ```bash
