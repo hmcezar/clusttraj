@@ -1,17 +1,18 @@
-# ClustTraj - A Python package for clustering similar structures from molecular simulations
+# clusttraj - Solvent-Informed Clustering of Trajectories with Python
+![clusttraj logo](imgs/logo.png)
 
 [![License: GPL v3](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.html) ![build](https://github.com/hmcezar/clusttraj/actions/workflows/ci.yml/badge.svg) [![docs](https://github.com/hmcezar/clusttraj/actions/workflows/documentation.yml/badge.svg)](https://hmcezar.github.io/clusttraj/) [![codecov](https://codecov.io/gh/hmcezar/clusttraj/graph/badge.svg?token=DYOKR4JZEN)](https://codecov.io/gh/hmcezar/clusttraj) [![PyPI version](https://badge.fury.io/py/clusttraj.svg)](https://badge.fury.io/py/clusttraj)
 
 -----------
-This Python package receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with the Kabsch algorithm and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
+This Python package receives a molecular dynamics or Monte Carlo trajectory (in .pdb, .xyz or any format supported by OpenBabel), finds the minimum RMSD between the structures with label reordering and optimal alignment, and performs agglomerative clustering (a kind of unsupervised machine learning) to classify similar conformations. 
 
-What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a distance matrix (stored in the condensed form).
+What the script does is to calculate the distance (using the minimum RMSD) between each configuration of the trajectory, building a RMSD matrix (stored in the condensed form).
 Different strategies can be used in order to compute distances that correspond to the expected minimum RMSD, such as atom reordering or stepwise alignments.
-Notice that calculating the distance matrix might take some time depending on how long your trajectories are and how many atoms there are in each configuration.
-The distance matrix can also be read from a file (with the `-i` option) to avoid recalculating it every time you want to change the linkage method (with`-m`) or distance of the clustering.
+Notice that calculating the RMSD matrix might take some time depending on how long your trajectories are and how many atoms there are in each configuration.
+The RMSD matrix can also be read from a file (with the `-i` option) to avoid recalculating it every time you want to change the linkage method (with`-m`) or distance of the clustering.
 
-## Dependencies
-The following libraries are required:
+## Installation
+The following libraries are used by clusttraj:
 - [argparse](https://docs.python.org/3/library/argparse.html)
 - [NumPy](http://www.numpy.org/)
 - [OpenBabel](http://openbabel.org/)
@@ -25,7 +26,7 @@ We also have [qmllib](https://github.com/qmlcode/qmllib) as an optional dependen
 For `openbabel`, we use the `pip` package `openbabel-wheel` which provides pre-built `openbabel` packages for Linux and MacOS.
 More details can be seen in the [projects' GitHub page](https://github.com/njzjz/openbabel-wheel).
 
-You can install the package using `pip`
+You can install clusttraj using `pip`
 ```bash
 pip install clusttraj
 ``` 
@@ -34,6 +35,12 @@ If you want to use the `qmllib` reordering algorithm, you can install it with:
 ```bash
 pip install clusttraj[qml]
 ```
+
+## Citation
+If you use clusttraj in your academic work, please cite the [preprint on arXiv](https://arxiv.org/abs/2504.14978):
+> Rafael Bicudo Ribeiro and Henrique Musseli Cezar </br>
+> "clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling" </br>
+> https://doi.org/10.48550/arXiv.2504.14978
 
 ## Usage
 To see all the options run the script with the `-h` command option:
@@ -73,23 +80,23 @@ The reorder option can be used together with the `-ns` option, that receives an 
 When the `-ns` option is used, the script will first superpose the configurations considering only the solute atoms and then reorder considering only the solvent atoms (the atoms in the input that are after the ns atoms).
 For solute-solvent systems, the use of `-ns` is strongly encouraged.
 
-To use an already saved distance matrix, specify the file containing the distance matrix in the condensed form with the `-i` option.
+To use an already saved RMSD matrix, specify the file containing the RMSD matrix in the condensed form with the `-i` option.
 The options `-i` and `-od` are mutually exclusive.
 
 The `-p` flag specifies that pdf plots of some information will be saved.
 In this case, the filenames will start with the same name used for the clusters output (specified with the `-oc` option).
 When the option is used, the following is saved to disk:
-- A plot with the [multidimensional scaling](http://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling) representation of the distance matrix, colored with the clustering information
+- A plot with the [multidimensional scaling](http://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling) representation of the RMSD matrix, colored with the clustering information
 - The [dendrogram](https://en.wikipedia.org/wiki/Dendrogram)
 - The cluster classification evolution, that shows how during the trajectory, the configurations were classificated. This might be useful to analyze the quality of your sampling.
 
 If the `-cc` option is specified (along with a format supported by OpenBabel) the configurations belonging to the same cluster are superposed and printed to a file.
 The superpositions are done considering the [medoid](https://en.wikipedia.org/wiki/Medoid) of the cluster as reference.
 The medoid is printed as the first structure in the clustered strcuture files.
-If you did not consider the hydrogens while building the distance matrix, remember to use the `-n` option even if with `-i` in this case, since the superposition is done considering the flag.
+If you did not consider the hydrogens while building the RMSD matrix, remember to use the `-n` option even if with `-i` in this case, since the superposition is done considering the flag.
 
 ## Threading and parallelization
-The `-np` option specified the number of processes to be used to calculate the distance matrix.
+The `-np` option specified the number of processes to be used to calculate the RMSD matrix.
 Since this is the most time consuming task of the clustering, and due to being a embarassingly parallel problem, it was parallelized using a Python [multiprocessing pool](https://docs.python.org/3/library/multiprocessing.html).
 The default value for `-np` is 4.
 
@@ -109,9 +116,9 @@ The number of clusters that were found, as well as the number of members for eac
 Below there is an example of how this information is printed:
 ```
 $ clusttraj trajectory.xyz -rmsd 3.2 -np 4 -p -n -cc xyz
-2024-12-12 17:48:19,268 INFO     [distmat.py:34] <get_distmat> Calculating distance matrix using 4 threads
+2024-12-12 17:48:19,268 INFO     [distmat.py:34] <get_distmat> Calculating RMSD matrix using 4 threads
 
-2024-12-12 17:48:23,800 INFO     [distmat.py:38] <get_distmat> Saving condensed distance matrix to distmat.npy
+2024-12-12 17:48:23,800 INFO     [distmat.py:38] <get_distmat> Saving condensed RMSD matrix to distmat.npy
 
 2024-12-12 17:48:23,801 INFO     [classify.py:97] <classify_structures> Clustering using 'average' method to join the clusters
 
@@ -159,6 +166,6 @@ The dendrogram has an horizontal line plotted with it indicating the cutoff used
 The evolution of the classification with the trajectory looks like:
 ![Example evolution](imgs/example_evo.png)
 
-If you wish to use the distance matrix file to other uses, bear in mind that the matrix is stored in the condensed form, i.e., only the superior diagonal matrix is printed (not including the diagonal) in NumPy's `.npy` format.
+If you wish to use the RMSD matrix file to other uses, bear in mind that the matrix is stored in the condensed form, i.e., only the superior diagonal matrix is printed (not including the diagonal) in NumPy's `.npy` format.
 It means that if you have `N` structures in your trajectory, your file (specified with `-od` option, default filename `distmat.npy`) will have `N(N-1)/2` lines, with each line representing a distance.
 

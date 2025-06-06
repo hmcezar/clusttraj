@@ -11,7 +11,12 @@ import time
 from .io import Logger, configure_runtime, save_clusters_config
 from .distmat import get_distmat
 from .plot import plot_clust_evo, plot_dendrogram, plot_mds, plot_tsne
-from .classify import classify_structures, classify_structures_silhouette
+from .classify import (
+    classify_structures,
+    classify_structures_silhouette,
+    find_medoids_from_clusters,
+    sum_distmat,
+)
 from .metrics import compute_metrics
 
 
@@ -33,13 +38,13 @@ def main(args: List[str] = None) -> None:
     # get ClustOptions class with parsed arguments
     clust_opt = configure_runtime(args)
 
-    # get the distance matrix
+    # get the RMSD matrix
     start_time = time.monotonic()
     distmat = get_distmat(clust_opt)
     end_time = time.monotonic()
     if clust_opt.verbose:
         Logger.logger.info(
-            f"Time spent computing (or loading) distance matrix: {end_time - start_time:.6f} s\n"
+            f"Time spent computing (or loading) RMSD matrix: {end_time - start_time:.6f} s\n"
         )
 
     # perform the clustering
@@ -94,9 +99,17 @@ def main(args: List[str] = None) -> None:
         if clust_opt.verbose:
             Logger.logger.info(f"Time spent plotting: {end_time - start_time:.6f} s\n")
 
-    # print the cluster sizes
+    # print the cluster sizes and medoid info
     outclust_str = f"A total {len(clusters)} snapshots were read and {max(clusters)} cluster(s) was(were) found.\n"
-    outclust_str += "The cluster sizes are:\nCluster\tSize\n"
+
+    outclust_str += f"\nThe total sum of the RMSD matrix is {sum_distmat(distmat)}\n"
+
+    medoids = find_medoids_from_clusters(distmat, clusters)
+    outclust_str += "The index for the medoids are:\n"
+    for medoid in medoids:
+        outclust_str += f"{medoid} "
+
+    outclust_str += "\n\nThe cluster sizes are:\nCluster\tSize\n"
 
     labels, sizes = np.unique(clusters, return_counts=True)
     for label, size in zip(labels, sizes):

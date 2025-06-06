@@ -20,6 +20,24 @@ if importlib.util.find_spec("qmllib"):
 else:
     has_qml = False
 
+header_string = """
+        __           __  __               _ 
+  _____/ /_  _______/ /_/ /__________ _  (_)
+ / ___/ / / / / ___/ __/ __/ ___/ __ `/ / / 
+/ /__/ / /_/ (__  ) /_/ /_/ /  / /_/ / / /  
+\___/_/\__,_/____/\__/\__/_/   \__,_/_/ /   
+                                   /___/    
+
+A solvent-informed tool for clustering trajectories.
+
+Rafael B. Ribeiro and Henrique M. Cezar
+
+If you use this package, please cite:
+
+Ribeiro, R. B. & Cezar, H. M. clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling.
+Preprint at https://doi.org/10.48550/ARXIV.2504.14978 (2025)
+"""
+
 
 @dataclass
 class ClustOptions:
@@ -78,7 +96,8 @@ class ClustOptions:
         Returns:
             str: The string representation of the ClustOptions object.
         """
-        return_str = "\nFull command: " + " ".join(sys.argv)
+        return_str = header_string
+        return_str += "\nFull command: " + " ".join(sys.argv)
 
         # main parameters
         return_str += f"\n\nClusterized from trajectory file: {self.trajfile}\n"
@@ -122,9 +141,9 @@ class ClustOptions:
 
         # write file names
         if self.input_distmat:
-            return_str += f"\nDistance matrix was read from: {self.distmat_name}\n"
+            return_str += f"\nRMSD matrix was read from: {self.distmat_name}\n"
         else:
-            return_str += f"\nDistance matrix was written in: {self.distmat_name}\n"
+            return_str += f"\nRMSD matrix was written in: {self.distmat_name}\n"
 
         return_str += f"The classification of each configuration was written in: {self.out_clust_name}\n"
         if self.save_confs:
@@ -166,6 +185,7 @@ class Logger:
         cls.ch.setFormatter(cls.formatter)
         cls.logger.addHandler(cls.fh)
         cls.logger.addHandler(cls.ch)
+        cls.logger.info(header_string)
 
 
 def check_positive(value: str) -> int:
@@ -213,7 +233,9 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         argparse.Namespace: The parsed command line arguments.
     """
     parser = argparse.ArgumentParser(
-        description="Run a clustering analysis on a trajectory based on the minimal RMSD obtained with a Kabsch superposition."
+        prog="clusttraj",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=header_string,
     )
 
     parser.add_argument(
@@ -234,7 +256,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         metavar="NPROCS",
         type=check_positive,
         default=4,
-        help="defines the number of processes used to compute the distance matrix and multidimensional representation (default = 4)",
+        help="defines the number of processes used to compute the RMSD matrix and multidimensional representation (default = 4)",
     )
     parser.add_argument(
         "-n",
@@ -293,7 +315,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         action="store",
         default="hungarian",
         metavar="METHOD",
-        help="select which reorder algorithm to use; hungarian (default), brute, distance, qml. Warning: brute is VERY slow)",
+        help="select which reorder algorithm to use; hungarian (default), intertia-hungarian, brute, distance, qml. Warning: brute is VERY slow",
     )
     parser.add_argument(
         "-ns",
@@ -360,14 +382,14 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         "--input",
         type=extant_file,
         metavar="FILE",
-        help="file containing input distance matrix in condensed form (.npy format)",
+        help="file containing input RMSD matrix in condensed form (.npy format)",
     )
     io_group.add_argument(
         "-od",
         "--outputdistmat",
         metavar="FILE",
         default="distmat.npy",
-        help="file to store distance matrix in condensed form (default: distmat.npy)",
+        help="file to store RMSD matrix in condensed form (default: distmat.npy)",
     )
 
     if len(sys.argv) == 0:
@@ -380,6 +402,11 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     Logger.setup(args.log)
 
     # check input consistency
+    if os.path.splitext(args.trajectory_file)[1][1:] not in pybel.informats.keys():
+        parser.error(
+            f"The trajectory file format ({os.path.splitext(args.trajectory_file)[1][1:]}) is not supported."
+        )
+
     if args.method not in [
         "single",
         "complete",
@@ -391,7 +418,13 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
     ]:
         parser.error(f"The method you selected with -m ({args.method}) is not valid.")
 
-    if args.reorder_alg not in ["hungarian", "brute", "distance", "qml"]:
+    if args.reorder_alg not in [
+        "inertia-hungarian",
+        "hungarian",
+        "brute",
+        "distance",
+        "qml",
+    ]:
         parser.error(
             f"The reorder method you selected with --reorder-method ({args.reorder_alg}) is not valid."
         )
@@ -402,136 +435,7 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         )
 
     if args.clusters_configurations:
-        if args.clusters_configurations not in [
-            "acr",
-            "adf",
-            "adfout",
-            "alc",
-            "arc",
-            "bgf",
-            "box",
-            "bs",
-            "c3d1",
-            "c3d2",
-            "cac",
-            "caccrt",
-            "cache",
-            "cacint",
-            "can",
-            "car",
-            "ccc",
-            "cdx",
-            "cdxml",
-            "cht",
-            "cif",
-            "ck",
-            "cml",
-            "cmlr",
-            "com",
-            "copy",
-            "crk2d",
-            "crk3d",
-            "csr",
-            "cssr",
-            "ct",
-            "cub",
-            "cube",
-            "dmol",
-            "dx",
-            "ent",
-            "fa",
-            "fasta",
-            "fch",
-            "fchk",
-            "fck",
-            "feat",
-            "fh",
-            "fix",
-            "fpt",
-            "fract",
-            "fs",
-            "fsa",
-            "g03",
-            "g92",
-            "g94",
-            "g98",
-            "gal",
-            "gam",
-            "gamin",
-            "gamout",
-            "gau",
-            "gjc",
-            "gjf",
-            "gpr",
-            "gr96",
-            "gukin",
-            "gukout",
-            "gzmat",
-            "hin",
-            "inchi",
-            "inp",
-            "ins",
-            "jin",
-            "jout",
-            "mcdl",
-            "mcif",
-            "mdl",
-            "ml2",
-            "mmcif",
-            "mmd",
-            "mmod",
-            "mol",
-            "mol2",
-            "molden",
-            "molreport",
-            "moo",
-            "mop",
-            "mopcrt",
-            "mopin",
-            "mopout",
-            "mpc",
-            "mpd",
-            "mpqc",
-            "mpqcin",
-            "msi",
-            "msms",
-            "nw",
-            "nwo",
-            "outmol",
-            "pc",
-            "pcm",
-            "pdb",
-            "png",
-            "pov",
-            "pqr",
-            "pqs",
-            "prep",
-            "qcin",
-            "qcout",
-            "report",
-            "res",
-            "rsmi",
-            "rxn",
-            "sd",
-            "sdf",
-            "smi",
-            "smiles",
-            "sy2",
-            "t41",
-            "tdd",
-            "test",
-            "therm",
-            "tmol",
-            "txt",
-            "txyz",
-            "unixyz",
-            "vmol",
-            "xed",
-            "xml",
-            "xyz",
-            "yob",
-            "zin",
-        ]:
+        if args.clusters_configurations not in pybel.outformats.keys():
             parser.error(
                 f"The format you selected to save the clustered superposed configurations ({args.clusters_configurations}) is not valid."
             )
@@ -630,7 +534,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
 
     if not args.input and os.path.exists(args.outputdistmat) and not args.force:
         raise FileExistsError(
-            f"File {args.outputdistmat} already exists, specify a new filename with the -od command option or use the -f option. If you are trying to read the distance matrix from a file, use the -i option."
+            f"File {args.outputdistmat} already exists, specify a new filename with the -od command option or use the -f option. If you are trying to read the RMSD matrix from a file, use the -i option."
         )
 
     if os.path.exists(args.outputclusters) and not args.force:
@@ -664,7 +568,7 @@ def save_clusters_config(
     Args:
         trajfile: The trajectory file path.
         clusters: An array containing cluster labels.
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
         noh: Flag indicating whether to exclude hydrogen atoms.
         reorder (Union[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None]):
             A function to reorder the atoms, if necessary.
@@ -678,7 +582,7 @@ def save_clusters_config(
     Returns:
         None
     """
-    # complete distance matrix
+    # complete RMSD matrix
     sqdistmat = squareform(distmat)
 
     for cnum in range(1, max(clusters) + 1):

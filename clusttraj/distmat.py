@@ -1,4 +1,4 @@
-"""Functions to compute the distance matrix based on the provided
+"""Functions to compute the RMSD matrix based on the provided
 trajectory."""
 
 from openbabel import pybel
@@ -13,46 +13,44 @@ from typing import List, Union, Callable
 
 
 def get_distmat(clust_opt: ClustOptions) -> np.ndarray:
-    """Calculate or read a condensed distance matrix based on the given
+    """Calculate or read a condensed RMSD matrix based on the given
     clustering options.
 
     Args:
         clust_opt (ClustOptions): The clustering options.
 
     Returns:
-        np.ndarray: The condensed distance matrix.
+        np.ndarray: The condensed RMSD matrix.
     """
-    # check if distance matrix will be read from input or calculated
+    # check if RMSD matrix will be read from input or calculated
     # if a file is specified, read it (TODO: check if the matrix makes sense)
     if clust_opt.input_distmat:
         Logger.logger.info(
-            f"Reading condensed distance matrix from {clust_opt.distmat_name}\n"
+            f"Reading condensed RMSD matrix from {clust_opt.distmat_name}\n"
         )
         distmat = np.load(clust_opt.distmat_name)
-    # build a distance matrix already in the condensed form
+    # build a RMSD matrix already in the condensed form
     else:
         Logger.logger.info(
-            f"Calculating distance matrix using {clust_opt.n_workers} threads\n"
+            f"Calculating RMSD matrix using {clust_opt.n_workers} threads\n"
         )
         distmat = build_distance_matrix(clust_opt)
-        Logger.logger.info(
-            f"Saving condensed distance matrix to {clust_opt.distmat_name}\n"
-        )
+        Logger.logger.info(f"Saving condensed RMSD matrix to {clust_opt.distmat_name}\n")
         np.save(clust_opt.distmat_name, distmat)
 
     return distmat
 
 
 def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
-    """Compute the distance matrix.
+    """Compute the RMSD matrix.
 
     Args:
         clust_opt (ClustOptions): The options for clustering.
 
     Returns:
-        np.ndarray: The computed distance matrix.
+        np.ndarray: The computed RMSD matrix.
     """
-    # create iterator containing information to compute a line of the distance matrix
+    # create iterator containing information to compute a line of the RMSD matrix
     inputiterator = zip(
         itertools.count(),
         map(
@@ -71,10 +69,10 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
         itertools.repeat(clust_opt.final_kabsch),
     )
 
-    # create the pool with nprocs processes to compute the distance matrix in parallel
+    # create the pool with nprocs processes to compute the RMSD matrix in parallel
     p = multiprocessing.Pool(processes=clust_opt.n_workers)
 
-    # build the distance matrix in parallel
+    # build the RMSD matrix in parallel
     ldistmat = p.starmap(compute_distmat_line, inputiterator)
 
     return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
@@ -109,7 +107,7 @@ def compute_distmat_line(
         final_kabsch (bool): Whether to perform the final Kabsch rotation or not.
 
     Returns:
-        List[float]: The distance matrix.
+        List[float]: The RMSD matrix.
     """  # noqa: E501
     # unpack q_info tuple
     q_atoms, q_all = q_info
@@ -119,7 +117,7 @@ def compute_distmat_line(
     if noh:
         natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
 
-    # initialize distance matrix
+    # initialize RMSD matrix
     distmat = []
 
     for idx2, mol2 in enumerate(
@@ -267,9 +265,7 @@ def compute_distmat_line(
         if nsatoms and reorder and not final_kabsch:
             if weight_solute:
                 diff = Pr - Q
-                distmat.append(
-                    np.sqrt(np.dot(W, np.sum(diff * diff, axis=1)) / Pr.shape[0])
-                )
+                distmat.append(np.sqrt(np.dot(W, np.sum(diff * diff, axis=1))))
             else:
                 distmat.append(rmsd.rmsd(Pr, Q))
         else:

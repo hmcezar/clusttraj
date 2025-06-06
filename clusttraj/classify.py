@@ -1,4 +1,4 @@
-"""Functions to perform clustering based on the distance matrix."""
+"""Functions to perform clustering based on the RMSD matrix."""
 
 import scipy.cluster.hierarchy as hcl
 from scipy.spatial.distance import squareform
@@ -16,7 +16,7 @@ def classify_structures_silhouette(
 
     Args:
         clust_opt: The clustering options.
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
         dstep (float, optional): Interval between threshold values, defaults to 0.1
 
     Returns:
@@ -84,11 +84,11 @@ def classify_structures_silhouette(
 def classify_structures(
     clust_opt: ClustOptions, distmat: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Classify structures based on clustering options and distance matrix.
+    """Classify structures based on clustering options and RMSD matrix.
 
     Args:
         clust_opt: The clustering options.
-        distmat: The distance matrix.
+        distmat: The RMSD matrix.
 
     Returns:
         A tuple containing the linkage matrix and the clusters.
@@ -108,3 +108,37 @@ def classify_structures(
     np.savetxt(clust_opt.out_clust_name, clusters, fmt="%d")
 
     return Z, clusters
+
+
+def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.ndarray:
+    """Find the medoids of the clusters.
+
+    Args:
+        distmat: The RMSD matrix.
+        clusters: The clusters.
+
+    Returns:
+        The indices of the medoids.
+    """
+    n_clusters = len(np.unique(clusters))
+    medoids = np.zeros(n_clusters, dtype=int)
+    sq_distmat = squareform(distmat)
+
+    for i in range(1, n_clusters + 1):
+        indices = np.where(clusters == i)[0]
+        distmat_cluster = sq_distmat[indices][:, indices]
+        medoids[i - 1] = indices[np.argmin(np.sum(distmat_cluster, axis=0))]
+
+    return medoids
+
+
+def sum_distmat(distmat: np.ndarray) -> np.ndarray:
+    """Sum the RMSD matrix.
+
+    Args:
+        distmat: The RMSD matrix.
+
+    Returns:
+        The sum of the RMSD matrix.
+    """
+    return np.sum(distmat)

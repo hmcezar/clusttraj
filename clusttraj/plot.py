@@ -111,12 +111,12 @@ def plot_dendrogram(
 
 
 def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray) -> None:
-    """Plot the multidimensional scaling (MDS) of the distance matrix.
+    """Plot the multidimensional scaling (MDS) of the RMSD matrix.
 
     Args:
         clust_opt (ClustOptions): The clustering options.
         clusters (np.ndarray): The cluster labels.
-        distmat (np.ndarray): The distance matrix.
+        distmat (np.ndarray): The RMSD matrix.
 
     Returns:
         None
@@ -173,7 +173,7 @@ def plot_tsne(
     Args:
         clust_opt (ClustOptions): The clustering options.
         clusters (np.ndarray): The cluster labels.
-        distmat (np.ndarray): The distance matrix.
+        distmat (np.ndarray): The RMSD matrix.
 
     Returns:
         None
