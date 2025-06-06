@@ -188,7 +188,7 @@ def plot_tsne(
         n_jobs=clust_opt.n_workers,
     )
 
-    try: 
+    try:
         # Perform the t-SNE and get the 2D representation
         coords = tsne.fit_transform(squareform(distmat))
 
