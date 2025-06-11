@@ -9,7 +9,7 @@ import matplotlib.cm as cm
 from matplotlib.colors import to_hex
 from matplotlib.ticker import MaxNLocator
 import numpy as np
-from .io import ClustOptions
+from .io import ClustOptions, Logger
 
 
 def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
@@ -179,23 +179,40 @@ def plot_tsne(
         None
     """
 
-    sqdistmat = squareform(distmat)
-
-    if sqdistmat.shape[0] > 30:
-        perplexity = 30
-    else:
-        perplexity = sqdistmat.shape[0] - 1
     # Initialize the tSNE model
     tsne = manifold.TSNE(
         n_components=2,
-        perplexity=perplexity,
+        perplexity=30,
         learning_rate=200,
         random_state=666,
         n_jobs=clust_opt.n_workers,
     )
 
-    # Perform the t-SNE and get the 2D representation
-    coords = tsne.fit_transform(sqdistmat)
+    try:
+        # Perform the t-SNE and get the 2D representation
+        coords = tsne.fit_transform(squareform(distmat))
+
+    except ValueError as e:
+        if "perplexity must be less than n_samples" in str(e):
+            # Reduce the perplexity to the smallest value recommended
+            # to avoid n_samples < perplexity
+            tsne = manifold.TSNE(
+                n_components=2,
+                perplexity=5,
+                learning_rate=200,
+                random_state=666,
+                n_jobs=clust_opt.n_workers,
+            )
+            try:
+                coords = tsne.fit_transform(squareform(distmat))
+            except ValueError:
+                Logger.logger.info(
+                    "Skipping t-SNE plot. More than 5 configurations in "
+                    "the trajectory file are required for the t-SNE plot.\n"
+                )
+                return
+        else:
+            raise
 
     # Define a list of unique colors for each cluster
     unique_clusters = np.unique(clusters)
