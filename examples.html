@@ -1,0 +1,611 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; ClustTraj 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ClustTraj
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing ClustTraj</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clusttraj.html">clusttraj package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#clustering-of-water-molecules">Clustering of water molecules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manual-threshold">Manual threshold</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-threshold">Automatic threshold</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-distance-methods">Working with distance methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ward">Ward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#median">Median</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accounting-for-molecule-permutation">Accounting for molecule permutation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#final-kabsch-rotation">Final Kabsch rotation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#polymer-solvated-in-aqueous-mixture">Polymer solvated in aqueous mixture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#standard-clustering-using-rmsd">Standard clustering using RMSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reordering-solvent-molecules-and-the-final-kabsch-rotation">Reordering solvent molecules and the final Kabsch rotation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ClustTraj</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
+<p>Before following the steps presented in this section, make sure to install the
+<code class="docutils literal notranslate"><span class="pre">clusttraj</span></code> package as presented in <a class="reference internal" href="install.html"><span class="doc">Installing ClustTraj</span></a>.</p>
+<section id="clustering-of-water-molecules">
+<span id="water-example"></span><h2>Clustering of water molecules<a class="headerlink" href="#clustering-of-water-molecules" title="Link to this heading"></a></h2>
+<p>Here we perform the clustering of water molecules from a molecular dynamics simulation.
+The <code class="docutils literal notranslate"><span class="pre">h2o_traj.xyz</span></code> file has the configurations of 5 water molecules:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>head<span class="w"> </span>h2o_traj.xyz
+
+<span class="go">15</span>
+<span class="go">Frame 1</span>
+<span class="go">       O     5.79224   23.34640   11.44660</span>
+<span class="go">       H     4.98409   23.01319   11.83659</span>
+<span class="go">       H     5.84046   22.91839   10.59179</span>
+<span class="go">       O     5.59517   22.31815    8.86907</span>
+<span class="go">       H     5.09795   21.51188    8.73143</span>
+<span class="go">       H     6.50540   22.06908    8.70880</span>
+<span class="go">       O     2.78349   22.26232   10.73374</span>
+<span class="go">       H     2.46676   23.16482   10.69619</span>
+</pre></div>
+</div>
+<p>To perform the clustering procedure we need to provide the file with configurations
+and the Root Mean Square Deviation (RMSD) threshold distance. This cutoff distance establishes the
+maximum accepted distance between clusters and can be determined in two ways.</p>
+<section id="manual-threshold">
+<h3>Manual threshold<a class="headerlink" href="#manual-threshold" title="Link to this heading"></a></h3>
+<p>We can fix the maximum RMSD deviation between units in the same cluster
+up to a certain number, <cite>e.g.</cite>, 2.0 Angstrons:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-rmsd<span class="w"> </span><span class="m">2</span>.0
+</pre></div>
+</div>
+<p>As a result, we obtained 4 output files, <cite>i.e.</cite>, <code class="docutils literal notranslate"><span class="pre">distmat.npy</span></code>, <code class="docutils literal notranslate"><span class="pre">clusters.dat</span></code>, <code class="docutils literal notranslate"><span class="pre">clusters.out</span></code> and <code class="docutils literal notranslate"><span class="pre">clusttraj.log</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">distmat.npy</span></code> file has the condensed RMSD matrix in the <code class="docutils literal notranslate"><span class="pre">numpy</span></code> file format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clusters.dat</span></code> file has the labels of each configuration in the configurations file.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>head<span class="w"> </span>clusters.dat
+<span class="go">3</span>
+<span class="go">3</span>
+<span class="go">1</span>
+<span class="go">2</span>
+<span class="go">1</span>
+<span class="go">1</span>
+<span class="go">2</span>
+<span class="go">1</span>
+<span class="go">1</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clusters.out</span></code> file has the simulation details and the cluster sizes.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat<span class="w"> </span>clusters.out
+
+<span class="go">Full command: /Users/rafael/Documents/Física/projetos/clusttraj/clusttraj/__main__.py h2o_traj.xyz -rmsd 2.0</span>
+
+<span class="go">Clusterized from trajectory file: h2o_traj.xyz</span>
+<span class="go">Method: average</span>
+<span class="go">RMSD criterion: 2.0</span>
+<span class="go">Ignoring hydrogens?: False</span>
+
+<span class="go">RMSD matrix was written in: distmat.npy</span>
+<span class="go">The classification of each configuration was written in: clusters.dat</span>
+<span class="go">A total 100 snapshots were read and 3 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       44</span>
+<span class="go">2       22</span>
+<span class="go">3       34</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clusttraj.log</span></code> file has the system output and the cluster sizes.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat<span class="w"> </span>clusttraj.log
+<span class="go">2024-12-10 20:03:47,369 INFO     [distmat.py:34] &lt;get_distmat&gt; Calculating RMSD matrix using 4 threads</span>
+
+<span class="go">2024-12-10 20:03:49,416 INFO     [distmat.py:38] &lt;get_distmat&gt; Saving condensed RMSD matrix to distmat.npy</span>
+
+<span class="go">2024-12-10 20:03:49,418 INFO     [classify.py:97] &lt;classify_structures&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-10 20:03:49,420 INFO     [classify.py:105] &lt;classify_structures&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-10 20:03:49,422 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 3 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       44</span>
+<span class="go">2       22</span>
+<span class="go">3       34</span>
+
+<span class="go">2024-12-10 20:03:49,422 INFO     [main.py:126] &lt;main&gt; Total wall time: 2.053868 s</span>
+</pre></div>
+</div>
+</section>
+<section id="automatic-threshold">
+<h3>Automatic threshold<a class="headerlink" href="#automatic-threshold" title="Link to this heading"></a></h3>
+<p>Instead of manually fixing the maximum RMSD, we can run the <code class="docutils literal notranslate"><span class="pre">-ss</span></code> flag to
+determine the threshold as the value that maximizes the silhouette coefficient.
+The coefficient varies between -1 and 1, such that higher values indicate a better
+clustering procedure. Further details can be found <a class="reference external" href="LINK-DO-PAPER">here</a>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-i<span class="w"> </span>distmat.npy<span class="w"> </span>-p
+</pre></div>
+</div>
+<p>Since we already computed the RMSD matrix, we can provide it as
+input using the <code class="docutils literal notranslate"><span class="pre">-i</span></code> flag. Additionally, the <code class="docutils literal notranslate"><span class="pre">-p</span></code> flag generates
+3 new output files for visualization.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clusters_mds.pdf</span></code> plots the multidimensional scaling (MDS) of the RMSD matrix.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/average_full_mds.pdf"><img alt="_images/average_full_mds.pdf" class="align-center" src="_images/average_full_mds.pdf" style="width: 300pt;" />
+</a>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clusters_dendrogram.pdf</span></code> plots the hierarchical clustering dendrogram.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/average_full_dend.pdf"><img alt="_images/average_full_dend.pdf" class="align-center" src="_images/average_full_dend.pdf" style="width: 500pt;" />
+</a>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clusters_evo.pdf</span></code> plots the evolution of cluster populations during the simulation.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/average_full_evo.pdf"><img alt="_images/average_full_evo.pdf" class="align-center" src="_images/average_full_evo.pdf" style="width: 500pt;" />
+</a>
+<p>The highest silhouette score is printed in the <code class="docutils literal notranslate"><span class="pre">clusttraj.log</span></code> file, along
+with the corresponding RMSD threshold:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat<span class="w"> </span>clusttraj.log
+<span class="go">2024-12-10 20:06:50,323 INFO     [distmat.py:28] &lt;get_distmat&gt; Reading condensed RMSD matrix from distmat.npy</span>
+
+<span class="go">2024-12-10 20:06:50,324 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-10 20:06:50,338 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.21741836027295453</span>
+
+<span class="go">2024-12-10 20:06:50,338 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 2.160840752745414, 2.2608407527454135</span>
+
+<span class="go">2024-12-10 20:06:50,338 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 2.160840752745414 has been adopted</span>
+
+<span class="go">2024-12-10 20:06:50,338 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-10 20:06:52,172 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       44</span>
+<span class="go">2       56</span>
+
+<span class="go">2024-12-10 20:06:52,172 INFO     [main.py:126] &lt;main&gt; Total wall time: 1.850199 s</span>
+</pre></div>
+</div>
+<p>To determine the optimal threshold the silhouette coefficient is computed for
+all values in in the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html">linkage matrix</a>
+with the default step of 0.1. In this case more than one value yields the
+same optimal threshold (2.16 and 2.26), and the smallest one is adopted to
+enhance the within cluster similarity.</p>
+</section>
+<section id="working-with-distance-methods">
+<h3>Working with distance methods<a class="headerlink" href="#working-with-distance-methods" title="Link to this heading"></a></h3>
+<p>To investigate the performance of different cluster distance methods we can use
+the <code class="docutils literal notranslate"><span class="pre">-m</span></code> flag.</p>
+<section id="ward">
+<h4>Ward<a class="headerlink" href="#ward" title="Link to this heading"></a></h4>
+<p>In the case of following the Ward variance minimization algorithm:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-i<span class="w"> </span>distmat.npy<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span>ward<span class="w"> </span>-f
+</pre></div>
+</div>
+<p>In this approach the <code class="docutils literal notranslate"><span class="pre">ward</span></code> method is adopted instead of the default <code class="docutils literal notranslate"><span class="pre">average</span></code>
+method. The <code class="docutils literal notranslate"><span class="pre">-f</span></code> flag is also included to force the output overwrite with the new data.
+From the log file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">22</span><span class="w"> </span>clusttraj.log
+<span class="go">2024-12-10 20:23:31,014 INFO     [main.py:126] &lt;main&gt; Total wall time: 2.051024 s</span>
+
+<span class="go">2024-12-10 20:24:58,651 INFO     [distmat.py:28] &lt;get_distmat&gt; Reading condensed RMSD matrix from distmat.npy</span>
+
+<span class="go">2024-12-10 20:24:58,652 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;ward&#39; method to join the clusters</span>
+
+<span class="go">2024-12-10 20:24:58,712 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.23037242401157287</span>
+
+<span class="go">2024-12-10 20:24:58,712 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 6.0608407527454125, 6.160840752745413, 6.260840752745413, 6.360840752745412, 6.460840752745413, 6.5608407527454125, 6.660840752745413, 6.760840752745413, 6.860840752745412, 6.960840752745413, 7.0608407527454125, 7.160840752745413, 7.260840752745413, 7.360840752745412, 7.460840752745413, 7.5608407527454125, 7.660840752745412, 7.760840752745413, 7.860840752745412, 7.960840752745412, 8.060840752745412, 8.160840752745413, 8.260840752745413, 8.360840752745412, 8.460840752745412, 8.560840752745412, 8.660840752745413, 8.760840752745413, 8.860840752745412, 8.960840752745412, 9.060840752745412, 9.160840752745411, 9.260840752745413, 9.360840752745412, 9.460840752745412, 9.560840752745412, 9.660840752745411, 9.760840752745413, 9.860840752745412, 9.960840752745412, 10.060840752745412, 10.160840752745411, 10.260840752745413, 10.360840752745412, 10.460840752745412, 10.560840752745412, 10.660840752745411, 10.760840752745413</span>
+
+<span class="go">2024-12-10 20:24:58,712 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 6.0608407527454125 has been adopted</span>
+
+<span class="go">2024-12-10 20:24:58,712 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-10 20:25:00,661 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       46</span>
+<span class="go">2       54</span>
+
+<span class="go">2024-12-10 20:25:00,661 INFO     [main.py:126] &lt;main&gt; Total wall time: 2.011472 s</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">ward</span></code> method also resulted in two clusters with similar populations
+(46/54 vs 44/56) and with higher silhouette coefficient (0.230 vs 0.217).
+On the other hand, the smallest RMSD threshold is 6.06, indicating higher deviation
+between the geometries in each cluster.</p>
+</section>
+<section id="median">
+<h4>Median<a class="headerlink" href="#median" title="Link to this heading"></a></h4>
+<p>To adopt the <code class="docutils literal notranslate"><span class="pre">median</span></code> method we can run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-i<span class="w"> </span>distmat.npy<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span>median<span class="w"> </span>-f
+<span class="go">2024-12-10 20:27:55,765 INFO     [distmat.py:28] &lt;get_distmat&gt; Reading condensed RMSD matrix from distmat.npy</span>
+
+<span class="go">2024-12-10 20:27:55,766 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;median&#39; method to join the clusters</span>
+
+<span class="go">2024-12-10 20:27:55,775 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.07527635729544939</span>
+
+<span class="go">2024-12-10 20:27:55,775 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 1.8608407527454136, 1.9608407527454137, 2.060840752745414</span>
+
+<span class="go">2024-12-10 20:27:55,775 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 1.8608407527454136 has been adopted</span>
+
+<span class="go">2024-12-10 20:27:55,775 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-10 20:27:58,152 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       99</span>
+<span class="go">2       1</span>
+
+<span class="go">2024-12-10 20:27:58,153 INFO     [main.py:126] &lt;main&gt; Total wall time: 2.388923 s</span>
+</pre></div>
+</div>
+<p>In this case the highest silhouette score of 0.075 indicates that the points are
+located near the edge of the clusters. The distribution of population among the
+2 clusters (1/99) also indicates the limitations of the method. Finally, visual
+inspection of the dendrogram shows anomalous behavior.</p>
+<a class="reference internal image-reference" href="_images/anomalous_dend.pdf"><img alt="_images/anomalous_dend.pdf" class="align-center" src="_images/anomalous_dend.pdf" style="width: 500pt;" />
+</a>
+<p>The reader is encouraged to verify that the addition of <code class="docutils literal notranslate"><span class="pre">-odl</span></code> for <a class="reference external" href="https://academic.oup.com/bioinformatics/article/17/suppl_1/S22/261423?login=true">optimal visualization</a> flag cannot avoid the dendrogram crossings.</p>
+</section>
+</section>
+<section id="accounting-for-molecule-permutation">
+<h3>Accounting for molecule permutation<a class="headerlink" href="#accounting-for-molecule-permutation" title="Link to this heading"></a></h3>
+<p>As an attempt to avoid separating similar configurations due to permutation of identical
+molecules, we can reorder the atoms using the <code class="docutils literal notranslate"><span class="pre">-e</span></code> flag.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-e<span class="w"> </span>-f
+</pre></div>
+</div>
+<p>For this system the reordering compromised the statistical quality of the clustering.
+The number of clusters was increased from 2 to 35 while the optimal silhouette score
+was reduced from 0.217 to 0.119:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-e<span class="w"> </span>-f
+<span class="go">2024-12-10 20:44:05,214 INFO     [distmat.py:34] &lt;get_distmat&gt; Calculating RMSD matrix using 4 threads</span>
+
+<span class="go">2024-12-10 20:44:07,216 INFO     [distmat.py:38] &lt;get_distmat&gt; Saving condensed RMSD matrix to distmat.npy</span>
+
+<span class="go">2024-12-10 20:44:07,217 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-10 20:44:07,229 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.11873407875769022</span>
+
+<span class="go">2024-12-10 20:44:07,229 INFO     [classify.py:71] &lt;classify_structures_silhouette&gt; Optimal RMSD threshold value: 1.2370133377873964</span>
+
+<span class="go">2024-12-10 20:44:07,229 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-10 20:44:09,279 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 35 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       2</span>
+<span class="go">2       4</span>
+<span class="go">3       3</span>
+<span class="go">4       1</span>
+<span class="go">5       1</span>
+<span class="go">6       1</span>
+<span class="go">7       2</span>
+<span class="go">8       2</span>
+<span class="go">9       3</span>
+<span class="go">10      2</span>
+<span class="go">11      7</span>
+<span class="go">12      3</span>
+<span class="go">13      7</span>
+<span class="go">14      7</span>
+<span class="go">15      3</span>
+<span class="go">16      5</span>
+<span class="go">17      4</span>
+<span class="go">18      3</span>
+<span class="go">19      2</span>
+<span class="go">20      4</span>
+<span class="go">21      2</span>
+<span class="go">22      3</span>
+<span class="go">23      3</span>
+<span class="go">24      1</span>
+<span class="go">25      2</span>
+<span class="go">26      3</span>
+<span class="go">27      2</span>
+<span class="go">28      1</span>
+<span class="go">29      2</span>
+<span class="go">30      2</span>
+<span class="go">31      5</span>
+<span class="go">32      4</span>
+<span class="go">33      2</span>
+<span class="go">34      1</span>
+<span class="go">35      1</span>
+
+<span class="go">2024-12-10 20:44:09,280 INFO     [main.py:126] &lt;main&gt; Total wall time: 4.066500 s</span>
+</pre></div>
+</div>
+<p>This functionality is especially useful in the case of solvated systems. In our case,
+we can treat one water molecule as the solute and the others as solvent. For example,
+considering the first water molecule as the solute:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-e<span class="w"> </span>-f<span class="w"> </span>-ns<span class="w"> </span><span class="m">3</span>
+<span class="go">2024-12-10 20:46:41,192 INFO     [distmat.py:34] &lt;get_distmat&gt; Calculating RMSD matrix using 4 threads</span>
+
+<span class="go">2024-12-10 20:46:43,383 INFO     [distmat.py:38] &lt;get_distmat&gt; Saving condensed RMSD matrix to distmat.npy</span>
+
+<span class="go">2024-12-10 20:46:43,385 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-10 20:46:43,407 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.24735123044958363</span>
+
+<span class="go">2024-12-10 20:46:43,407 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 3.035586843407412, 3.135586843407412, 3.235586843407412, 3.335586843407412</span>
+
+<span class="go">2024-12-10 20:46:43,407 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 3.035586843407412 has been adopted</span>
+
+<span class="go">2024-12-10 20:46:43,407 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-10 20:46:45,206 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       3</span>
+<span class="go">2       97</span>
+
+<span class="go">2024-12-10 20:46:45,206 INFO     [main.py:126] &lt;main&gt; Total wall time: 4.015671 s</span>
+</pre></div>
+</div>
+<p>The number of solvent atoms must be specified using the <code class="docutils literal notranslate"><span class="pre">-ns</span></code> flag, and as a result
+we managed to increase the silhouette coefficient to 0.247 with a significant change
+in the cluster populations:</p>
+</section>
+<section id="final-kabsch-rotation">
+<h3>Final Kabsch rotation<a class="headerlink" href="#final-kabsch-rotation" title="Link to this heading"></a></h3>
+<p>We can also add a final Kabsch rotation to minimize the RMSD after reordering the
+solvent atoms:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>clusttraj<span class="w"> </span>h2o_traj.xyz<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-e<span class="w"> </span>-f<span class="w"> </span>-ns<span class="w"> </span><span class="m">3</span><span class="w"> </span>--final-kabsch
+</pre></div>
+</div>
+<p>For this system no significant changes were observed, as the silhouette coefficient
+and cluster populations remain almost identical.</p>
+</section>
+</section>
+<section id="polymer-solvated-in-aqueous-mixture">
+<span id="polymer-example"></span><h2>Polymer solvated in aqueous mixture<a class="headerlink" href="#polymer-solvated-in-aqueous-mixture" title="Link to this heading"></a></h2>
+<p>In this example we are going to consider a larger system with solute and solvent
+molecules. From an MD simulation of a single oligomer chain comprising 10 monomers of PTQ10
+solvated in chloroform, we extracted 100 snapshots to perform the clustering procedure. The
+classical simulations were performed for 50 ns at the NPT ensemble using the
+<a class="reference external" href="https://doi.org/10.1016/j.softx.2015.06.001">GROMACS software</a>, and the trajectory is
+stored in the <code class="docutils literal notranslate"><span class="pre">olig_solv.gro</span></code> file. Here is the first frame of the trajectory:</p>
+<a class="reference internal image-reference" href="_images/olig_solv.pdf"><img alt="_images/olig_solv.pdf" class="align-center" src="_images/olig_solv.pdf" style="width: 200pt;" />
+</a>
+<p>Since the code uses <code class="docutils literal notranslate"><span class="pre">openbabel</span></code> to read the
+configurations, the trajectory file can be provided in any one of the <a class="reference external" href="http://openbabel.org/docs/FileFormats/Overview.html">file formats supported
+by the library</a>.</p>
+<section id="standard-clustering-using-rmsd">
+<h3>Standard clustering using RMSD<a class="headerlink" href="#standard-clustering-using-rmsd" title="Link to this heading"></a></h3>
+<p>For comparison, we start by running the traditional hierarchical clustering scheme that
+does not account for solvent permutation. Instead of calling the library via <code class="docutils literal notranslate"><span class="pre">python</span>
+<span class="pre">-m</span> <span class="pre">clusttraj</span></code>, as done in the <a class="reference internal" href="#water-example"><span class="std std-ref">previous section</span></a>, one can directly
+run the program:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>clusttraj<span class="w"> </span>olig_solv.gro<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>--metrics
+<span class="go">2024-12-12 16:13:01,490 INFO     [distmat.py:34] &lt;get_distmat&gt; Calculating RMSD matrix using 4 threads</span>
+
+<span class="go">2024-12-12 16:13:43,838 INFO     [distmat.py:38] &lt;get_distmat&gt; Saving condensed RMSD matrix to distmat.npy</span>
+
+<span class="go">2024-12-12 16:13:43,840 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-12 16:13:43,923 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.13900364227503081</span>
+
+<span class="go">2024-12-12 16:13:43,923 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 25.157769211396136, 25.257769211396134</span>
+
+<span class="go">2024-12-12 16:13:43,923 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 25.157769211396136 has been adopted</span>
+
+<span class="go">2024-12-12 16:13:43,924 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-12 16:13:46,184 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       99</span>
+<span class="go">2       1</span>
+
+<span class="go">2024-12-12 16:13:46,189 INFO     [main.py:126] &lt;main&gt; Total wall time: 44.698860 s</span>
+</pre></div>
+</div>
+<p>For this case we obtain only two clusters with a drastic difference in population,
+which is not very helpful for analysis. The addition of <code class="docutils literal notranslate"><span class="pre">--metrics</span></code> flag compute
+computes 4 scores to quantitatively compare the models performance.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tail<span class="w"> </span>clusters.out
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       99</span>
+<span class="go">2       1</span>
+
+<span class="go">Silhouette score: 0.139</span>
+<span class="go">Calinski Harabsz score: 2.476</span>
+<span class="go">Davies-Bouldin score: 0.619</span>
+<span class="go">Cophenetic correlation coefficient: 0.908</span>
+</pre></div>
+</div>
+</section>
+<section id="reordering-solvent-molecules-and-the-final-kabsch-rotation">
+<h3>Reordering solvent molecules and the final Kabsch rotation<a class="headerlink" href="#reordering-solvent-molecules-and-the-final-kabsch-rotation" title="Link to this heading"></a></h3>
+<p>To include the molecular permutation we include the <code class="docutils literal notranslate"><span class="pre">-e</span></code> flag and parse the number of oligomer
+atoms in the <code class="docutils literal notranslate"><span class="pre">-ns</span></code> flag, to be ignored during the reordering process.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>clusttraj<span class="w"> </span>olig_solv.gro<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>--metrics<span class="w"> </span>-e<span class="w"> </span>-ns<span class="w"> </span><span class="m">702</span><span class="w"> </span>-f
+<span class="go">2024-12-12 16:09:08,619 INFO     [distmat.py:34] &lt;get_distmat&gt; Calculating RMSD matrix using 4 threads</span>
+
+<span class="go">2024-12-12 16:12:08,573 INFO     [distmat.py:38] &lt;get_distmat&gt; Saving condensed RMSD matrix to distmat.npy</span>
+
+<span class="go">2024-12-12 16:12:08,576 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-12 16:12:08,675 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.4420374106917728</span>
+
+<span class="go">2024-12-12 16:12:08,676 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 11.532116467337541, 11.632116467337543, 11.73211646733754, 11.832116467337542, 11.93211646733754, 12.032116467337541, 12.13211646733754, 12.23211646733754, 12.332116467337539, 12.43211646733754, 12.532116467337538, 12.63211646733754, 12.732116467337537, 12.832116467337539, 12.932116467337536, 13.032116467337538, 13.132116467337536, 13.232116467337537, 13.332116467337535, 13.432116467337536, 13.532116467337534, 13.632116467337536, 13.732116467337534, 13.832116467337535, 13.932116467337533, 14.032116467337534, 14.132116467337532, 14.232116467337534, 14.332116467337531, 14.432116467337533, 14.53211646733753, 14.632116467337532, 14.73211646733753, 14.832116467337531, 14.93211646733753, 15.03211646733753, 15.132116467337529, 15.23211646733753, 15.332116467337528, 15.43211646733753, 15.532116467337527, 15.632116467337529, 15.732116467337526, 15.832116467337528, 15.932116467337526, 16.032116467337527, 16.132116467337525, 16.232116467337526, 16.332116467337524, 16.432116467337526, 16.532116467337524</span>
+
+<span class="go">2024-12-12 16:12:08,676 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 11.532116467337541 has been adopted</span>
+
+<span class="go">2024-12-12 16:12:08,676 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-12 16:12:11,256 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       30</span>
+<span class="go">2       70</span>
+
+<span class="go">2024-12-12 16:12:11,262 INFO     [main.py:126] &lt;main&gt; Total wall time: 182.642790 s</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tail<span class="w"> </span>clusters.out
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       30</span>
+<span class="go">2       70</span>
+
+<span class="go">Silhouette score: 0.442</span>
+<span class="go">Calinski Harabsz score: 256.998</span>
+<span class="go">Davies-Bouldin score: 0.482</span>
+<span class="go">Cophenetic correlation coefficient: 0.845</span>
+</pre></div>
+</div>
+<p>In addition to the wrong interpretation when not considering the permutation between
+identical molecules, the metrics are generally worst. Given the summary presented below,
+the three scores are significantly better when accounting for the permutation.</p>
+<a class="reference internal image-reference" href="_images/summary.png"><img alt="_images/summary.png" class="align-center" src="_images/summary.png" style="width: 500pt;" />
+</a>
+<p>Even the difference in the Cophenetic correlation coefficient is small, indicating an
+overall statistically better clustering approach with the reordering process. Finally,
+one can perform the final Kabsch rotation by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>clusttraj<span class="w"> </span>olig_solv.gro<span class="w"> </span>-m<span class="w"> </span>average<span class="w"> </span>-ss<span class="w"> </span>-p<span class="w"> </span>--metrics<span class="w"> </span>-e<span class="w"> </span>-ns<span class="w"> </span><span class="m">702</span><span class="w"> </span>-f<span class="w"> </span>--final-kabsch
+<span class="go">2024-12-12 16:35:25,405 INFO     [distmat.py:34] &lt;get_distmat&gt; Calculating RMSD matrix using 4 threads</span>
+
+<span class="go">2024-12-12 16:38:24,715 INFO     [distmat.py:38] &lt;get_distmat&gt; Saving condensed RMSD matrix to distmat.npy</span>
+
+<span class="go">2024-12-12 16:38:24,718 INFO     [classify.py:27] &lt;classify_structures_silhouette&gt; Clustering using &#39;average&#39; method to join the clusters</span>
+
+<span class="go">2024-12-12 16:38:24,798 INFO     [classify.py:61] &lt;classify_structures_silhouette&gt; Highest silhouette score: 0.4505111680708198</span>
+
+<span class="go">2024-12-12 16:38:24,798 INFO     [classify.py:65] &lt;classify_structures_silhouette&gt; The following RMSD threshold values yielded the same optimial silhouette score: 11.504201293638701, 11.6042012936387, 11.7042012936387, 11.8042012936387, 11.9042012936387, 12.0042012936387, 12.104201293638699, 12.204201293638699, 12.304201293638698, 12.404201293638698, 12.504201293638697, 12.604201293638697, 12.704201293638697, 12.804201293638696, 12.904201293638696, 13.004201293638696, 13.104201293638695, 13.204201293638695, 13.304201293638695, 13.404201293638694, 13.504201293638694, 13.604201293638694, 13.704201293638693, 13.804201293638693, 13.904201293638693, 14.004201293638692, 14.104201293638692, 14.204201293638691, 14.304201293638691, 14.40420129363869, 14.50420129363869, 14.60420129363869, 14.70420129363869, 14.80420129363869, 14.904201293638689, 15.004201293638689, 15.104201293638688, 15.204201293638688, 15.304201293638688, 15.404201293638687, 15.504201293638687, 15.604201293638686, 15.704201293638686, 15.804201293638686, 15.904201293638685, 16.004201293638687, 16.104201293638685, 16.204201293638683, 16.304201293638684, 16.404201293638685, 16.504201293638683</span>
+
+<span class="go">2024-12-12 16:38:24,798 INFO     [classify.py:68] &lt;classify_structures_silhouette&gt; The smallest RMSD of 11.504201293638701 has been adopted</span>
+
+<span class="go">2024-12-12 16:38:24,798 INFO     [classify.py:76] &lt;classify_structures_silhouette&gt; Saving clustering classification to clusters.dat</span>
+
+<span class="go">2024-12-12 16:38:26,979 INFO     [main.py:102] &lt;main&gt; A total 100 snapshots were read and 2 cluster(s) was(were) found.</span>
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       30</span>
+<span class="go">2       70</span>
+
+<span class="go">2024-12-12 16:38:26,981 INFO     [main.py:126] &lt;main&gt; Total wall time: 181.576293 s</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>tail<span class="w"> </span>clusters.out
+<span class="go">The cluster sizes are:</span>
+<span class="go">Cluster Size</span>
+<span class="go">1       30</span>
+<span class="go">2       70</span>
+
+<span class="go">Silhouette score: 0.451</span>
+<span class="go">Calinski Harabsz score: 268.899</span>
+<span class="go">Davies-Bouldin score: 0.463</span>
+<span class="go">Cophenetic correlation coefficient: 0.845</span>
+</pre></div>
+</div>
+<p>In this case, we obtained the same clustering evolution but with small differences
+in the coefficients that consistently better, <cite>i.e.</cite>, with a slight increase in silhouette and
+Calinski-Harabasz scores and a decrease in the Davies-Bouldin score.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Henrique Musseli Cezar.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
