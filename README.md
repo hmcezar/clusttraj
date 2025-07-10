@@ -39,10 +39,11 @@ pip install clusttraj[qml]
 ```
 
 ## Citation
-If you use clusttraj in your academic work, please cite the [preprint on arXiv](https://arxiv.org/abs/2504.14978):
+If you use clusttraj in your academic work, please cite:
 > Rafael Bicudo Ribeiro and Henrique Musseli Cezar </br>
 > "clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling" </br>
-> https://doi.org/10.48550/arXiv.2504.14978
+> Journal of Chemical Theory and Computation, ASAP, 2025. </br>
+> https://pubs.acs.org/doi/10.1021/acs.jctc.5c00634
 
 ## Usage
 To see all the options run the script with the `-h` command option:
