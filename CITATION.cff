@@ -20,8 +20,8 @@ authors:
     orcid: 'https://orcid.org/0000-0002-7553-0482'
 identifiers:
   - type: doi
-    value: 10.48550/arXiv.2504.14978
-    description: Manuscript with the software description
+    value: 10.1021/acs.jctc.5c00634
+    description: Journal of Chemical Theory and Computation paper
 repository-code: 'https://github.com/hmcezar/clusttraj'
 url: 'https://hmcezar.github.io/clusttraj/'
 abstract: >-
