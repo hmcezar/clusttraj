@@ -42,7 +42,7 @@ pip install clusttraj[qml]
 If you use clusttraj in your academic work, please cite:
 > Rafael Bicudo Ribeiro and Henrique Musseli Cezar </br>
 > "clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling" </br>
-> Journal of Chemical Theory and Computation, ASAP, 2025. </br>
+> Journal of Chemical Theory and Computation, 21, 6759–6768, 2025. </br>
 > https://pubs.acs.org/doi/10.1021/acs.jctc.5c00634
 
 ## Usage
