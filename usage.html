@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage &mdash; ClustTraj 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="clusttraj package" href="clusttraj.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ClustTraj
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing ClustTraj</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clusttraj.html">clusttraj package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#threading-and-parallelization">Threading and parallelization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ClustTraj</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
+<p>To see all the options run the script with the <code class="docutils literal notranslate"><span class="pre">-h</span></code> command option:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">clusttraj -h</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m clusttraj -h</span>
+</pre></div>
+</div>
+<p>The only mandatory argument are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and the maximum RMSD between two configurations for them to be considered of the same cluster.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">clusttraj trajectory.xyz -rmsd &lt;threshold&gt;</span>
+</pre></div>
+</div>
+<p>Instead of fixing the RMSD, one can use the <code class="docutils literal notranslate"><span class="pre">-ss</span></code> flag to determine the threshold as the value that maximize the <a class="reference external" href="https://en.wikipedia.org/wiki/Silhouette_(clustering)">silhouette coefficient</a> metric:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">clusttraj trajectory.xyz -ss</span>
+</pre></div>
+</div>
+<p>Additional options are available for specifying the input and output files and selecting how the clustering is done. The possible methods used for the agglomerative clustering are the ones available in the linkage method of SciPy’s hierarchical clustering. A list with the possible methods (selected with <code class="docutils literal notranslate"><span class="pre">-m</span></code>) and the description of each of them can be found <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html">here</a>.</p>
+<p>The default method for the linkage is <code class="docutils literal notranslate"><span class="pre">average</span></code>, since <a class="reference external" href="https://dx.doi.org/10.1021/ct700119m">it was found</a> to have a good compromise with the number of clusters and the actual similarity. To learn more about how the clustering is performed using this algorithm, see <a class="reference external" href="https://en.wikipedia.org/wiki/UPGMA">UPGMA</a>.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">-n</span></code> option is used, the hydrogens are ignored when performing the Kabsch algorithm to find the superposition and calculating the RMSD. This is useful to avoid clustering identical structures with just a methyl group rotated as different.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-e</span></code> or <code class="docutils literal notranslate"><span class="pre">--reorder</span></code> option, tries to reorder the atoms to increase the overlap and reduce the RMSD. The algorithm can be selected with <code class="docutils literal notranslate"><span class="pre">--reorder-alg</span></code>, between qml (default), hungarian, brute or distance. For more information about the implementation, see the <a class="reference external" href="https://github.com/charnley/rmsd">RMSD</a> package.</p>
+<p>The reorder option can be used together with the <code class="docutils literal notranslate"><span class="pre">-ns</span></code> option, that receives an integer with the number of atoms of the solute. When the <code class="docutils literal notranslate"><span class="pre">-ns</span></code> option is used, the script will first superpose the configurations considering only the solute atoms and then reorder considering only the solvent atoms (the atoms in the input that are after the ns atoms). For solute-solvent systems, the use of <code class="docutils literal notranslate"><span class="pre">-ns</span></code> is strongly encouraged.</p>
+<p>To use an already saved RMSD matrix, specify the file containing the RMSD matrix in the condensed form with the <code class="docutils literal notranslate"><span class="pre">-i</span></code> option. The options <code class="docutils literal notranslate"><span class="pre">-i</span></code> and <code class="docutils literal notranslate"><span class="pre">-od</span></code> are mutually exclusive, since <code class="docutils literal notranslate"><span class="pre">-od</span></code> specifies the name of the output RMSD matrix file to be stored.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-p</span></code> flag specifies that pdf plots of some information will be saved.
+In this case, the filenames will start with the same name used for the clusters output (specified with the <code class="docutils literal notranslate"><span class="pre">-oc</span></code> option). When the option is used, the following is saved to disk:</p>
+<ul class="simple">
+<li><p>A plot with the <a class="reference external" href="http://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling">multidimensional scaling</a> representation of the RMSD matrix, colored with the clustering information</p></li>
+<li><p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Dendrogram">dendrogram</a></p></li>
+<li><p>The cluster classification evolution, that shows how during the trajectory, the configurations were classificated. This might be useful to analyze the quality of your sampling.</p></li>
+</ul>
+<p>If the <code class="docutils literal notranslate"><span class="pre">-cc</span></code> option is specified (along with a format supported by OpenBabel) the configurations belonging to the same cluster are superposed and printed to a file.
+The superpositions are done considering the <a class="reference external" href="https://en.wikipedia.org/wiki/Medoid">medoid</a> of the cluster as reference. The medoid is printed as the first structure in the clustered strcuture files.</p>
+<p>If you did not consider the hydrogens while building the RMSD matrix, remember to use the <code class="docutils literal notranslate"><span class="pre">-n</span></code> option even if with <code class="docutils literal notranslate"><span class="pre">-i</span></code> in this case, since the superposition is done considering the flag.</p>
+<section id="threading-and-parallelization">
+<h2>Threading and parallelization<a class="headerlink" href="#threading-and-parallelization" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">-np</span></code> option specified the number of processes to be used to calculate the RMSD matrix.</p>
+<p>Since this is the most time consuming task of the clustering, and due to being a embarassingly parallel problem, it was parallelized using a Python <a class="reference external" href="https://docs.python.org/3/library/multiprocessing.html">multiprocessing pool</a>.
+The default value for <code class="docutils literal notranslate"><span class="pre">-np</span></code> is 4.</p>
+<p>When using <code class="docutils literal notranslate"><span class="pre">-np</span></code> make sure you also set the correct number of threads for <code class="docutils literal notranslate"><span class="pre">numpy</span></code>.
+If you want to use just the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> parallelization (recommended) use the following bash commands to set the number of <code class="docutils literal notranslate"><span class="pre">numpy</span></code> threads to one:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export OMP_NUM_THREADS=1</span>
+<span class="go">export OPENBLAS_NUM_THREADS=1</span>
+<span class="go">export MKL_NUM_THREADS=1</span>
+<span class="go">export VECLIB_MAXIMUM_THREADS=1</span>
+<span class="go">export NUMEXPR_NUM_THREADS=1</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="clusttraj.html" class="btn btn-neutral float-left" title="clusttraj package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Henrique Musseli Cezar.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

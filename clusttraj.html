@@ -1,0 +1,810 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clusttraj package &mdash; ClustTraj 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="Installing ClustTraj" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ClustTraj
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing ClustTraj</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">clusttraj package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj.classify">clusttraj.classify module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.classify.classify_structures"><code class="docutils literal notranslate"><span class="pre">classify_structures()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.classify.classify_structures_silhouette"><code class="docutils literal notranslate"><span class="pre">classify_structures_silhouette()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.classify.find_medoids_from_clusters"><code class="docutils literal notranslate"><span class="pre">find_medoids_from_clusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.classify.sum_distmat"><code class="docutils literal notranslate"><span class="pre">sum_distmat()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj.distmat">clusttraj.distmat module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.distmat.build_distance_matrix"><code class="docutils literal notranslate"><span class="pre">build_distance_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.distmat.compute_distmat_line"><code class="docutils literal notranslate"><span class="pre">compute_distmat_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.distmat.get_distmat"><code class="docutils literal notranslate"><span class="pre">get_distmat()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj.io">clusttraj.io module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.ClustOptions"><code class="docutils literal notranslate"><span class="pre">ClustOptions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.dendrogram_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.dendrogram_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.distmat_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.distmat_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.evo_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.evo_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.exclusions"><code class="docutils literal notranslate"><span class="pre">ClustOptions.exclusions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.final_kabsch"><code class="docutils literal notranslate"><span class="pre">ClustOptions.final_kabsch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.input_distmat"><code class="docutils literal notranslate"><span class="pre">ClustOptions.input_distmat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.mds_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.mds_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.method"><code class="docutils literal notranslate"><span class="pre">ClustOptions.method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.metrics"><code class="docutils literal notranslate"><span class="pre">ClustOptions.metrics</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.min_rmsd"><code class="docutils literal notranslate"><span class="pre">ClustOptions.min_rmsd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.n_workers"><code class="docutils literal notranslate"><span class="pre">ClustOptions.n_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.no_hydrogen"><code class="docutils literal notranslate"><span class="pre">ClustOptions.no_hydrogen</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.opt_order"><code class="docutils literal notranslate"><span class="pre">ClustOptions.opt_order</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.optimal_cut"><code class="docutils literal notranslate"><span class="pre">ClustOptions.optimal_cut</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.out_clust_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.out_clust_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.out_conf_fmt"><code class="docutils literal notranslate"><span class="pre">ClustOptions.out_conf_fmt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.out_conf_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.out_conf_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.overwrite"><code class="docutils literal notranslate"><span class="pre">ClustOptions.overwrite</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.plot"><code class="docutils literal notranslate"><span class="pre">ClustOptions.plot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.reorder"><code class="docutils literal notranslate"><span class="pre">ClustOptions.reorder</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.reorder_alg"><code class="docutils literal notranslate"><span class="pre">ClustOptions.reorder_alg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.reorder_alg_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.reorder_alg_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.reorder_excl"><code class="docutils literal notranslate"><span class="pre">ClustOptions.reorder_excl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.reorder_solvent_only"><code class="docutils literal notranslate"><span class="pre">ClustOptions.reorder_solvent_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.save_confs"><code class="docutils literal notranslate"><span class="pre">ClustOptions.save_confs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.silhouette_score"><code class="docutils literal notranslate"><span class="pre">ClustOptions.silhouette_score</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.solute_natoms"><code class="docutils literal notranslate"><span class="pre">ClustOptions.solute_natoms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.summary_name"><code class="docutils literal notranslate"><span class="pre">ClustOptions.summary_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.trajfile"><code class="docutils literal notranslate"><span class="pre">ClustOptions.trajfile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.update"><code class="docutils literal notranslate"><span class="pre">ClustOptions.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.verbose"><code class="docutils literal notranslate"><span class="pre">ClustOptions.verbose</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.ClustOptions.weight_solute"><code class="docutils literal notranslate"><span class="pre">ClustOptions.weight_solute</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.Logger"><code class="docutils literal notranslate"><span class="pre">Logger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.Logger.formatter"><code class="docutils literal notranslate"><span class="pre">Logger.formatter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.Logger.logformat"><code class="docutils literal notranslate"><span class="pre">Logger.logformat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.Logger.logger"><code class="docutils literal notranslate"><span class="pre">Logger.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clusttraj.io.Logger.setup"><code class="docutils literal notranslate"><span class="pre">Logger.setup()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.check_positive"><code class="docutils literal notranslate"><span class="pre">check_positive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.configure_runtime"><code class="docutils literal notranslate"><span class="pre">configure_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.extant_file"><code class="docutils literal notranslate"><span class="pre">extant_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.parse_args"><code class="docutils literal notranslate"><span class="pre">parse_args()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.io.save_clusters_config"><code class="docutils literal notranslate"><span class="pre">save_clusters_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj.main">clusttraj.main module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj.plot">clusttraj.plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.plot.plot_clust_evo"><code class="docutils literal notranslate"><span class="pre">plot_clust_evo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.plot.plot_dendrogram"><code class="docutils literal notranslate"><span class="pre">plot_dendrogram()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.plot.plot_mds"><code class="docutils literal notranslate"><span class="pre">plot_mds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.plot.plot_tsne"><code class="docutils literal notranslate"><span class="pre">plot_tsne()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj.utils">clusttraj.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.utils.get_mol_coords"><code class="docutils literal notranslate"><span class="pre">get_mol_coords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.utils.get_mol_info"><code class="docutils literal notranslate"><span class="pre">get_mol_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-clusttraj">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clusttraj.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ClustTraj</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">clusttraj package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/clusttraj.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="clusttraj-package">
+<h1>clusttraj package<a class="headerlink" href="#clusttraj-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-clusttraj.classify">
+<span id="clusttraj-classify-module"></span><h2>clusttraj.classify module<a class="headerlink" href="#module-clusttraj.classify" title="Link to this heading"></a></h2>
+<p>Functions to perform clustering based on the RMSD matrix.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.classify.classify_structures">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.classify.</span></span><span class="sig-name descname"><span class="pre">classify_structures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#clusttraj.classify.classify_structures" title="Link to this definition"></a></dt>
+<dd><p>Classify structures based on clustering options and RMSD matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clust_opt</strong> – The clustering options.</p></li>
+<li><p><strong>distmat</strong> – The RMSD matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the linkage matrix and the clusters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.classify.classify_structures_silhouette">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.classify.</span></span><span class="sig-name descname"><span class="pre">classify_structures_silhouette</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dstep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#clusttraj.classify.classify_structures_silhouette" title="Link to this definition"></a></dt>
+<dd><p>Find the optimal threshold following the silhouette score metric and
+perform the classification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clust_opt</strong> – The clustering options.</p></li>
+<li><p><strong>distmat</strong> – The RMSD matrix.</p></li>
+<li><p><strong>dstep</strong> (<em>float</em><em>, </em><em>optional</em>) – Interval between threshold values, defaults to 0.1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the linkage matrix and the clusters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.classify.find_medoids_from_clusters">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.classify.</span></span><span class="sig-name descname"><span class="pre">find_medoids_from_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#clusttraj.classify.find_medoids_from_clusters" title="Link to this definition"></a></dt>
+<dd><p>Find the medoids of the clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distmat</strong> – The RMSD matrix.</p></li>
+<li><p><strong>clusters</strong> – The clusters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The indices of the medoids.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.classify.sum_distmat">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.classify.</span></span><span class="sig-name descname"><span class="pre">sum_distmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#clusttraj.classify.sum_distmat" title="Link to this definition"></a></dt>
+<dd><p>Sum the RMSD matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>distmat</strong> – The RMSD matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sum of the RMSD matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-clusttraj.distmat">
+<span id="clusttraj-distmat-module"></span><h2>clusttraj.distmat module<a class="headerlink" href="#module-clusttraj.distmat" title="Link to this heading"></a></h2>
+<p>Functions to compute the RMSD matrix based on the provided
+trajectory.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.distmat.build_distance_matrix">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.distmat.</span></span><span class="sig-name descname"><span class="pre">build_distance_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#clusttraj.distmat.build_distance_matrix" title="Link to this definition"></a></dt>
+<dd><p>Compute the RMSD matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>clust_opt</strong> (<a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><em>ClustOptions</em></a>) – The options for clustering.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed RMSD matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.distmat.compute_distmat_line">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.distmat.</span></span><span class="sig-name descname"><span class="pre">compute_distmat_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder_solvent_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsatoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_solute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorderexcl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_kabsch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#clusttraj.distmat.compute_distmat_line" title="Link to this definition"></a></dt>
+<dd><p>Compute the distance between molecule idx1 and molecules with idx2 &gt;
+idx1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx1</strong> (<em>int</em>) – The index of the first molecule.</p></li>
+<li><p><strong>q_info</strong> (<em>tuple</em>) – Tuple containing the atom and all information of the first molecule.</p></li>
+<li><p><strong>trajfile</strong> (<em>str</em>) – The path to the trajectory file.</p></li>
+<li><p><strong>noh</strong> (<em>bool</em>) – Whether to consider hydrogen atoms or not.</p></li>
+<li><p><strong>reorder</strong> (<em>Union</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>]</em><em>, </em><em>np.ndarray</em><em>]</em><em>, </em><em>None</em><em>]</em>) – A function to reorder the atoms, if necessary.</p></li>
+<li><p><strong>nsatoms</strong> (<em>int</em>) – The number of atoms in the solute.</p></li>
+<li><p><strong>reorderexcl</strong> (<em>np.ndarray</em>) – The array defining the excluded atoms during reordering.</p></li>
+<li><p><strong>final_kabsch</strong> (<em>bool</em>) – Whether to perform the final Kabsch rotation or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The RMSD matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.distmat.get_distmat">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.distmat.</span></span><span class="sig-name descname"><span class="pre">get_distmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#clusttraj.distmat.get_distmat" title="Link to this definition"></a></dt>
+<dd><p>Calculate or read a condensed RMSD matrix based on the given
+clustering options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>clust_opt</strong> (<a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><em>ClustOptions</em></a>) – The clustering options.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The condensed RMSD matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-clusttraj.io">
+<span id="clusttraj-io-module"></span><h2>clusttraj.io module<a class="headerlink" href="#module-clusttraj.io" title="Link to this heading"></a></h2>
+<p>Input parsing, output information and a class to store the options for
+clustering.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">ClustOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_rmsd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder_alg_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder_alg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_conf_fmt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder_solvent_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclusions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_hydrogen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_confs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_kabsch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silhouette_score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distmat_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_clust_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evo_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mds_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dendrogram_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_conf_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solute_natoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_solute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder_excl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimal_cut</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#clusttraj.io.ClustOptions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to store the options for clustering.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.dendrogram_name">
+<span class="sig-name descname"><span class="pre">dendrogram_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.dendrogram_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.distmat_name">
+<span class="sig-name descname"><span class="pre">distmat_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.distmat_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.evo_name">
+<span class="sig-name descname"><span class="pre">evo_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.evo_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.exclusions">
+<span class="sig-name descname"><span class="pre">exclusions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.exclusions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.final_kabsch">
+<span class="sig-name descname"><span class="pre">final_kabsch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.final_kabsch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.input_distmat">
+<span class="sig-name descname"><span class="pre">input_distmat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.input_distmat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.mds_name">
+<span class="sig-name descname"><span class="pre">mds_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.mds_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.metrics">
+<span class="sig-name descname"><span class="pre">metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.min_rmsd">
+<span class="sig-name descname"><span class="pre">min_rmsd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.min_rmsd" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.n_workers">
+<span class="sig-name descname"><span class="pre">n_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.n_workers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.no_hydrogen">
+<span class="sig-name descname"><span class="pre">no_hydrogen</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.no_hydrogen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.opt_order">
+<span class="sig-name descname"><span class="pre">opt_order</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.opt_order" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.optimal_cut">
+<span class="sig-name descname"><span class="pre">optimal_cut</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.optimal_cut" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.out_clust_name">
+<span class="sig-name descname"><span class="pre">out_clust_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.out_clust_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.out_conf_fmt">
+<span class="sig-name descname"><span class="pre">out_conf_fmt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.out_conf_fmt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.out_conf_name">
+<span class="sig-name descname"><span class="pre">out_conf_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.out_conf_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.overwrite">
+<span class="sig-name descname"><span class="pre">overwrite</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.overwrite" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.plot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.reorder">
+<span class="sig-name descname"><span class="pre">reorder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.reorder" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.reorder_alg">
+<span class="sig-name descname"><span class="pre">reorder_alg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.reorder_alg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.reorder_alg_name">
+<span class="sig-name descname"><span class="pre">reorder_alg_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.reorder_alg_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.reorder_excl">
+<span class="sig-name descname"><span class="pre">reorder_excl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.reorder_excl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.reorder_solvent_only">
+<span class="sig-name descname"><span class="pre">reorder_solvent_only</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.reorder_solvent_only" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.save_confs">
+<span class="sig-name descname"><span class="pre">save_confs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.save_confs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.silhouette_score">
+<span class="sig-name descname"><span class="pre">silhouette_score</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.silhouette_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.solute_natoms">
+<span class="sig-name descname"><span class="pre">solute_natoms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.solute_natoms" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.summary_name">
+<span class="sig-name descname"><span class="pre">summary_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.summary_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.trajfile">
+<span class="sig-name descname"><span class="pre">trajfile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.trajfile" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.io.ClustOptions.update" title="Link to this definition"></a></dt>
+<dd><p>Update the instance with new values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new</strong> (<em>dict</em>) – A dictionary containing the new values to update.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.verbose" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.ClustOptions.weight_solute">
+<span class="sig-name descname"><span class="pre">weight_solute</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#clusttraj.io.ClustOptions.weight_solute" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="clusttraj.io.Logger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">Logger</span></span><a class="headerlink" href="#clusttraj.io.Logger" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Logger class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.Logger.formatter">
+<span class="sig-name descname"><span class="pre">formatter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;logging.Formatter</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#clusttraj.io.Logger.formatter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.Logger.logformat">
+<span class="sig-name descname"><span class="pre">logformat</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'%(asctime)s</span> <span class="pre">%(levelname)-8s</span> <span class="pre">[%(filename)s:%(lineno)d]</span> <span class="pre">&lt;%(funcName)s&gt;</span> <span class="pre">%(message)s'</span></em><a class="headerlink" href="#clusttraj.io.Logger.logformat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="clusttraj.io.Logger.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Logger</span> <span class="pre">clusttraj.io</span> <span class="pre">(WARNING)&gt;</span></em><a class="headerlink" href="#clusttraj.io.Logger.logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="clusttraj.io.Logger.setup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.io.Logger.setup" title="Link to this definition"></a></dt>
+<dd><p>Set up the logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>logfile</strong> (<em>str</em>) – The path to the log file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.io.check_positive">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">check_positive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#clusttraj.io.check_positive" title="Link to this definition"></a></dt>
+<dd><p>Check if the given value is a positive integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>str</em>) – The value to be checked.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>argparse.ArgumentTypeError</strong> – If the value is not a positive integer.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The converted positive integer value.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.io.configure_runtime">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">configure_runtime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></span><a class="headerlink" href="#clusttraj.io.configure_runtime" title="Link to this definition"></a></dt>
+<dd><p>Configure the runtime based on command line arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args_in</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – The command line arguments.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The parsed command line arguments.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>argparse.Namespace</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.io.extant_file">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">extant_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#clusttraj.io.extant_file" title="Link to this definition"></a></dt>
+<dd><p>Check if a file exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>str</em>) – The file path to check.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>argparse.ArgumentTypeError</strong> – If the file does not exist.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The input file path if it exists.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.io.parse_args">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Namespace</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></span><a class="headerlink" href="#clusttraj.io.parse_args" title="Link to this definition"></a></dt>
+<dd><p>Parse all the information from the argument parser, storing in the
+ClustOptions class.</p>
+<p>Define file names and set the pointers to the correct functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>Namespace</em>) – The arguments parsed from the argument parser.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of the ClustOptions class with the parsed options.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions">ClustOptions</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.io.save_clusters_config">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.io.</span></span><span class="sig-name descname"><span class="pre">save_clusters_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder_solvent_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsatoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_solute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outbasename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfmt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorderexcl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_kabsch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.io.save_clusters_config" title="Link to this definition"></a></dt>
+<dd><p>Save best superpositioned configurations for each cluster. First
+configuration is the medoid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trajfile</strong> – The trajectory file path.</p></li>
+<li><p><strong>clusters</strong> – An array containing cluster labels.</p></li>
+<li><p><strong>distmat</strong> – The RMSD matrix.</p></li>
+<li><p><strong>noh</strong> – Flag indicating whether to exclude hydrogen atoms.</p></li>
+<li><p><strong>reorder</strong> (<em>Union</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>]</em><em>, </em><em>np.ndarray</em><em>]</em><em>, </em><em>None</em><em>]</em>) – A function to reorder the atoms, if necessary.</p></li>
+<li><p><strong>nsatoms</strong> – The number of atoms in the solute.</p></li>
+<li><p><strong>outbasename</strong> – The base name for the output files.</p></li>
+<li><p><strong>outfmt</strong> – The output file format.</p></li>
+<li><p><strong>reorderexcl</strong> – An array of atom indices to exclude during reordering.</p></li>
+<li><p><strong>final_kabsch</strong> – Flag indicating whether to perform a final Kabsch rotation.</p></li>
+<li><p><strong>overwrite</strong> – Flag indicating whether to overwrite existing output files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-clusttraj.main">
+<span id="clusttraj-main-module"></span><h2>clusttraj.main module<a class="headerlink" href="#module-clusttraj.main" title="Link to this heading"></a></h2>
+<p>Main entry point for clusttraj.</p>
+<p>Can be called from command line or from an external library given a list
+of arguments.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.main.main">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.main.main" title="Link to this definition"></a></dt>
+<dd><p>Main function that performs clustering and generates output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>List</em>) – List of command-line arguments. Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-clusttraj.plot">
+<span id="clusttraj-plot-module"></span><h2>clusttraj.plot module<a class="headerlink" href="#module-clusttraj.plot" title="Link to this heading"></a></h2>
+<p>Functions to plot the obtained results.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.plot.plot_clust_evo">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.plot.</span></span><span class="sig-name descname"><span class="pre">plot_clust_evo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.plot.plot_clust_evo" title="Link to this definition"></a></dt>
+<dd><p>Plot the evolution of cluster classification over the given samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clust_opt</strong> (<a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><em>ClustOptions</em></a>) – The clustering options.</p></li>
+<li><p><strong>clusters</strong> (<em>np.ndarray</em>) – The cluster classifications for each sample.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.plot.plot_dendrogram">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.plot.</span></span><span class="sig-name descname"><span class="pre">plot_dendrogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.plot.plot_dendrogram" title="Link to this definition"></a></dt>
+<dd><p>Plot a dendrogram based on hierarchical clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clust_opt</strong> (<a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><em>ClustOptions</em></a>) – The options for clustering.</p></li>
+<li><p><strong>clusters</strong> (<em>np.ndarray</em>) – The cluster labels.</p></li>
+<li><p><strong>Z</strong> (<em>np.ndarray</em>) – The linkage matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.plot.plot_mds">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.plot.</span></span><span class="sig-name descname"><span class="pre">plot_mds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.plot.plot_mds" title="Link to this definition"></a></dt>
+<dd><p>Plot the multidimensional scaling (MDS) of the RMSD matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clust_opt</strong> (<a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><em>ClustOptions</em></a>) – The clustering options.</p></li>
+<li><p><strong>clusters</strong> (<em>np.ndarray</em>) – The cluster labels.</p></li>
+<li><p><strong>distmat</strong> (<em>np.ndarray</em>) – The RMSD matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.plot.plot_tsne">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.plot.</span></span><span class="sig-name descname"><span class="pre">plot_tsne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clust_opt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><span class="pre">ClustOptions</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distmat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.plot.plot_tsne" title="Link to this definition"></a></dt>
+<dd><p>Plot the t-distributed Stochastic Neighbor Embedding 2D plot of the clustering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clust_opt</strong> (<a class="reference internal" href="#clusttraj.io.ClustOptions" title="clusttraj.io.ClustOptions"><em>ClustOptions</em></a>) – The clustering options.</p></li>
+<li><p><strong>clusters</strong> (<em>np.ndarray</em>) – The cluster labels.</p></li>
+<li><p><strong>distmat</strong> (<em>np.ndarray</em>) – The RMSD matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-clusttraj.utils">
+<span id="clusttraj-utils-module"></span><h2>clusttraj.utils module<a class="headerlink" href="#module-clusttraj.utils" title="Link to this heading"></a></h2>
+<p>Additional utility functions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.utils.get_mol_coords">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.utils.</span></span><span class="sig-name descname"><span class="pre">get_mol_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Molecule</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#clusttraj.utils.get_mol_coords" title="Link to this definition"></a></dt>
+<dd><p>Get the coordinates of all atoms in a molecule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<em>pybel.Molecule</em>) – The molecule object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The array of atom coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.utils.get_mol_info">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.utils.</span></span><span class="sig-name descname"><span class="pre">get_mol_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Molecule</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#clusttraj.utils.get_mol_info" title="Link to this definition"></a></dt>
+<dd><p>Get the atomic numbers and coordinates of all atoms in a molecule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<em>pybel.Molecule</em>) – The molecule object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The array of atomic numbers and the array of atom coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-clusttraj">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-clusttraj" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="clusttraj.main">
+<span class="sig-prename descclassname"><span class="pre">clusttraj.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#clusttraj.main" title="Link to this definition"></a></dt>
+<dd><p>Main function that performs clustering and generates output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>List</em>) – List of command-line arguments. Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-left" title="Installing ClustTraj" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Henrique Musseli Cezar.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
