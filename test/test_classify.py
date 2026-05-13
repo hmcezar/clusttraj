@@ -9,9 +9,7 @@ def test_classify_structures(clust_opt, test_distmat, Z_matrix, clusters_seq):
     assert clusters == pytest.approx(clusters_seq, abs=1e-8)
 
 
-def test_classify_structures_nclusters_two_clusters(
-    clust_opt, test_distmat, Z_matrix
-):
+def test_classify_structures_nclusters_two_clusters(clust_opt, test_distmat, Z_matrix):
     clust_opt.n_clusters = 2
 
     Z, clusters = classify_structures_nclusters(clust_opt, test_distmat)
@@ -20,9 +18,7 @@ def test_classify_structures_nclusters_two_clusters(
     assert clusters == pytest.approx([1, 1, 2], abs=1e-8)
 
 
-def test_classify_structures_nclusters_three_clusters(
-    clust_opt, test_distmat, Z_matrix
-):
+def test_classify_structures_nclusters_three_clusters(clust_opt, test_distmat, Z_matrix):
     clust_opt.n_clusters = 3
 
     Z, clusters = classify_structures_nclusters(clust_opt, test_distmat)
