@@ -25,7 +25,7 @@ def test_ClustOptions(options_dict):
     assert clust_opt.reorder is False
     assert clust_opt.reorder_solvent_only is False
     assert clust_opt.input_distmat is False
-    assert clust_opt.distmat_name == "test/ref/test_distmat.npy"
+    assert os.path.basename(clust_opt.distmat_name) == "distmat.npy"
     assert os.path.basename(clust_opt.summary_name) == "clusters.out"
     assert os.path.basename(clust_opt.evo_name) == "clusters_evo.pdf"
     assert os.path.basename(clust_opt.dendrogram_name) == "clusters_dendrogram.pdf"
@@ -86,6 +86,7 @@ def test_parse_args():
         force=True,
         final_kabsch=True,
         silhouette_score=False,
+        n_clusters=None,
         metrics=False,
         verbose=False,
     )
@@ -115,6 +116,7 @@ def test_parse_args():
         force=True,
         final_kabsch=True,
         silhouette_score=False,
+        n_clusters=None,
         metrics=False,
         verbose=False,
     )
@@ -132,6 +134,19 @@ def test_configure_runtime(caplog):
     assert clust_opt.min_rmsd == pytest.approx(1.0, abs=1e-8)
     assert clust_opt.n_workers == 1
     assert clust_opt.out_clust_name == "clusters.dat"
+
+    clust_opt = configure_runtime(
+        ["test/ref/testtraj.xyz", "--n-clusters", "2", "-np", "1"]
+    )
+
+    assert clust_opt.n_clusters == 2
+    assert clust_opt.min_rmsd is None
+    assert clust_opt.silhouette_score is False
+
+    with pytest.raises(SystemExit):
+        clust_opt = configure_runtime(
+            ["test/ref/testtraj.xyz", "--n-clusters", "2", "--min-rmsd", "1.0"]
+        )
 
     with pytest.raises(SystemExit):
         clust_opt = configure_runtime(

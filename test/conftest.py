@@ -33,7 +33,7 @@ def options_dict(tmp_path):
         "reorder": False,
         "reorder_solvent_only": False,
         "input_distmat": False,
-        "distmat_name": "test/ref/test_distmat.npy",
+        "distmat_name": os.path.join(tmp_path, "distmat.npy"),
         "summary_name": os.path.join(tmp_path, "clusters.out"),
         "evo_name": os.path.join(tmp_path, "clusters_evo.pdf"),
         "dendrogram_name": os.path.join(tmp_path, "clusters_dendrogram.pdf"),
@@ -53,6 +53,7 @@ def options_dict(tmp_path):
         "overwrite": True,
         "final_kabsch": False,
         "silhouette_score": False,
+        "n_clusters": None,
     }
 
     return options_dict

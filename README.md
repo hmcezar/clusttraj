@@ -68,9 +68,15 @@ or
 python -m clusttraj -h
 ```
 
-The mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel), and either the maximum RMSD to join two configurations option (`-rmsd`) or the silhouette score option (`-ss`).
+The mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel), and one clustering criterion: the maximum RMSD to join two configurations (`-rmsd`), the silhouette score option (`-ss`), or the number of clusters to generate (`-nc`/`--n-clusters`).
 ```
 clusttraj trajectory.xyz -rmsd 1.0
+```
+
+To cut the dendrogram to a fixed number of clusters, use `--n-clusters`:
+
+```
+clusttraj trajectory.xyz --n-clusters 5
 ```
 or
 ```
