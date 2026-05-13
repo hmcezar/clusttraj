@@ -25,8 +25,19 @@ The following libraries are used by clusttraj:
 
 We also have [qmllib](https://github.com/qmlcode/qmllib) as an optional dependency as one of the reordering algorithms.
 
-For `openbabel`, we use the `pip` package `openbabel-wheel` which provides pre-built `openbabel` packages for Linux and MacOS.
-More details can be seen in the [projects' GitHub page](https://github.com/njzjz/openbabel-wheel).
+OpenBabel is a runtime dependency, but it is not installed by default when installing `clusttraj` with `pip`.
+If you use Conda, install OpenBabel from conda-forge before installing `clusttraj`:
+```bash
+conda install -c conda-forge openbabel
+pip install clusttraj
+```
+
+For pip-only environments, `clusttraj` provides an optional dependency that installs the `openbabel-wheel` package:
+```bash
+pip install "clusttraj[openbabel]"
+```
+
+Avoid mixing Conda OpenBabel and `openbabel-wheel` in the same environment. If you see OpenBabel import or linker errors, remove one provider and reinstall OpenBabel from the package manager used by that environment.
 
 You can install clusttraj using `pip`
 ```bash
@@ -171,4 +182,3 @@ The evolution of the classification with the trajectory looks like:
 
 If you wish to use the RMSD matrix file to other uses, bear in mind that the matrix is stored in the condensed form, i.e., only the superior diagonal matrix is printed (not including the diagonal) in NumPy's `.npy` format.
 It means that if you have `N` structures in your trajectory, your file (specified with `-od` option, default filename `distmat.npy`) will have `N(N-1)/2` lines, with each line representing a distance.
-

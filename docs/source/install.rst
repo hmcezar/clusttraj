@@ -7,24 +7,51 @@ Installing ``clusttraj`` is simple and can be achieved using ``pip``:
 
     pip install clusttraj
 
-This will automatically install the package and its dependencies.
+This will automatically install ``clusttraj`` and its Python dependencies, except for
+Open Babel.
 
 We recommend performing the installation in an empty virtual environment.
 
 Dependencies
 ************
 
-``clustttraj`` dependencies should be installed automatically by ``pip``.
+Most ``clusttraj`` dependencies are installed automatically by ``pip``.
+Open Babel is a runtime dependency, but it is not installed by default.
 
-Currently, the following dependencies are installed:
+Currently, the following dependencies are used:
 
 * `NumPy <http://www.numpy.org/>`_
 * `OpenBabel <http://openbabel.org/>`_
 * `RMSD <https://github.com/charnley/rmsd>`_
-* `QML <https://github.com/qmlcode/qml>`_
 * `SciPy <https://www.scipy.org/>`_
 * `scikit-learn <http://scikit-learn.org/stable/index.html>`_
 * `matplotlib <https://matplotlib.org/>`_
+
+If you use Conda, install Open Babel from conda-forge before installing
+``clusttraj``:
+
+.. code-block:: console
+
+    conda install -c conda-forge openbabel
+    pip install clusttraj
+
+For pip-only environments, ``clusttraj`` provides an optional dependency that
+installs the ``openbabel-wheel`` package:
+
+.. code-block:: console
+
+    pip install "clusttraj[openbabel]"
+
+Avoid mixing Conda Open Babel and ``openbabel-wheel`` in the same environment.
+If you see Open Babel import or linker errors, remove one provider and reinstall
+Open Babel from the package manager used by that environment.
+
+``qmllib`` is an optional dependency for one of the reordering algorithms and
+can be installed with:
+
+.. code-block:: console
+
+    pip install "clusttraj[qml]"
 
 Since the ``qml`` project development has been slow, we provide a fork repository in which
 we updated the package to be installable in modern enviroments with newer versions of 

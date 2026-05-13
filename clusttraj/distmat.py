@@ -1,13 +1,13 @@
 """Functions to compute the RMSD matrix based on the provided
 trajectory."""
 
-from openbabel import pybel
 import numpy as np
 import rmsd
 import os
 import multiprocessing
 import itertools
 from .io import ClustOptions, Logger
+from .openbabel_compat import pybel
 from .utils import get_mol_info
 from typing import List, Union, Callable
 
