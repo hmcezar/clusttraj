@@ -63,6 +63,7 @@ class ClustOptions:
     overwrite: bool = None
     final_kabsch: bool = None
     silhouette_score: bool = None
+    n_clusters: int = None
     metrics: bool = None
     distmat_name: str = None
     out_clust_name: str = None
@@ -111,6 +112,8 @@ class ClustOptions:
             else:
                 raise ValueError("optimal_cut must be a float or np.ndarray")
             return_str += f"RMSD criterion found by silhouette: {scut}\n"
+        elif self.n_clusters is not None:
+            return_str += f"Number of clusters criterion: {self.n_clusters}\n"
         else:
             return_str += f"RMSD criterion: {self.min_rmsd}\n"
         return_str += f"Ignoring hydrogens?: {self.no_hydrogen}\n"
@@ -375,6 +378,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         type=float,
         help="value of RMSD used to classify structures as similar",
     )
+    rmsd_criterion.add_argument(
+        "-nc",
+        "--n-clusters",
+        type=check_positive,
+        help="number of clusters to generate by cutting the dendrogram",
+    )
 
     io_group = parser.add_mutually_exclusive_group()
     io_group.add_argument(
@@ -518,6 +527,7 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         "overwrite": args.force,
         "final_kabsch": args.final_kabsch,
         "silhouette_score": args.silhouette_score,
+        "n_clusters": args.n_clusters,
         "metrics": args.metrics,
         "verbose": args.verbose,
     }

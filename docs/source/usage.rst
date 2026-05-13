@@ -14,11 +14,17 @@ or
 
 	python -m clusttraj -h
 
-The only mandatory argument are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and the maximum RMSD between two configurations for them to be considered of the same cluster.
+The mandatory arguments are the path to the file containing the trajectory (in a format that OpenBabel can read with Pybel) and one clustering criterion: the maximum RMSD between two configurations for them to be considered of the same cluster, a silhouette-selected RMSD threshold, or a fixed number of clusters.
 
 .. code-block:: console
 
 	clusttraj trajectory.xyz -rmsd <threshold>
+
+To cut the dendrogram to a fixed number of clusters, use ``--n-clusters``:
+
+.. code-block:: bash
+
+	clusttraj trajectory.xyz --n-clusters 5
 
 Instead of fixing the RMSD, one can use the ``-ss`` flag to determine the threshold as the value that maximize the `silhouette coefficient <https://en.wikipedia.org/wiki/Silhouette_(clustering)>`_ metric:
 

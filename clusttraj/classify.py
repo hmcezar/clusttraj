@@ -110,6 +110,39 @@ def classify_structures(
     return Z, clusters
 
 
+def classify_structures_nclusters(
+    clust_opt: ClustOptions, distmat: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Classify structures using a user-selected number of clusters.
+
+    Args:
+        clust_opt: The clustering options.
+        distmat: The RMSD matrix.
+
+    Returns:
+        A tuple containing the linkage matrix and the clusters.
+    """
+    Logger.logger.info(
+        f"Clustering using '{clust_opt.method}' method to join the clusters\n"
+    )
+    Z = hcl.linkage(distmat, clust_opt.method, optimal_ordering=clust_opt.opt_order)
+
+    n_snapshots = Z.shape[0] + 1
+    if clust_opt.n_clusters > n_snapshots:
+        raise ValueError(
+            f"Cannot request {clust_opt.n_clusters} clusters from {n_snapshots} snapshots"
+        )
+
+    clusters = hcl.cut_tree(Z, n_clusters=[clust_opt.n_clusters]).ravel() + 1
+
+    Logger.logger.info(
+        f"Saving clustering classification to {clust_opt.out_clust_name}\n"
+    )
+    np.savetxt(clust_opt.out_clust_name, clusters, fmt="%d")
+
+    return Z, clusters
+
+
 def find_medoids_from_clusters(distmat: np.ndarray, clusters: np.ndarray) -> np.ndarray:
     """Find the medoids of the clusters.
 

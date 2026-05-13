@@ -10,6 +10,7 @@ def test_get_distmat(options_dict, test_distmat):
     assert distmat == pytest.approx(test_distmat, abs=1e-8)
 
     options_dict["input_distmat"] = True
+    options_dict["distmat_name"] = "test/ref/test_distmat.npy"
     distmat = get_distmat(ClustOptions(**options_dict))
     assert len(distmat) == 3
     assert distmat == pytest.approx(test_distmat, abs=1e-8)

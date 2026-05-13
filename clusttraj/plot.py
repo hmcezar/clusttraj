@@ -12,6 +12,22 @@ import numpy as np
 from .io import ClustOptions, Logger
 
 
+def _nclusters_cut_height(Z: np.ndarray, n_clusters: int) -> float:
+    """Return a visual dendrogram cut height for a requested cluster count."""
+    n_snapshots = Z.shape[0] + 1
+    heights = Z[:, 2]
+
+    if n_clusters >= n_snapshots:
+        return 0.0
+    if n_clusters <= 1:
+        return heights[-1]
+
+    lower_merge = n_snapshots - n_clusters - 1
+    upper_merge = n_snapshots - n_clusters
+
+    return (heights[lower_merge] + heights[upper_merge]) / 2.0
+
+
 def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
     """Plot the evolution of cluster classification over the given samples.
 
@@ -85,6 +101,9 @@ def plot_dendrogram(
             threshold = clust_opt.optimal_cut
         else:
             raise ValueError("optimal_cut must be a float or np.ndarray")
+    elif clust_opt.n_clusters is not None:
+        threshold = _nclusters_cut_height(Z, clust_opt.n_clusters)
+        plt.axhline(threshold, linestyle="--", linewidth=2, color=line_color)
     else:
         plt.axhline(clust_opt.min_rmsd, linestyle="--", linewidth=2, color=line_color)
         threshold = clust_opt.min_rmsd

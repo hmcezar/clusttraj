@@ -14,6 +14,14 @@ def test_plot_dendrogram(clust_opt, clusters_seq, Z_matrix):
     assert os.path.exists(clust_opt.dendrogram_name)
 
 
+def test_plot_dendrogram_nclusters(clust_opt, Z_matrix):
+    clust_opt.n_clusters = 2
+
+    assert plot_dendrogram(clust_opt, [1, 1, 2], Z_matrix) is None
+
+    assert os.path.exists(clust_opt.dendrogram_name)
+
+
 def test_plot_mds(clust_opt, clusters_seq, test_distmat):
     assert plot_mds(clust_opt, clusters_seq, test_distmat) is None
 

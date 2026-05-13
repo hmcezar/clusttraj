@@ -13,6 +13,7 @@ from .distmat import get_distmat
 from .plot import plot_clust_evo, plot_dendrogram, plot_mds, plot_tsne
 from .classify import (
     classify_structures,
+    classify_structures_nclusters,
     classify_structures_silhouette,
     find_medoids_from_clusters,
     sum_distmat,
@@ -49,10 +50,16 @@ def main(args: List[str] = None) -> None:
 
     # perform the clustering
     start_time = time.monotonic()
-    if clust_opt.silhouette_score:
-        Z, clusters = classify_structures_silhouette(clust_opt, distmat)
-    else:
-        Z, clusters = classify_structures(clust_opt, distmat)
+    try:
+        if clust_opt.silhouette_score:
+            Z, clusters = classify_structures_silhouette(clust_opt, distmat)
+        elif clust_opt.n_clusters is not None:
+            Z, clusters = classify_structures_nclusters(clust_opt, distmat)
+        else:
+            Z, clusters = classify_structures(clust_opt, distmat)
+    except ValueError as exc:
+        Logger.logger.error(f"{exc}\n")
+        raise SystemExit(str(exc)) from exc
     end_time = time.monotonic()
     if clust_opt.verbose:
         Logger.logger.info(f"Time spent clustering: {end_time - start_time:.6f} s\n")
