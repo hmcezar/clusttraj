@@ -3,4 +3,3 @@ rmsd>=1.6.3
 scipy
 scikit-learn
 matplotlib
-openbabel-wheel>=3.0

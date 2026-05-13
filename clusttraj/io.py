@@ -1,8 +1,6 @@
 """Input parsing, output information and a class to store the options for
 clustering."""
 
-from openbabel import pybel
-from openbabel import openbabel
 from scipy.spatial.distance import squareform
 import os
 import sys
@@ -13,6 +11,7 @@ import logging
 import importlib.util
 from typing import Callable, List, Union
 from dataclasses import dataclass
+from .openbabel_compat import openbabel, pybel
 from .utils import get_mol_info
 
 if importlib.util.find_spec("qmllib"):
@@ -35,7 +34,8 @@ Rafael B. Ribeiro and Henrique M. Cezar
 If you use this package, please cite:
 
 Ribeiro, R. B. & Cezar, H. M. clusttraj: A Solvent-Informed Clustering Tool for Molecular Modeling.
-Preprint at https://doi.org/10.48550/ARXIV.2504.14978 (2025)
+Journal of Chemical Theory and Computation, 21, 6759–6768, 2025.
+https://pubs.acs.org/doi/10.1021/acs.jctc.5c00634
 """
 
 
