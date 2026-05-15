@@ -30,7 +30,7 @@ def classify_structures_silhouette(
     Z = hcl.linkage(distmat, clust_opt.method, optimal_ordering=clust_opt.opt_order)
 
     # Initialize the score and threshold
-    ss_opt = np.float64()
+    ss_opt = np.float64(-1.0)
     t_opt = np.array([])
     labels_opt = np.array([])
 
@@ -55,8 +55,8 @@ def classify_structures_silhouette(
         # Update the values to the highest silhouette score
         if np.all(ss > ss_opt):
             ss_opt = ss
-            t_opt = t
-            labels_opt = hcl_labels
+            t_opt = np.array([t])
+            labels_opt = np.array([hcl_labels])
 
     Logger.logger.info(f"Highest silhouette score: {ss_opt:.5f}\n")
 
@@ -69,7 +69,7 @@ def classify_structures_silhouette(
         clusters = labels_opt[0]
     else:
         Logger.logger.info(f"Optimal RMSD threshold value: {t_opt[0]:.5f}\n")
-        clusters = labels_opt
+        clusters = labels_opt[0]
 
     clust_opt.update({"optimal_cut": t_opt})
 
