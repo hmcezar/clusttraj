@@ -56,3 +56,23 @@ def test_main_nclusters_too_many_clusters(tmp_path):
                 os.path.join(tmp_path, "clusters.dat"),
             ]
         )
+
+
+def test_main_save_medoids(tmp_path):
+    main(
+        [
+            "test/ref/testtraj.xyz",
+            "--n-clusters",
+            "2",
+            "-np",
+            "1",
+            "-i",
+            "test/ref/test_distmat.npy",
+            "-oc",
+            os.path.join(tmp_path, "clusters.dat"),
+            "-mc",
+            "xyz",
+        ]
+    )
+
+    assert os.path.exists(os.path.join(tmp_path, "clusters_medoids.xyz"))

@@ -115,6 +115,9 @@ The superpositions are done considering the [medoid](https://en.wikipedia.org/wi
 The medoid is printed as the first structure in the clustered strcuture files.
 If you did not consider the hydrogens while building the RMSD matrix, remember to use the `-n` option even if with `-i` in this case, since the superposition is done considering the flag.
 
+The `-mc` option (along with a format supported by OpenBabel) saves the superposed medoid configuration for all the clusters in a single file.
+The first medoid is used as the reference configuration and the remaining medoids are superposed to it.
+
 ## Threading and parallelization
 The `-np` option specified the number of processes to be used to calculate the RMSD matrix.
 Since this is the most time consuming task of the clustering, and due to being a embarassingly parallel problem, it was parallelized using a Python [multiprocessing pool](https://docs.python.org/3/library/multiprocessing.html).
