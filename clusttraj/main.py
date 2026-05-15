@@ -8,7 +8,7 @@ import sys
 import numpy as np
 from typing import List
 import time
-from .io import Logger, configure_runtime, save_clusters_config
+from .io import Logger, configure_runtime, save_clusters_config, save_medoids_config
 from .distmat import get_distmat
 from .plot import plot_clust_evo, plot_dendrogram, plot_mds, plot_tsne
 from .classify import (
@@ -112,6 +112,32 @@ def main(args: List[str] = None) -> None:
     outclust_str += f"\nThe total sum of the RMSD matrix is {sum_distmat(distmat)}\n"
 
     medoids = find_medoids_from_clusters(distmat, clusters)
+
+    if clust_opt.save_medoids:
+        start_time = time.monotonic()
+        Logger.logger.info(
+            f"Writing superposed medoids to file {clust_opt.out_medoids_name}.{clust_opt.out_medoids_fmt}\n"
+        )
+        save_medoids_config(
+            clust_opt.trajfile,
+            medoids,
+            clust_opt.no_hydrogen,
+            clust_opt.reorder_alg,
+            clust_opt.reorder_solvent_only,
+            clust_opt.solute_natoms,
+            clust_opt.weight_solute,
+            clust_opt.out_medoids_name,
+            clust_opt.out_medoids_fmt,
+            clust_opt.reorder_excl,
+            clust_opt.final_kabsch,
+            clust_opt.overwrite,
+        )
+        end_time = time.monotonic()
+        if clust_opt.verbose:
+            Logger.logger.info(
+                f"Time spent saving medoids: {end_time - start_time:.6f} s\n"
+            )
+
     outclust_str += "The index for the medoids are:\n"
     for medoid in medoids:
         outclust_str += f"{medoid} "

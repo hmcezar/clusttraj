@@ -1,6 +1,9 @@
 import pytest
 import os
 import numpy as np
+import matplotlib
+
+matplotlib.use("Agg")
 from openbabel import pybel
 from clusttraj.io import ClustOptions
 
@@ -39,6 +42,9 @@ def options_dict(tmp_path):
         "dendrogram_name": os.path.join(tmp_path, "clusters_dendrogram.pdf"),
         "out_conf_name": os.path.join(tmp_path, "clusters_confs"),
         "out_conf_fmt": "xyz",
+        "save_medoids": False,
+        "out_medoids_name": os.path.join(tmp_path, "clusters_medoids"),
+        "out_medoids_fmt": "xyz",
         "mds_name": os.path.join(tmp_path, "clusters.pdf"),
         "save_confs": False,
         "plot": False,

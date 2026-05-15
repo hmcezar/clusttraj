@@ -58,6 +58,7 @@ class ClustOptions:
     no_hydrogen: bool = None
     input_distmat: bool = None
     save_confs: bool = None
+    save_medoids: bool = None
     plot: bool = None
     opt_order: bool = None
     overwrite: bool = None
@@ -71,6 +72,8 @@ class ClustOptions:
     mds_name: str = None
     dendrogram_name: str = None
     out_conf_name: str = None
+    out_medoids_name: str = None
+    out_medoids_fmt: str = None
     summary_name: str = None
     solute_natoms: int = None
     weight_solute: float = None
@@ -287,6 +290,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
         help="save superposed configurations for each cluster in EXTENSION format",
     )
     parser.add_argument(
+        "-mc",
+        "--medoids-configurations",
+        metavar="EXTENSION",
+        help="save superposed medoids in EXTENSION format",
+    )
+    parser.add_argument(
         "-oc",
         "--outputclusters",
         default="clusters.dat",
@@ -449,6 +458,12 @@ def configure_runtime(args_in: List[str]) -> ClustOptions:
                 f"The format you selected to save the clustered superposed configurations ({args.clusters_configurations}) is not valid."
             )
 
+    if args.medoids_configurations:
+        if args.medoids_configurations not in pybel.outformats.keys():
+            parser.error(
+                f"The format you selected to save the superposed medoids ({args.medoids_configurations}) is not valid."
+            )
+
     if args.reorder_exclusions and args.no_hydrogen:
         parser.error(
             "You cannot use --no-hydrogen and reorder exclusions with -eex at the same time"
@@ -513,6 +528,13 @@ def parse_args(args: argparse.Namespace) -> ClustOptions:
         ),
         "out_conf_fmt": (
             args.clusters_configurations if args.clusters_configurations else None
+        ),
+        "save_medoids": bool(args.medoids_configurations),
+        "out_medoids_name": (
+            basenameout + "_medoids" if args.medoids_configurations else None
+        ),
+        "out_medoids_fmt": (
+            args.medoids_configurations if args.medoids_configurations else None
         ),
         "plot": bool(args.plot),
         "evo_name": basenameout + "_evo.pdf" if args.plot else None,
@@ -829,6 +851,245 @@ def save_clusters_config(
 
         # closes the file for the cnum cluster
         outfile.close()
+
+
+def save_medoids_config(
+    trajfile: str,
+    medoids: np.ndarray,
+    noh: bool,
+    reorder: Union[
+        Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None
+    ],
+    reorder_solvent_only: bool,
+    nsatoms: int,
+    weight_solute: float,
+    outbasename: str,
+    outfmt: str,
+    reorderexcl: np.ndarray,
+    final_kabsch: bool,
+    overwrite: bool,
+) -> None:
+    """Save best superpositioned medoids configurations to a single file.
+    First medoid is the reference.
+
+    Args:
+        trajfile: The trajectory file path.
+        medoids: An array containing medoid indices.
+        noh: Flag indicating whether to exclude hydrogen atoms.
+        reorder (Union[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None]):
+            A function to reorder the atoms, if necessary.
+        nsatoms: The number of atoms in the solute.
+        weight_solute: The weight of the solute atoms in the RMSD calculation.
+        outbasename: The base name for the output file.
+        outfmt: The output file format.
+        reorderexcl: An array of atom indices to exclude during reordering.
+        final_kabsch: Flag indicating whether to perform a final Kabsch rotation.
+        overwrite: Flag indicating whether to overwrite existing output files.
+
+    Returns:
+        None
+    """
+    # create object to output the configurations
+    outfile = pybel.Outputfile(outfmt, outbasename + "." + outfmt, overwrite=overwrite)
+
+    # get the reference medoid coordinates
+    ref_medoid = medoids[0]
+    for idx, mol in enumerate(
+        pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)
+    ):
+        if idx != ref_medoid:
+            continue
+
+        # medoid coordinates
+        tnatoms = len(mol.atoms)
+        q_atoms, q_all = get_mol_info(mol)
+
+        # get the number of non hydrogen atoms in the solute to subtract if needed
+        natoms = nsatoms
+        if noh:
+            natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
+
+        if nsatoms:
+            if noh:
+                not_hydrogens = np.where(q_atoms != 1)
+                Q = np.copy(q_all[not_hydrogens])
+                Qa = np.copy(q_atoms[not_hydrogens])
+            else:
+                Q = np.copy(q_all)
+                Qa = np.copy(q_atoms)
+
+            qcenter = rmsd.centroid(Q[:natoms])
+        elif noh:
+            not_hydrogens = np.where(q_atoms != 1)
+            Q = np.copy(q_all[not_hydrogens])
+            qcenter = rmsd.centroid(Q)
+            Qa = np.copy(q_atoms[not_hydrogens])
+        else:
+            Q = np.copy(q_all)
+            qcenter = rmsd.centroid(Q)
+            Qa = np.copy(q_atoms)
+
+        # center the coordinates at the origin
+        Q -= qcenter
+
+        # write medoid configuration to file
+        molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"
+        for i, coords in enumerate(q_all - qcenter):
+            molstring += (
+                openbabel.GetSymbol(int(q_atoms[i]))
+                + "\t"
+                + str(coords[0])
+                + "\t"
+                + str(coords[1])
+                + "\t"
+                + str(coords[2])
+                + "\n"
+            )
+        rmol = pybel.readstring("xyz", molstring)
+        outfile.write(rmol)
+
+        break
+
+    # rotate all other medoids into the reference medoid and print them to the file
+    for idx, mol in enumerate(
+        pybel.readfile(os.path.splitext(trajfile)[1][1:], trajfile)
+    ):
+        if idx not in medoids[1:]:
+            continue
+
+        # config coordinates
+        p_atoms, p_all = get_mol_info(mol)
+
+        if nsatoms:
+            if noh:
+                not_hydrogens = np.where(p_atoms != 1)
+                P = np.copy(p_all[not_hydrogens])
+                Pa = np.copy(p_atoms[not_hydrogens])
+            else:
+                P = np.copy(p_all)
+                Pa = np.copy(p_atoms)
+
+            pcenter = rmsd.centroid(P[:natoms])
+        elif noh:
+            not_hydrogens = np.where(p_atoms != 1)
+            P = np.copy(p_all[not_hydrogens])
+            pcenter = rmsd.centroid(P)
+            Pa = np.copy(p_atoms[not_hydrogens])
+        else:
+            P = np.copy(p_all)
+            pcenter = rmsd.centroid(P)
+            Pa = np.copy(p_atoms)
+
+        # center the coordinates at the origin
+        P -= pcenter
+        p_all -= pcenter
+
+        # generate rotation to superpose the solute configuration
+        if nsatoms:
+            # center the coordinates at the solute
+            P -= rmsd.centroid(Q[:natoms])
+
+            # Kabsch rotation
+            U = rmsd.kabsch(P[:natoms], Q[:natoms])
+
+            # rotate the whole system
+            P = np.dot(P, U)
+            p_all = np.dot(p_all, U)
+
+            # reorder solute atoms
+            if reorder and not reorder_solvent_only:
+                soluexcl = np.where(reorderexcl < natoms)
+                soluteview = np.delete(np.arange(natoms), reorderexcl[soluexcl])
+                Pview = P[soluteview]
+                Paview = Pa[soluteview]
+
+                prr = reorder(Qa[soluteview], Paview, Q[soluteview], Pview)
+                Pview = Pview[prr]
+                Paview = Paview[prr]
+
+                whereins = np.where(
+                    np.atleast_1d(np.isin(np.arange(natoms), reorderexcl))
+                )
+                Psolu = np.insert(
+                    Pview,
+                    [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                    P[reorderexcl[soluexcl]],
+                    axis=0,
+                )
+                Pasolu = np.insert(
+                    Paview,
+                    [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                    Pa[reorderexcl[soluexcl]],
+                    axis=0,
+                )
+
+                P = np.concatenate((Psolu, P[np.arange(len(P) - natoms) + natoms]))
+                Pa = np.concatenate((Pasolu, Pa[np.arange(len(Pa) - natoms) + natoms]))
+
+                # Kabsch rotation
+                U = rmsd.kabsch(P[:natoms], Q[:natoms])
+                P = np.dot(P, U)
+                p_all = np.dot(p_all, U)
+        else:
+            # Kabsch rotation
+            U = rmsd.kabsch(P, Q)
+            P = np.dot(P, U)
+            p_all = np.dot(p_all, U)
+
+        # reorder the solvent atoms separately
+        if reorder:
+            if nsatoms:
+                exclusions = np.unique(np.concatenate((np.arange(natoms), reorderexcl)))
+            else:
+                exclusions = reorderexcl
+
+            view = np.delete(np.arange(len(P)), exclusions)
+            Pview = P[view]
+            Paview = Pa[view]
+
+            prr = reorder(Qa[view], Paview, Q[view], Pview)
+            Pview = Pview[prr]
+
+            whereins = np.where(np.atleast_1d(np.isin(np.arange(len(P)), exclusions)))
+            Pr = np.insert(
+                Pview,
+                [x - whereins[0].tolist().index(x) for x in whereins[0]],
+                P[exclusions],
+                axis=0,
+            )
+        else:
+            Pr = P
+
+        # compute the weights
+        if weight_solute and final_kabsch:
+            W = np.zeros(Pr.shape[0])
+            W[:natoms] = weight_solute / natoms
+            W[natoms:] = (1.0 - weight_solute) / (Pr.shape[0] - natoms)
+
+            R, T, _ = rmsd.kabsch_weighted(Q, Pr, W)
+            p_all = np.dot(p_all, R.T) + T
+
+        elif nsatoms and reorder and final_kabsch:
+            U = rmsd.kabsch(Pr, Q)
+            p_all = np.dot(p_all, U)
+
+        # write rotated configuration to file
+        molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"
+        for i, coords in enumerate(p_all):
+            molstring += (
+                openbabel.GetSymbol(int(p_atoms[i]))
+                + "\t"
+                + str(coords[0])
+                + "\t"
+                + str(coords[1])
+                + "\t"
+                + str(coords[2])
+                + "\n"
+            )
+        rmol = pybel.readstring("xyz", molstring)
+        outfile.write(rmol)
+
+    outfile.close()
 
 
 # type: ignore

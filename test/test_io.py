@@ -10,6 +10,7 @@ from clusttraj.io import (
     configure_runtime,
     parse_args,
     save_clusters_config,
+    save_medoids_config,
 )
 
 
@@ -76,6 +77,7 @@ def test_parse_args():
         outputdistmat="distmat.npy",
         outputclusters="clusters.dat",
         clusters_configurations=True,
+        medoids_configurations=None,
         plot=True,
         trajectory_file="trajectory.xyz",
         min_rmsd=0.1,
@@ -106,6 +108,7 @@ def test_parse_args():
         outputdistmat="distmat.npy",
         outputclusters="clusters.dat",
         clusters_configurations=True,
+        medoids_configurations=None,
         plot=True,
         trajectory_file="trajectory.xyz",
         min_rmsd=0.1,
@@ -147,6 +150,16 @@ def test_configure_runtime(caplog):
         clust_opt = configure_runtime(
             ["test/ref/testtraj.xyz", "--n-clusters", "2", "--min-rmsd", "1.0"]
         )
+
+
+def test_mc_flag_parsing():
+    clust_opt = configure_runtime(
+        ["test/ref/testtraj.xyz", "--min-rmsd", "1.0", "-np", "1", "-mc", "xyz"]
+    )
+
+    assert clust_opt.save_medoids is True
+    assert clust_opt.out_medoids_fmt == "xyz"
+    assert os.path.basename(clust_opt.out_medoids_name) == "clusters_medoids"
 
     with pytest.raises(SystemExit):
         clust_opt = configure_runtime(
@@ -201,3 +214,23 @@ def test_save_clusters_config(clust_opt, clusters_seq, test_distmat):
     assert os.path.exists(clust_opt.out_conf_name + "_1." + clust_opt.out_conf_fmt)
     assert os.path.exists(clust_opt.out_conf_name + "_2." + clust_opt.out_conf_fmt)
     assert os.path.exists(clust_opt.out_conf_name + "_3." + clust_opt.out_conf_fmt)
+
+
+def test_save_medoids_config(clust_opt):
+    medoids = np.array([0, 1, 2])
+    save_medoids_config(
+        clust_opt.trajfile,
+        medoids,
+        clust_opt.no_hydrogen,
+        clust_opt.reorder_alg,
+        clust_opt.reorder_solvent_only,
+        clust_opt.solute_natoms,
+        clust_opt.weight_solute,
+        clust_opt.out_medoids_name,
+        clust_opt.out_medoids_fmt,
+        clust_opt.reorder_excl,
+        clust_opt.final_kabsch,
+        clust_opt.overwrite,
+    )
+
+    assert os.path.exists(clust_opt.out_medoids_name + "." + clust_opt.out_medoids_fmt)
