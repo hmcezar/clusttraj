@@ -56,6 +56,8 @@ The superpositions are done considering the `medoid <https://en.wikipedia.org/wi
 
 If you did not consider the hydrogens while building the RMSD matrix, remember to use the ``-n`` option even if with ``-i`` in this case, since the superposition is done considering the flag.
 
+The ``-mc`` option (along with a format supported by OpenBabel) saves the superposed medoid configuration for all the clusters in a single file. The first medoid is used as the reference configuration and the remaining medoids are superposed to it.
+
 Threading and parallelization
 -----------------------------
 

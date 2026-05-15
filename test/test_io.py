@@ -3,6 +3,7 @@ import argparse
 import os
 import numpy as np
 import rmsd
+from openbabel import pybel
 from clusttraj.io import (
     ClustOptions,
     check_positive,
@@ -190,6 +191,17 @@ def test_mc_flag_parsing():
 
     with pytest.raises(SystemExit):
         clust_opt = configure_runtime(
+            [
+                "test/ref/testtraj.xyz",
+                "--min-rmsd",
+                "1.0",
+                "-mc",
+                "nonexistent-extension",
+            ]
+        )
+
+    with pytest.raises(SystemExit):
+        clust_opt = configure_runtime(
             ["test/ref/testtraj.xyz", "--min-rmsd", "1.0", "-n", "-eex", "1"]
         )
 
@@ -233,4 +245,9 @@ def test_save_medoids_config(clust_opt):
         clust_opt.overwrite,
     )
 
-    assert os.path.exists(clust_opt.out_medoids_name + "." + clust_opt.out_medoids_fmt)
+    out_file = clust_opt.out_medoids_name + "." + clust_opt.out_medoids_fmt
+    assert os.path.exists(out_file)
+
+    # verify the number of frames
+    frames = list(pybel.readfile(clust_opt.out_medoids_fmt, out_file))
+    assert len(frames) == len(medoids)
