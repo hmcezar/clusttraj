@@ -43,6 +43,7 @@ clusttraj = "clusttraj.main:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov[all]"]
+bench = ["pytest-benchmark"]
 docs = ["sphinx", "sphinx_rtd_theme"]
 lint = ["black"]
 qml = ["qmllib"]
