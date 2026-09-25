@@ -25,21 +25,6 @@ The following libraries are used by clusttraj:
 
 We also have [qmllib](https://github.com/qmlcode/qmllib) as an optional dependency as one of the reordering algorithms.
 
-OpenBabel is installed automatically as a dependency when installing `clusttraj`
-with `pip`:
-```bash
-pip install clusttraj
-```
-
-If you use Conda, you can install OpenBabel from conda-forge before installing
-`clusttraj`:
-```bash
-conda install -c conda-forge openbabel
-pip install clusttraj
-```
-
-Avoid mixing Conda OpenBabel and pip `openbabel` in the same environment. If you see OpenBabel import or linker errors, remove one provider and reinstall OpenBabel from the package manager used by that environment.
-
 You can install clusttraj using `pip`
 ```bash
 pip install clusttraj
