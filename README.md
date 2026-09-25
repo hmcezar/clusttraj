@@ -119,6 +119,9 @@ export VECLIB_MAXIMUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 ```
 
+By default the whole trajectory is loaded into memory before computing the RMSD matrix (`--preload`), which avoids re-parsing the file for every pair of structures and is much faster.
+If your trajectory is too large to fit in memory, use `--no-preload` to stream it from disk instead (slower, but works for trajectories of any size).
+
 ## Output
 The logging is done both to `stdout` and to the file `clusttraj.log`.
 The number of clusters that were found, as well as the number of members for each cluster are printed in a table.

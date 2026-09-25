@@ -73,3 +73,18 @@ def test_build_distance_matrix(clust_opt, test_distmat):
     assert distmat[0] == pytest.approx(test_distmat[0], abs=1e-8)
     assert distmat[1] == pytest.approx(test_distmat[1], abs=1e-8)
     assert distmat[2] == pytest.approx(test_distmat[2], abs=1e-8)
+
+
+def test_build_distance_matrix_preload_matches_streaming(clust_opt, test_distmat):
+    """Preload (default) and streaming (opt-out) paths must agree."""
+    import copy
+
+    assert clust_opt.preload is True  # preloading is the default
+    pre_distmat = build_distance_matrix(clust_opt)
+
+    stream_opt = copy.copy(clust_opt)
+    stream_opt.preload = False
+    stream_distmat = build_distance_matrix(stream_opt)
+
+    assert pre_distmat == pytest.approx(stream_distmat, abs=1e-12)
+    assert pre_distmat == pytest.approx(test_distmat, abs=1e-8)
