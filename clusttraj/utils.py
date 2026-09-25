@@ -2,7 +2,7 @@
 
 import numpy as np
 from typing import Tuple
-from .openbabel_compat import pybel
+from openbabel import pybel
 
 
 def get_mol_coords(mol: pybel.Molecule) -> np.ndarray:

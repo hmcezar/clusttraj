@@ -1,15 +1,68 @@
 """Functions to plot the obtained results."""
 
+import inspect
 from sklearn import manifold
 from scipy.spatial.distance import squareform
 import scipy.cluster.hierarchy as hcl
 from scipy.cluster import hierarchy
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from matplotlib.colors import to_hex
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 from .io import ClustOptions, Logger
+
+
+def _get_cmap_lut(name: str, lut: int):
+    """Return a discrete colormap, compatible with old and new matplotlib.
+
+    ``matplotlib.cm.get_cmap`` was removed in matplotlib 3.9;
+    ``pyplot.get_cmap`` works on both old and new versions.
+    """
+    return plt.get_cmap(name, lut)
+
+
+def _mds_kwargs(clust_opt: ClustOptions) -> dict:
+    """Build MDS kwargs compatible with old and new scikit-learn.
+
+    Old versions take ``dissimilarity="precomputed"`` with a boolean
+    ``metric`` flag, while newer ones take ``metric="precomputed"`` plus
+    ``normalized_stress``. Transitional versions accept
+    ``normalized_stress`` while ``metric`` is still boolean, so decide
+    on the ``metric`` default type rather than feature presence.
+    """
+    params = inspect.signature(manifold.MDS).parameters
+    kwargs = {
+        "n_components": 2,
+        "random_state": 666,
+        "n_init": 3,
+        "max_iter": 200,
+        "eps": 1e-3,
+    }
+    metric_param = params.get("metric")
+    use_metric_str = metric_param is not None and isinstance(metric_param.default, str)
+    if use_metric_str:
+        kwargs["metric"] = "precomputed"
+        if "normalized_stress" in params:
+            kwargs["normalized_stress"] = "auto"
+    elif "dissimilarity" in params:
+        kwargs["dissimilarity"] = "precomputed"
+    if "n_jobs" in params:
+        kwargs["n_jobs"] = clust_opt.n_workers
+    return kwargs
+
+
+def _tsne_kwargs(clust_opt: ClustOptions, perplexity: float) -> dict:
+    """Build t-SNE kwargs, only passing ``n_jobs`` when supported."""
+    params = inspect.signature(manifold.TSNE).parameters
+    kwargs = {
+        "n_components": 2,
+        "perplexity": perplexity,
+        "learning_rate": 200,
+        "random_state": 666,
+    }
+    if "n_jobs" in params:
+        kwargs["n_jobs"] = clust_opt.n_workers
+    return kwargs
 
 
 def _nclusters_cut_height(Z: np.ndarray, n_clusters: int) -> float:
@@ -57,7 +110,7 @@ def plot_clust_evo(clust_opt: ClustOptions, clusters: np.ndarray) -> None:
         clusters,
         marker="o",
         c=clusters,
-        cmap=plt.cm.nipy_spectral,
+        cmap="nipy_spectral",
     )
     plt.xlabel("Sample Index", fontsize=14)
     plt.ylabel("Cluster classification", fontsize=14)
@@ -110,7 +163,7 @@ def plot_dendrogram(
 
     # Use the 'nipy_spectral' cmap to color the dendrogram
     unique_clusters = np.unique(clusters)
-    cmap = cm.get_cmap("nipy_spectral", len(unique_clusters))
+    cmap = _get_cmap_lut("nipy_spectral", len(unique_clusters))
     colors = [to_hex(cmap(i)) for i in range(cmap.N)]
 
     hierarchy.set_link_color_palette(colors)
@@ -144,16 +197,7 @@ def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray)
     plt.figure()
 
     # Initialize the MDS model
-    mds = manifold.MDS(
-        n_components=2,
-        dissimilarity="precomputed",
-        random_state=666,
-        n_init=3,
-        max_iter=200,
-        eps=1e-3,
-        n_jobs=clust_opt.n_workers,
-        normalized_stress="auto",
-    )
+    mds = manifold.MDS(**_mds_kwargs(clust_opt))
 
     # Perform MDS and get the 2D representation
     coords = mds.fit_transform(squareform(distmat))
@@ -174,9 +218,7 @@ def plot_mds(clust_opt: ClustOptions, clusters: np.ndarray, distmat: np.ndarray)
     )
 
     # Scatter plot the coordinates with cluster colors
-    plt.scatter(
-        coords[:, 0], coords[:, 1], marker="o", c=clusters, cmap=plt.cm.nipy_spectral
-    )
+    plt.scatter(coords[:, 0], coords[:, 1], marker="o", c=clusters, cmap="nipy_spectral")
 
     plt.title("MDS Visualization", fontsize=14)
 
@@ -199,13 +241,7 @@ def plot_tsne(
     """
 
     # Initialize the tSNE model
-    tsne = manifold.TSNE(
-        n_components=2,
-        perplexity=30,
-        learning_rate=200,
-        random_state=666,
-        n_jobs=clust_opt.n_workers,
-    )
+    tsne = manifold.TSNE(**_tsne_kwargs(clust_opt, perplexity=30))
 
     try:
         # Perform the t-SNE and get the 2D representation
@@ -215,13 +251,7 @@ def plot_tsne(
         if "perplexity must be less than n_samples" in str(e):
             # Reduce the perplexity to the smallest value recommended
             # to avoid n_samples < perplexity
-            tsne = manifold.TSNE(
-                n_components=2,
-                perplexity=5,
-                learning_rate=200,
-                random_state=666,
-                n_jobs=clust_opt.n_workers,
-            )
+            tsne = manifold.TSNE(**_tsne_kwargs(clust_opt, perplexity=5))
             try:
                 coords = tsne.fit_transform(squareform(distmat))
             except ValueError:
@@ -235,7 +265,7 @@ def plot_tsne(
 
     # Define a list of unique colors for each cluster
     unique_clusters = np.unique(clusters)
-    cmap = cm.get_cmap("nipy_spectral", len(unique_clusters))
+    cmap = _get_cmap_lut("nipy_spectral", len(unique_clusters))
     colors = [cmap(i) for i in range(len(unique_clusters))]
 
     # Set the figure size

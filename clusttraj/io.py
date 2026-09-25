@@ -11,7 +11,7 @@ import logging
 import importlib.util
 from typing import Callable, List, Union
 from dataclasses import dataclass
-from .openbabel_compat import openbabel, pybel
+from openbabel import openbabel, pybel
 from .utils import get_mol_info
 
 if importlib.util.find_spec("qmllib"):

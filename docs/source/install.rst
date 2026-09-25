@@ -7,16 +7,16 @@ Installing ``clusttraj`` is simple and can be achieved using ``pip``:
 
     pip install clusttraj
 
-This will automatically install ``clusttraj`` and its Python dependencies, except for
-Open Babel.
+This will automatically install ``clusttraj`` and its Python dependencies,
+including Open Babel.
 
 We recommend performing the installation in an empty virtual environment.
 
 Dependencies
 ************
 
-Most ``clusttraj`` dependencies are installed automatically by ``pip``.
-Open Babel is a runtime dependency, but it is not installed by default.
+Most ``clusttraj`` dependencies are installed automatically by ``pip``,
+including Open Babel.
 
 Currently, the following dependencies are used:
 
@@ -27,7 +27,7 @@ Currently, the following dependencies are used:
 * `scikit-learn <http://scikit-learn.org/stable/index.html>`_
 * `matplotlib <https://matplotlib.org/>`_
 
-If you use Conda, install Open Babel from conda-forge before installing
+If you use Conda, you can install Open Babel from conda-forge before installing
 ``clusttraj``:
 
 .. code-block:: console
@@ -35,14 +35,7 @@ If you use Conda, install Open Babel from conda-forge before installing
     conda install -c conda-forge openbabel
     pip install clusttraj
 
-For pip-only environments, ``clusttraj`` provides an optional dependency that
-installs the ``openbabel-wheel`` package:
-
-.. code-block:: console
-
-    pip install "clusttraj[openbabel]"
-
-Avoid mixing Conda Open Babel and ``openbabel-wheel`` in the same environment.
+Avoid mixing Conda Open Babel and pip ``openbabel`` in the same environment.
 If you see Open Babel import or linker errors, remove one provider and reinstall
 Open Babel from the package manager used by that environment.
 
