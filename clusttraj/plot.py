@@ -24,8 +24,11 @@ def _get_cmap_lut(name: str, lut: int):
 def _mds_kwargs(clust_opt: ClustOptions) -> dict:
     """Build MDS kwargs compatible with old and new scikit-learn.
 
-    Newer versions use ``metric`` + ``normalized_stress`` while older
-    ones use ``dissimilarity`` without ``normalized_stress``.
+    Old versions take ``dissimilarity="precomputed"`` with a boolean
+    ``metric`` flag, while newer ones take ``metric="precomputed"`` plus
+    ``normalized_stress``. Transitional versions accept
+    ``normalized_stress`` while ``metric`` is still boolean, so decide
+    on the ``metric`` default type rather than feature presence.
     """
     params = inspect.signature(manifold.MDS).parameters
     kwargs = {
@@ -35,10 +38,12 @@ def _mds_kwargs(clust_opt: ClustOptions) -> dict:
         "max_iter": 200,
         "eps": 1e-3,
     }
-    if "normalized_stress" in params:
-        if "metric" in params:
-            kwargs["metric"] = "precomputed"
-        kwargs["normalized_stress"] = "auto"
+    metric_param = params.get("metric")
+    use_metric_str = metric_param is not None and isinstance(metric_param.default, str)
+    if use_metric_str:
+        kwargs["metric"] = "precomputed"
+        if "normalized_stress" in params:
+            kwargs["normalized_stress"] = "auto"
     elif "dissimilarity" in params:
         kwargs["dissimilarity"] = "precomputed"
     if "n_jobs" in params:
