@@ -666,9 +666,7 @@ def align_mol(
     # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
     symbols = [openbabel.GetSymbol(int(a)) for a in p_atoms]
     lines = [str(tnatoms), mol.title.rstrip()]
-    lines.extend(
-        f"{s}\t{c[0]}\t{c[1]}\t{c[2]}" for s, c in zip(symbols, p_all)
-    )
+    lines.extend(f"{s}\t{c[0]}\t{c[1]}\t{c[2]}" for s, c in zip(symbols, p_all))
     return "\n".join(lines) + "\n"
 
 

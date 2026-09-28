@@ -38,7 +38,9 @@ def hungarian_ref_groups(ref_atoms):
     return unique, groups
 
 
-def reorder_hungarian_refcached(p_atoms, q_atoms, p_coord, q_coord, ref_unique=None, ref_groups=None):
+def reorder_hungarian_refcached(
+    p_atoms, q_atoms, p_coord, q_coord, ref_unique=None, ref_groups=None
+):
     """Exact equivalent of ``rmsd.reorder_hungarian`` with cached ref side.
 
     ``p_atoms``/``p_coord`` are the reference side (fixed per line):
@@ -206,7 +208,11 @@ def align_core(
     """
     if cache is None:
         cache = {}
-    excl_arr = np.asarray(excl_arr, dtype=np.int64).ravel()
+    excl_arr = (
+        np.asarray(excl_arr, dtype=np.int64).ravel()
+        if excl_arr is not None
+        else np.asarray([], dtype=np.int64)
+    )
     P = np.asarray(P, dtype=np.float64)
     Pa = np.asarray(Pa)
 

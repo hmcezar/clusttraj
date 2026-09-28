@@ -73,13 +73,20 @@ def load_trajectory_arrays(trajfile: str) -> Tuple[List[np.ndarray], List[np.nda
     return all_atoms, all_coords
 
 
+def _fork_available() -> bool:
+    """Whether child processes inherit memory (fork) instead of re-importing."""
+    try:
+        multiprocessing.get_context("fork")
+        return True
+    except (AttributeError, ValueError, RuntimeError):
+        return False
+
+
 def _new_pool(n_workers, **kwargs):
     """Pool preferring fork (fast startup, no re-import) with fallback."""
-    try:
-        ctx = multiprocessing.get_context("fork")
-    except (AttributeError, ValueError, RuntimeError):
-        return multiprocessing.Pool(processes=n_workers, **kwargs)
-    return ctx.Pool(processes=n_workers, **kwargs)
+    if _fork_available():
+        return multiprocessing.get_context("fork").Pool(processes=n_workers, **kwargs)
+    return multiprocessing.Pool(processes=n_workers, **kwargs)
 
 
 # --- worker state for the preloaded pool path ---
@@ -144,7 +151,11 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
     Returns:
         np.ndarray: The computed RMSD matrix.
     """
-    excl = np.asarray(clust_opt.reorder_excl, dtype=np.int64).ravel()
+    excl = (
+        np.asarray(clust_opt.reorder_excl, dtype=np.int64).ravel()
+        if clust_opt.reorder_excl is not None
+        else np.asarray([], dtype=np.int64)
+    )
 
     if bool(getattr(clust_opt, "preload", True)):
         try:
@@ -155,6 +166,13 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
             Logger.logger.info(
                 f"Preloading trajectory ({fsize / 1e9:.1f} GB) into memory; "
                 "use preload=False (streaming) if RAM is limited.\n"
+            )
+        if clust_opt.n_workers > 1 and not _fork_available():
+            Logger.logger.warning(
+                "Without fork (e.g. Windows/macOS) every worker process "
+                "receives its own copy of the preloaded trajectory, so RAM "
+                "use grows with the worker count; use preload=False "
+                "(streaming) for large trajectories on these systems.\n"
             )
         all_atoms, all_coords = load_trajectory_arrays(clust_opt.trajfile)
         n_frames = len(all_atoms)
@@ -169,7 +187,9 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
         )
         if clust_opt.n_workers == 1:
             ldistmat = [
-                _compute_line_preloaded(i, all_atoms[i], all_coords[i], all_atoms, all_coords, *worker_args)
+                _compute_line_preloaded(
+                    i, all_atoms[i], all_coords[i], all_atoms, all_coords, *worker_args
+                )
                 for i in range(n_frames)
             ]
         else:
@@ -198,8 +218,20 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
         if clust_opt.n_workers == 1:
             ldistmat = [compute_distmat_line(*task) for task in inputiterator]
         else:
-            with _new_pool(processes=clust_opt.n_workers) as pool:
-                ldistmat = pool.starmap(compute_distmat_line, inputiterator)
+            # submit in bounded batches: pool.starmap would otherwise turn
+            # the len-less iterator into a list first, holding every frame's
+            # arrays in the parent and defeating the streaming escape hatch
+            batchsize = max(1, clust_opt.n_workers * 2)
+            ldistmat = []
+            with _new_pool(clust_opt.n_workers) as pool:
+                batch = []
+                for task in inputiterator:
+                    batch.append(task)
+                    if len(batch) >= batchsize:
+                        ldistmat.extend(pool.starmap(compute_distmat_line, batch))
+                        batch = []
+                if batch:
+                    ldistmat.extend(pool.starmap(compute_distmat_line, batch))
 
     return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
 
@@ -258,7 +290,11 @@ def _pair_rmsd(
 def _line_common(q_atoms, q_coords, noh, nsatoms, reorderexcl):
     """Shared per-line setup: filter + center Q, fresh cache, excl array."""
     Qa, Qref, natoms, _ = prepare_ref(q_atoms, q_coords, noh, nsatoms)
-    excl_arr = np.asarray(reorderexcl, dtype=np.int64).ravel() if reorderexcl is not None else np.asarray([], dtype=np.int64)
+    excl_arr = (
+        np.asarray(reorderexcl, dtype=np.int64).ravel()
+        if reorderexcl is not None
+        else np.asarray([], dtype=np.int64)
+    )
     return Qa, Qref, natoms, excl_arr, {}
 
 
@@ -277,16 +313,27 @@ def _compute_line_preloaded(
     final_kabsch,
 ) -> List[float]:
     """One matrix line from preloaded arrays (preload=True path)."""
-    Qa, Qref, natoms, excl_arr, cache = _line_common(q_atoms, q_coords, noh, nsatoms, reorderexcl)
+    Qa, Qref, natoms, excl_arr, cache = _line_common(
+        q_atoms, q_coords, noh, nsatoms, reorderexcl
+    )
     distmat: List[float] = []
     for idx2 in range(idx1 + 1, len(all_atoms)):
         Pa, P = filter_moving(all_atoms[idx2], all_coords[idx2], noh, nsatoms)
         Q = Qref.copy()  # cheap vs Hungarian; keeps kernel pure
         distmat.append(
             _pair_rmsd(
-                P, Pa, Q, Qa, natoms, nsatoms, reorder,
-                reorder_solvent_only, excl_arr, weight_solute,
-                final_kabsch, cache,
+                P,
+                Pa,
+                Q,
+                Qa,
+                natoms,
+                nsatoms,
+                reorder,
+                reorder_solvent_only,
+                excl_arr,
+                weight_solute,
+                final_kabsch,
+                cache,
             )
         )
     return distmat
@@ -329,7 +376,9 @@ def compute_distmat_line(
         List[float]: The RMSD matrix.
     """  # noqa: E501
     q_atoms, q_all = q_info
-    Qa, Qref, natoms, excl_arr, cache = _line_common(q_atoms, q_all, noh, nsatoms, reorderexcl)
+    Qa, Qref, natoms, excl_arr, cache = _line_common(
+        q_atoms, q_all, noh, nsatoms, reorderexcl
+    )
     distmat: List[float] = []
     for idx2, mol2 in enumerate(pybel.readfile(_traj_format(trajfile), trajfile)):
         # skip if it's not an element from the superior diagonal matrix
@@ -341,9 +390,18 @@ def compute_distmat_line(
         Q = Qref.copy()
         distmat.append(
             _pair_rmsd(
-                P, Pa, Q, Qa, natoms, nsatoms, reorder,
-                reorder_solvent_only, excl_arr, weight_solute,
-                final_kabsch, cache,
+                P,
+                Pa,
+                Q,
+                Qa,
+                natoms,
+                nsatoms,
+                reorder,
+                reorder_solvent_only,
+                excl_arr,
+                weight_solute,
+                final_kabsch,
+                cache,
             )
         )
     return distmat

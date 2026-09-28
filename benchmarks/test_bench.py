@@ -125,7 +125,7 @@ def test_bench_mox_full(benchmark, tmp_path):
 
 
 def test_bench_mox_full_streaming(benchmark, tmp_path):
-    """Full 100-frame MOx matrix streamed from disk (default path)."""
+    """Full 100-frame MOx matrix streamed from disk (streaming opt-out path)."""
     opt = _mox_options(str(tmp_path), n_workers=1)
     opt.preload = False
     distmat = benchmark(build_distance_matrix, opt)
