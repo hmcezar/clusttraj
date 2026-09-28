@@ -101,4 +101,5 @@ jobs:
       run: >-
         gh release create
         '${{ github.ref_name }}' dist/**
+        --generate-notes
         --repo '${{ github.repository }}'
