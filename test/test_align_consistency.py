@@ -56,7 +56,9 @@ def parse_xyz(molstring):
     lines = molstring.strip().split("\n")
     nat = int(lines[0])
     symbols = [row.split()[0] for row in lines[2 : 2 + nat]]
-    coords = np.array([[float(x) for x in row.split()[1:]] for row in lines[2 : 2 + nat]])
+    coords = np.array(
+        [[float(x) for x in row.split()[1:]] for row in lines[2 : 2 + nat]]
+    )
     return lines[1], symbols, coords
 
 
@@ -209,9 +211,7 @@ def test_kernel_reproduces_matrix(options_dict):
                     else:
                         value = float(rmsd.rmsd(al.Pr, Qref_i))
                 elif al.kind == "weighted":
-                    value = weighted_rmsd_no_kabsch(
-                        al.Pr @ al.R + al.T, Qref_i, al.W
-                    )
+                    value = weighted_rmsd_no_kabsch(al.Pr @ al.R + al.T, Qref_i, al.W)
                 else:
                     value = float(rmsd.rmsd(al.Pr @ al.R, Qref_i))
                 assert value == pytest.approx(sq[i, j], abs=1e-9)
