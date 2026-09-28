@@ -13,10 +13,7 @@ from typing import Callable, List, Union
 from dataclasses import dataclass
 from openbabel import openbabel, pybel
 from .utils import get_mol_info
-from ._fastmath import (
-    build_weight_vector,
-    scatter_reordered,
-)
+from ._fastmath import align_core, filter_moving, prepare_ref
 
 if importlib.util.find_spec("qmllib"):
     has_qml = True
@@ -616,8 +613,9 @@ def align_mol(
 
     Args:
         mol (pybel.Molecule): The molecule to be aligned.
-        Q (np.ndarray): The reference coordinates.
-        Qa (np.ndarray): The reference atomic numbers.
+        Q (np.ndarray): The centered reference coordinates, as returned by
+            ``prepare_ref`` (same preparation as the RMSD matrix lines).
+        Qa (np.ndarray): The reference atomic numbers (filtered like Q).
         noh (bool): Flag indicating whether to exclude hydrogen atoms.
         reorder (Union[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], np.ndarray], None]):
             A function to reorder the atoms, if necessary.
@@ -646,112 +644,24 @@ def align_mol(
     if noh:
         natoms = len(np.where(p_atoms[:nsatoms] != 1)[0])
 
-    if nsatoms:
-        if noh:
-            not_hydrogens = np.where(p_atoms != 1)
-            P = np.copy(p_all[not_hydrogens])
-            Pa = np.copy(p_atoms[not_hydrogens])
-        else:
-            P = np.copy(p_all)
-            Pa = np.copy(p_atoms)
-
-        pcenter = rmsd.centroid(P[:natoms])
-    elif noh:
-        not_hydrogens = np.where(p_atoms != 1)
-        P = np.copy(p_all[not_hydrogens])
-        pcenter = rmsd.centroid(P)
-        Pa = np.copy(p_atoms[not_hydrogens])
-    else:
-        P = np.copy(p_all)
-        pcenter = rmsd.centroid(P)
-        Pa = np.copy(p_atoms)
-
-    # center the coordinates at the origin
-    P -= pcenter
-    p_all -= pcenter
-
-    # generate rotation to superpose the solute configuration
-    if nsatoms:
-        # center the coordinates at the solute
-        P -= rmsd.centroid(Q[:natoms])
-
-        # try to improve atom matching by performing Kabsch
-        # generate a rotation considering only the solute atoms
-        U = rmsd.kabsch(P[:natoms], Q[:natoms])
-
-        # rotate the whole system with this rotation
-        P = P @ U
-        p_all = p_all @ U
-
-        # reorder solute atoms
-        if reorder and not reorder_solvent_only:
-            # find the solute atoms that are not excluded
-            soluexcl = reorderexcl[reorderexcl < natoms]
-            soluteview = np.delete(np.arange(natoms), soluexcl)
-            Pview = P[soluteview]
-            Paview = Pa[soluteview]
-
-            # reorder just these atoms
-            prr = reorder(Qa[soluteview], Paview, Q[soluteview], Pview)
-            Pview = Pview[prr]
-            Paview = Paview[prr]
-
-            Psolu = np.empty((natoms, 3), dtype=P.dtype)
-            Psolu[soluteview] = Pview
-            Psolu[soluexcl] = P[soluexcl]
-            Pasolu = np.empty((natoms,), dtype=Pa.dtype)
-            Pasolu[soluteview] = Paview
-            Pasolu[soluexcl] = Pa[soluexcl]
-
-            P = np.concatenate((Psolu, P[natoms:]))
-            Pa = np.concatenate((Pasolu, Pa[natoms:]))
-
-            # generate a rotation considering only the solute atoms
-            U = rmsd.kabsch(P[:natoms], Q[:natoms])
-
-            # rotate the whole system with this rotation
-            P = P @ U
-            p_all = p_all @ U
-
-    else:
-        # Kabsch rotation
-        U = rmsd.kabsch(P, Q)
-        P = P @ U
-        p_all = p_all @ U
-
-    # reorder the solvent atoms separately
-    if reorder:
-        # if the solute is specified, reorder just the solvent atoms in this step
-        if nsatoms:
-            exclusions = np.unique(np.concatenate((np.arange(natoms), reorderexcl)))
-        else:
-            exclusions = np.unique(reorderexcl)
-        exclusions = exclusions[exclusions < len(P)]
-
-        # get the view without the excluded atoms
-        view = np.delete(np.arange(len(P)), exclusions)
-        Pview = P[view]
-        Paview = Pa[view]
-
-        prr = reorder(Qa[view], Paview, Q[view], Pview)
-        Pview = Pview[prr]
-
-        # build the total molecule with the reordered atoms
-        Pr = scatter_reordered(len(P), view, exclusions, P[exclusions], Pview)
-    else:
-        Pr = P
-
-    # compute the weights
-    if weight_solute and final_kabsch:
-        W = build_weight_vector(Pr.shape[0], natoms, weight_solute)
-
-        R, T, _ = rmsd.kabsch_weighted(Q, Pr, W)
-        p_all = p_all @ R.T + T
-
-    elif nsatoms and reorder and final_kabsch:
-        # rotate whole configuration (considering hydrogens even with noh)
-        U = rmsd.kabsch(Pr, Q)
-        p_all = p_all @ U
+    # every alignment step runs in the shared kernel (same code — and same
+    # final rotation — as the RMSD matrix in distmat), so the written
+    # structure carries exactly the matrix superposition
+    Pa, P = filter_moving(p_atoms, p_all, noh, nsatoms)
+    p_all = align_core(
+        P,
+        Pa,
+        Q,
+        Qa,
+        natoms,
+        nsatoms=nsatoms,
+        reorder=reorder,
+        reorder_solvent_only=reorder_solvent_only,
+        excl_arr=reorderexcl,
+        weight_solute=weight_solute,
+        final_kabsch=final_kabsch,
+        p_full=p_all,
+    ).full
 
     # write rotated configuration to file (molstring is a xyz string used to generate de pybel mol)
     symbols = [openbabel.GetSymbol(int(a)) for a in p_atoms]
@@ -825,37 +735,10 @@ def save_clusters_config(
             if idx != medoid:
                 continue
 
-            # medoid coordinates
+            # medoid coordinates (same reference preparation as distmat)
             tnatoms = len(mol.atoms)
             q_atoms, q_all = get_mol_info(mol)
-
-            # get the number of non hydrogen atoms in the solute to subtract if needed
-            natoms = nsatoms
-            if noh:
-                natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
-
-            if nsatoms:
-                if noh:
-                    not_hydrogens = np.where(q_atoms != 1)
-                    Q = np.copy(q_all[not_hydrogens])
-                    Qa = np.copy(q_atoms[not_hydrogens])
-                else:
-                    Q = np.copy(q_all)
-                    Qa = np.copy(q_atoms)
-
-                qcenter = rmsd.centroid(Q[:natoms])
-            elif noh:
-                not_hydrogens = np.where(q_atoms != 1)
-                Q = np.copy(q_all[not_hydrogens])
-                qcenter = rmsd.centroid(Q)
-                Qa = np.copy(q_atoms[not_hydrogens])
-            else:
-                Q = np.copy(q_all)
-                qcenter = rmsd.centroid(Q)
-                Qa = np.copy(q_atoms)
-
-            # center the coordinates at the origin
-            Q -= qcenter
+            Qa, Q, natoms, qcenter = prepare_ref(q_atoms, q_all, noh, nsatoms)
 
             # write medoid configuration to file (molstring is a xyz string used to generate de pybel mol)
             molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"
@@ -955,34 +838,7 @@ def save_medoids_config(
     mol = mol_list[0]
     tnatoms = len(mol.atoms)
     q_atoms, q_all = get_mol_info(mol)
-
-    # get the number of non hydrogen atoms in the solute to subtract if needed
-    natoms = nsatoms
-    if noh:
-        natoms = len(np.where(q_atoms[:nsatoms] != 1)[0])
-
-    if nsatoms:
-        if noh:
-            not_hydrogens = np.where(q_atoms != 1)
-            Q = np.copy(q_all[not_hydrogens])
-            Qa = np.copy(q_atoms[not_hydrogens])
-        else:
-            Q = np.copy(q_all)
-            Qa = np.copy(q_atoms)
-
-        qcenter = rmsd.centroid(Q[:natoms])
-    elif noh:
-        not_hydrogens = np.where(q_atoms != 1)
-        Q = np.copy(q_all[not_hydrogens])
-        qcenter = rmsd.centroid(Q)
-        Qa = np.copy(q_atoms[not_hydrogens])
-    else:
-        Q = np.copy(q_all)
-        qcenter = rmsd.centroid(Q)
-        Qa = np.copy(q_atoms)
-
-    # center the coordinates at the origin
-    Q -= qcenter
+    Qa, Q, natoms, qcenter = prepare_ref(q_atoms, q_all, noh, nsatoms)
 
     # write medoid configuration to file
     molstring = str(tnatoms) + "\n" + mol.title.rstrip() + "\n"

@@ -10,11 +10,11 @@ from .io import ClustOptions, Logger
 from openbabel import pybel
 from .utils import get_mol_info
 from ._fastmath import (
-    hungarian_ref_groups,
-    reorder_hungarian_refcached,
-    weighted_rmsd_no_kabsch,
+    align_core,
     build_weight_vector,
-    scatter_reordered,
+    filter_moving,
+    prepare_ref,
+    weighted_rmsd_no_kabsch,
 )
 from typing import List, Union, Callable, Tuple
 
@@ -204,48 +204,6 @@ def build_distance_matrix(clust_opt: ClustOptions) -> np.ndarray:
     return np.asarray([x for n in ldistmat if len(n) > 0 for x in n])
 
 
-def _prepare_q_side(q_atoms, q_all, noh, nsatoms):
-    """Filter hydrogens once per line; return Qa, Q, natoms."""
-    if nsatoms:
-        if noh:
-            q_mask = q_atoms != 1
-            Qa = q_atoms[q_mask]
-            Q = q_all[q_mask].astype(np.float64, copy=True)
-            natoms = int(np.count_nonzero(q_atoms[:nsatoms] != 1))
-        else:
-            Qa = q_atoms
-            Q = q_all.astype(np.float64, copy=True)
-            natoms = int(nsatoms)
-    elif noh:
-        q_mask = q_atoms != 1
-        Qa = q_atoms[q_mask]
-        Q = q_all[q_mask].astype(np.float64, copy=True)
-        natoms = 0
-    else:
-        Qa = q_atoms
-        Q = q_all.astype(np.float64, copy=True)
-        natoms = 0
-    return Qa, Q, natoms
-
-
-def _do_reorder(reorder, qa_v, pa_v, q_v, p_v, cache, key):
-    """Reorder via rmsd, caching the reference-side index groups.
-
-    The reference side (``qa_v``) is identical for every pair of a matrix
-    line; when the reorder function is exactly ``rmsd.reorder_hungarian``,
-    its ``unique``/``where`` work on that side is done once per line. The
-    cache is line-local (a few int arrays), so memory stays flat. Custom
-    reorder callables go through untouched.
-    """
-    if reorder is rmsd.reorder_hungarian:
-        entry = cache.get(key)
-        if entry is None:
-            entry = hungarian_ref_groups(qa_v)
-            cache[key] = entry
-        return reorder_hungarian_refcached(qa_v, pa_v, q_v, p_v, entry[0], entry[1])
-    return reorder(qa_v, pa_v, q_v, p_v)
-
-
 def _pair_rmsd(
     P,
     Pa,
@@ -260,116 +218,48 @@ def _pair_rmsd(
     final_kabsch,
     cache,
 ) -> float:
-    """RMSD between one pair; Q must already be centered (hoisted per line)."""
-    # center P at origin (Q arrives pre-centered from the line cache)
-    if nsatoms:
-        pcenter = P[:natoms].mean(axis=0)
-    else:
-        pcenter = P.mean(axis=0)
-    P = P - pcenter
+    """RMSD between one pair; Q must already be centered (hoisted per line).
 
-    if nsatoms:
-        # solute-first superposition (Q solute already at origin, so the old
-        # residual centering here was a ~1e-16 no-op; skipped)
-        U = rmsd.kabsch(P[:natoms], Q[:natoms])
-        P = P @ U
-
-        if reorder is not None and not reorder_solvent_only:
-            key = ("solute", len(P), natoms)
-            entry = cache.get(key)
-            if entry is None:
-                excl_arr = np.asarray(reorderexcl, dtype=np.int64).ravel()
-                soluexcl = excl_arr[excl_arr < natoms]
-                soluteview = np.delete(np.arange(natoms), soluexcl)
-                entry = (soluteview, soluexcl)
-                cache[key] = entry
-            else:
-                soluteview, soluexcl = entry
-            Pview = P[soluteview]
-            Paview = Pa[soluteview]
-            prr = _do_reorder(reorder, Qa[soluteview], Paview, Q[soluteview], Pview, cache, ("hq_solute", len(P), natoms))
-            Pview = Pview[prr]
-            Paview = Paview[prr]
-            # scatter back (exact replacement for insert+index loop)
-            Psolu = np.empty((natoms, 3), dtype=P.dtype)
-            Psolu[soluteview] = Pview
-            Psolu[soluexcl] = P[soluexcl]
-            Pasolu = np.empty((natoms,), dtype=Pa.dtype)
-            Pasolu[soluteview] = Paview
-            Pasolu[soluexcl] = Pa[soluexcl]
-            P = np.concatenate((Psolu, P[natoms:]))
-            Pa = np.concatenate((Pasolu, Pa[natoms:]))
-            U = rmsd.kabsch(P[:natoms], Q[:natoms])
-            P = P @ U
-    else:
-        U = rmsd.kabsch(P, Q)
-        P = P @ U
-
-    if reorder is not None:
-        key = ("solv", len(P), natoms)
-        entry = cache.get(key)
-        if entry is None:
-            excl_arr = np.asarray(reorderexcl, dtype=np.int64).ravel()
-            if nsatoms:
-                exclusions = np.unique(np.concatenate((np.arange(natoms), excl_arr)))
-            else:
-                exclusions = np.unique(excl_arr)
-            # keep exclusions in-bounds for varying sizes
-            exclusions = exclusions[exclusions < len(P)]
-            view = np.delete(np.arange(len(P)), exclusions)
-            entry = (exclusions, view)
-            cache[key] = entry
-        else:
-            exclusions, view = entry
-        Pview = P[view]
-        Paview = Pa[view]
-        prr = _do_reorder(reorder, Qa[view], Paview, Q[view], Pview, cache, ("hq_solv", len(P), natoms))
-        Pview = Pview[prr]
-        Pr = scatter_reordered(len(P), view, exclusions, P[exclusions], Pview)
-    else:
-        Pr = P
-
+    Every alignment step runs in :func:`_fastmath.align_core`, shared with
+    ``io.align_mol``, so matrix values and saved structures always agree.
+    Only the final scalar is computed here.
+    """
+    W = None
     if weight_solute:
-        ckey = ("w", len(Pr), natoms, float(weight_solute))
+        ckey = ("w", len(P), natoms, float(weight_solute))
         W = cache.get(ckey)
         if W is None:
-            W = build_weight_vector(len(Pr), natoms, weight_solute)
+            W = build_weight_vector(len(P), natoms, weight_solute)
             cache[ckey] = W
-
-    if nsatoms and reorder is not None and not final_kabsch:
-        if weight_solute:
-            return weighted_rmsd_no_kabsch(Pr, Q, W)
-        return float(rmsd.rmsd(Pr, Q))
-    if weight_solute:
-        return float(rmsd.kabsch_weighted_rmsd(Pr, Q, W))
-    return float(rmsd.kabsch_rmsd(Pr, Q))
+    al = align_core(
+        P,
+        Pa,
+        Q,
+        Qa,
+        natoms,
+        nsatoms=nsatoms,
+        reorder=reorder,
+        reorder_solvent_only=reorder_solvent_only,
+        excl_arr=reorderexcl,
+        weight_solute=weight_solute,
+        final_kabsch=final_kabsch,
+        cache=cache,
+        W=W,
+    )
+    if al.kind == "none":
+        if al.W is not None:
+            return weighted_rmsd_no_kabsch(al.Pr, Q, al.W)
+        return float(rmsd.rmsd(al.Pr, Q))
+    if al.kind == "weighted":
+        return float(al.w_rmsd)
+    return float(rmsd.kabsch_rmsd(al.Pr, Q))
 
 
 def _line_common(q_atoms, q_coords, noh, nsatoms, reorderexcl):
     """Shared per-line setup: filter + center Q, fresh cache, excl array."""
-    q_atoms = np.asarray(q_atoms)
-    q_coords = np.asarray(q_coords, dtype=np.float64)
-    Qa, Qref, natoms = _prepare_q_side(q_atoms, q_coords, noh, nsatoms)
-    if nsatoms:
-        qcenter = Qref[:natoms].mean(axis=0) if len(Qref) else 0.0
-    else:
-        qcenter = Qref.mean(axis=0) if len(Qref) else 0.0
-    Qref = Qref - qcenter
+    Qa, Qref, natoms, _ = prepare_ref(q_atoms, q_coords, noh, nsatoms)
     excl_arr = np.asarray(reorderexcl, dtype=np.int64).ravel() if reorderexcl is not None else np.asarray([], dtype=np.int64)
     return Qa, Qref, natoms, excl_arr, {}
-
-
-def _filter_p_side(p_atoms, p_all, noh, nsatoms):
-    """Filter hydrogens for the moving frame; returns Pa, P (fresh copy)."""
-    if nsatoms:
-        if noh:
-            p_mask = p_atoms != 1
-            return p_atoms[p_mask], p_all[p_mask].astype(np.float64, copy=True)
-        return p_atoms, np.array(p_all, dtype=np.float64, copy=True)
-    if noh:
-        p_mask = p_atoms != 1
-        return p_atoms[p_mask], p_all[p_mask].astype(np.float64, copy=True)
-    return p_atoms, np.array(p_all, dtype=np.float64, copy=True)
 
 
 def _compute_line_preloaded(
@@ -390,7 +280,7 @@ def _compute_line_preloaded(
     Qa, Qref, natoms, excl_arr, cache = _line_common(q_atoms, q_coords, noh, nsatoms, reorderexcl)
     distmat: List[float] = []
     for idx2 in range(idx1 + 1, len(all_atoms)):
-        Pa, P = _filter_p_side(all_atoms[idx2], all_coords[idx2], noh, nsatoms)
+        Pa, P = filter_moving(all_atoms[idx2], all_coords[idx2], noh, nsatoms)
         Q = Qref.copy()  # cheap vs Hungarian; keeps kernel pure
         distmat.append(
             _pair_rmsd(
@@ -447,7 +337,7 @@ def compute_distmat_line(
         if idx1 >= idx2:
             continue
         p_atoms, p_all = get_mol_info(mol2)
-        Pa, P = _filter_p_side(np.asarray(p_atoms), np.asarray(p_all), noh, nsatoms)
+        Pa, P = filter_moving(np.asarray(p_atoms), np.asarray(p_all), noh, nsatoms)
         Q = Qref.copy()
         distmat.append(
             _pair_rmsd(
