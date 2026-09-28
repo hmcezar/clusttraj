@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from openbabel import openbabel, pybel
 from .utils import get_mol_info
 from ._fastmath import (
-    kabsch_weighted_fast,
     build_weight_vector,
     scatter_reordered,
 )
@@ -746,7 +745,7 @@ def align_mol(
     if weight_solute and final_kabsch:
         W = build_weight_vector(Pr.shape[0], natoms, weight_solute)
 
-        R, T, _ = kabsch_weighted_fast(Q, Pr, W)
+        R, T, _ = rmsd.kabsch_weighted(Q, Pr, W)
         p_all = p_all @ R.T + T
 
     elif nsatoms and reorder and final_kabsch:

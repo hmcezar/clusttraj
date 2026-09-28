@@ -1,13 +1,16 @@
-"""Vectorized math helpers (NumPy-only, no Cython).
+"""Small NumPy helpers for the RMSD pipeline (no Cython).
 
-These mirror the speedups from charnley/rmsd#133 (vectorized weighted
-Kabsch) so clusttraj gets the same wins without depending on an unmerged
-upstream release. Installed rmsd 1.6.5 still has the triple-loop
-``kabsch_weighted``; this module provides a drop-in fast equivalent.
+Requires ``rmsd>=1.7.0``, which ships the vectorized weighted Kabsch
+(charnley/rmsd#133) — clusttraj calls ``rmsd.kabsch_weighted`` /
+``rmsd.kabsch_weighted_rmsd`` directly. What remains here are
+clusttraj-side savings upstream does not provide:
 
-All functions preserve rmsd semantics; numerical differences vs the
-reference triple-loop are at the ~1e-15 level (floating-point
-re-association only).
+- direct-placement rebuild of reordered structures (``scatter_reordered``),
+- solute weight-vector construction (``build_weight_vector``),
+- weighted RMSD without the final rotation (``weighted_rmsd_no_kabsch``),
+- caching of the Hungarian reference side, which is fixed per matrix
+  line (``hungarian_ref_groups`` / ``reorder_hungarian_refcached`` —
+  exactly equivalent to ``rmsd.reorder_hungarian``).
 """
 
 import numpy as np
@@ -50,54 +53,6 @@ def reorder_hungarian_refcached(p_atoms, q_atoms, p_coord, q_coord, ref_unique=N
         _, winner_cols = linear_sum_assignment(distances)
         view_reorder[p_idx] = q_idx[winner_cols]
     return view_reorder
-
-
-def kabsch_weighted_fast(P, Q, W=None):
-    """Vectorized equivalent of ``rmsd.kabsch_weighted``.
-
-    Returns (U, V, rmsd) with identical conventions:
-        P' = P @ U + V
-    """
-    P = np.asarray(P, dtype=np.float64)
-    Q = np.asarray(Q, dtype=np.float64)
-    n = P.shape[0]
-    if W is None:
-        w1 = np.full(n, 1.0 / n, dtype=np.float64)
-    else:
-        w1 = np.asarray(W, dtype=np.float64).reshape(-1)
-    wsum = w1.sum()
-    # rmsd's `iw = 3 / W.sum()` where W was tiled to (N,3); == 1 / w1.sum()
-    iw = 1.0 / wsum if wsum != 0 else 0.0
-
-    PW = P * w1[:, None]
-    QW = Q * w1[:, None]
-    CMP = PW.sum(axis=0)
-    CMQ = QW.sum(axis=0)
-    # C[i,k] = sum_j P[j,i]*Q[j,k]*w[j]
-    C = PW.T @ Q
-    C = (C - np.outer(CMP, CMQ) * iw) * iw
-
-    PSQ = float((P * P * w1[:, None]).sum() - float(CMP @ CMP) * iw)
-    QSQ = float((Q * Q * w1[:, None]).sum() - float(CMQ @ CMQ) * iw)
-
-    V_, S, Wt = np.linalg.svd(C)
-    d = (np.linalg.det(V_) * np.linalg.det(Wt)) < 0.0
-    if d:
-        S[-1] = -S[-1]
-        V_[:, -1] = -V_[:, -1]
-    U = V_ @ Wt
-    msd = (PSQ + QSQ) * iw - 2.0 * float(S.sum())
-    if msd < 0.0:
-        msd = 0.0
-    rmsd_val = float(np.sqrt(msd))
-    Vout = (CMP - U @ CMQ) * iw
-    return U, Vout, rmsd_val
-
-
-def kabsch_weighted_rmsd_fast(P, Q, W=None):
-    """Fast ``rmsd.kabsch_weighted_rmsd``."""
-    _, _, r = kabsch_weighted_fast(P, Q, W)
-    return r
 
 
 def weighted_rmsd_no_kabsch(P, Q, W):

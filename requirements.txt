@@ -1,6 +1,6 @@
 numpy
 openbabel>=3.2
-rmsd>=1.6.3
+rmsd>=1.7.0
 scipy
 scikit-learn
 matplotlib

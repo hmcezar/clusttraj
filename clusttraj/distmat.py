@@ -11,7 +11,6 @@ from openbabel import pybel
 from .utils import get_mol_info
 from ._fastmath import (
     hungarian_ref_groups,
-    kabsch_weighted_rmsd_fast,
     reorder_hungarian_refcached,
     weighted_rmsd_no_kabsch,
     build_weight_vector,
@@ -342,7 +341,7 @@ def _pair_rmsd(
             return weighted_rmsd_no_kabsch(Pr, Q, W)
         return float(rmsd.rmsd(Pr, Q))
     if weight_solute:
-        return float(kabsch_weighted_rmsd_fast(Pr, Q, W))
+        return float(rmsd.kabsch_weighted_rmsd(Pr, Q, W))
     return float(rmsd.kabsch_rmsd(Pr, Q))
 
 
