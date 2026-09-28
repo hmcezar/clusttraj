@@ -73,3 +73,42 @@ def test_build_distance_matrix(clust_opt, test_distmat):
     assert distmat[0] == pytest.approx(test_distmat[0], abs=1e-8)
     assert distmat[1] == pytest.approx(test_distmat[1], abs=1e-8)
     assert distmat[2] == pytest.approx(test_distmat[2], abs=1e-8)
+
+
+def test_build_distance_matrix_preload_matches_streaming(clust_opt, test_distmat):
+    """Preload (default) and streaming (opt-out) paths must agree."""
+    import copy
+
+    assert clust_opt.preload is True  # preloading is the default
+    pre_distmat = build_distance_matrix(clust_opt)
+
+    stream_opt = copy.copy(clust_opt)
+    stream_opt.preload = False
+    stream_distmat = build_distance_matrix(stream_opt)
+
+    assert pre_distmat == pytest.approx(stream_distmat, abs=1e-12)
+    assert pre_distmat == pytest.approx(test_distmat, abs=1e-8)
+
+
+def test_build_distance_matrix_unset_exclusions(clust_opt, test_distmat):
+    """Leaving reorder_excl unset (None) must behave like no exclusions."""
+    import copy
+
+    clust_opt = copy.copy(clust_opt)
+    clust_opt.reorder_excl = None
+    distmat = build_distance_matrix(clust_opt)
+    assert distmat == pytest.approx(test_distmat, abs=1e-8)
+
+
+def test_build_distance_matrix_streaming_workers_matches(clust_opt):
+    """Streaming with several workers must match (tasks go out in batches)."""
+    import copy
+
+    assert clust_opt.preload is True
+    expected = build_distance_matrix(clust_opt)
+
+    stream_opt = copy.copy(clust_opt)
+    stream_opt.preload = False
+    stream_opt.n_workers = 2
+    got = build_distance_matrix(stream_opt)
+    assert got == pytest.approx(expected, abs=1e-12)

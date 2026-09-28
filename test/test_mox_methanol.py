@@ -118,6 +118,9 @@ def _mox_options(tmp_path):
         reorder_excl=np.asarray([], np.int32),
         optimal_cut=None,
         verbose=False,
+        # small trajectory: preload into memory (streaming via --no-preload
+        # stays available for trajectories too large for RAM).
+        preload=True,
     )
 
 
